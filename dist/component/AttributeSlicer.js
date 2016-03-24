@@ -1,1 +1,598 @@
-!function(e,t){if("object"==typeof exports&&"object"==typeof module)module.exports=t(require("jQuery"));else if("function"==typeof define&&define.amd)define(["jQuery"],t);else{var i=t("object"==typeof exports?require("jQuery"):e.jQuery);for(var n in i)("object"==typeof exports?exports:e)[n]=i[n]}}(this,function(e){return function(e){function t(n){if(i[n])return i[n].exports;var a=i[n]={exports:{},id:n,loaded:!1};return e[n].call(a.exports,a,a.exports,t),a.loaded=!0,a.exports}var i={};return t.m=e,t.c=i,t.p="",t(0)}([function(e,t,i){"use strict";var n=i(2),a=i(3),s=i(1),r=function(){function e(t){var i=this;this._data=[],this._eventEmitter=new n["default"],this.loadingSearch=!1,this._serverSideSearch=!0,this._selectedItems=[],this._loadingMoreData=!1,this.element=t,this.listContainer=t.append(a(e.template)).find(".advanced-slicer"),this.listEle=this.listContainer.find(".list"),this.listEle.scroll(function(){return i.checkLoadMoreData()}),this.selectionsEle=t.find(".selections"),this.checkAllEle=t.find(".check-all").on("click",function(){return i.toggleSelectAll()}),this.clearAllEle=t.find(".clear-all").on("click",function(){return i.clearSelection()}),this.attachEvents(),this.loadingMoreData=!0}return Object.defineProperty(e.prototype,"serverSideSearch",{get:function(){return this._serverSideSearch},set:function(e){this._serverSideSearch=e},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"events",{get:function(){return this._eventEmitter},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"dimensions",{set:function(e){this.listEle.find(".display-container").css({width:"100%"}),this.listEle.css({width:"100%",height:e.height-this.element.find(".slicer-options").height()-10})},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"showValues",{set:function(e){this.element.toggleClass("has-values",e)},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"showSelections",{set:function(e){this.element.toggleClass("show-selections",e)},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"showHighlight",{get:function(){return this.element.hasClass("show-highlight")},set:function(e){this.element.toggleClass("show-highlight",!!e)},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"data",{get:function(){return this._data},set:function(t){this.listEle.empty(),this.loadingMoreData=!1,t&&t.length&&(this.listEle.append(t.map(function(t){var i=e.listItemFactory(t.matchPrefix,t.match,t.matchSuffix),n=t.renderedValue;if(n){var a=i.find(".value-display");a.css({width:n+"%"}),a.find(".value").html(""+t.value)}return i[t.selected?"hide":"show"].call(i),i.find("input").prop("checked",t.selected),i.data("item",t),i})),this.loadingSearch=!0,this.element.find(".searchbox").val(this.searchString),this.loadingSearch=!1),this._data=t,this.updateSelectAllButtonState()},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"selectedItems",{get:function(){return this._selectedItems},set:function(e){var t=this,i=this.selectedItems.slice(0);this._selectedItems=e;var n=e&&e.length===this.data.length,a=e&&e.length>0&&!n;this.syncItemVisiblity(),e&&(this.selectionsEle.find(".token").remove(),e.map(function(e){return t.createSelectionToken(e)}).forEach(function(e){return e.insertBefore(t.element.find(".clear-all"))})),this.raiseSelectionChanged(this.selectedItems,i),this.checkAllEle.prop("checked",a),this.checkAllEle.prop("indeterminate",a)},enumerable:!0,configurable:!0}),Object.defineProperty(e.prototype,"searchString",{get:function(){return this.element.find(".searchbox").val()},enumerable:!0,configurable:!0}),e.prototype.sort=function(e,t){this.data.sort(function(i,n){var a=s(i[e],n[e]);return t?-1*a:a})},Object.defineProperty(e.prototype,"loadingMoreData",{get:function(){return this._loadingMoreData},set:function(e){this._loadingMoreData=e,this.element.toggleClass("loading",e)},enumerable:!0,configurable:!0}),e.prototype.syncItemVisiblity=function(){var e=this.selectedItems,t=this.element.find(".item"),i=this,n=function(e,t){return(e.match+""||"").indexOf(t)>=0||(e.matchPrefix+""||"").indexOf(t)>=0||(e.matchSuffix+""||"").indexOf(t)>=0};t.each(function(){var t=a(this).data("item"),s=!(e&&e.filter(function(e){return e.equals(t)}).length>0);s&&!i.serverSideSearch&&i.searchString&&(s=n(t,i.searchString)),a(this).toggle(s)})},e.prototype.toggleSelectAll=function(){var e=this.checkAllEle.prop("checked");e?this.selectedItems=this._data.slice(0):this.selectedItems=[]},e.prototype.createSelectionToken=function(e){var t=this,i=a("<div/>"),n=(e.matchPrefix||"")+e.match+(e.matchSuffix||"");return i.addClass("token").attr("title",n).data("item",e).on("click",function(){i.remove();var n=t.selectedItems.filter(function(t){return t.equals(e)})[0];t.selectedItems.splice(t.selectedItems.indexOf(n),1),t.selectedItems=t.selectedItems.slice(0)}).text(n),i},e.prototype.clearSelection=function(){this.selectedItems=[]},e.prototype.updateSelectAllButtonState=function(){this.checkAllEle.prop("indeterminate",this.selectedItems.length>0&&this._data.length!==this.selectedItems.length),this.checkAllEle.prop("checked",this.selectedItems.length>0)},e.prototype.attachEvents=function(){var t=this;this.element.find(".searchbox").on("input",_.debounce(function(){t.loadingSearch||(t.serverSideSearch&&setTimeout(function(){return t.checkLoadMoreDataBasedOnSearch()},10),t.syncItemVisiblity(),t.element.toggleClass("has-search",!!t.searchString))},e.SEARCH_DEBOUNCE)),this.listEle.on("click",function(e){var i=a(e.target).parents(".item");if(i.length>0){var n=i.data("item");t.selectedItems.push(n),t.selectedItems=t.selectedItems.slice(0),t.updateSelectAllButtonState()}e.stopImmediatePropagation(),e.stopPropagation()})},e.prototype.checkLoadMoreDataBasedOnSearch=function(){this.raiseCanLoadMoreData(!0)&&(this.loadPromise&&(this.loadPromise.cancel=!0),this.loadingMoreData=!1,this.raiseLoadMoreData(!0))},e.prototype.checkLoadMoreData=function(){var e=this.listEle[0],t=e.scrollHeight,i=e.scrollTop,n=t-(i+e.clientHeight)<200&&t>=200;n&&!this.loadingMoreData&&this.raiseCanLoadMoreData()&&this.raiseLoadMoreData(!1)},e.prototype.raiseLoadMoreData=function(e){var t=this,i={};if(this.events.raiseEvent("loadMoreData",i,e,this.searchString),i.result){this.loadingMoreData=!0;var n=this.loadPromise=i.result.then(function(i){return n.cancel?void 0:(t.loadingMoreData=!1,t.loadPromise=void 0,e?t.data=i:t.data=t.data.concat(i),setTimeout(function(){return t.checkLoadMoreData()},10),i)},function(){t.data=[],t.loadingMoreData=!1});return n}},e.prototype.raiseCanLoadMoreData=function(e){e===void 0&&(e=!1);var t={result:!1};return this.events.raiseEvent("canLoadMoreData",t,e),t.result},e.prototype.raiseSelectionChanged=function(e,t){this.events.raiseEvent("selectionChanged",e,t)},e.SEARCH_DEBOUNCE=500,e.template='\n        <div class="advanced-slicer">\n            <div class="slicer-options">\n                <input class="searchbox" placeholder="Search" />\n                <div style="margin:0;padding:0;margin-top:5px;">\n                <div class="selection-container">\n                    <div class="selections">\n                        <span class="clear-all">Clear All</span>\n                    </div>\n                </div>\n                <!-- Disabled -->\n                <label style="display:none;vertical-align:middle"><input class="check-all" type="checkbox" style="margin-right:5px;vertical-align:middle"/>&nbsp;Select All</label>\n                </div>\n                <hr/>\n            </div>\n            <div class="list" style="overflow:hidden;overflow-y:auto"></div>\n            <div class=\'load-spinner\' style=\'transform:scale(0.6);\'><div>\n        </div>\n    '.trim().replace(/\n/g,""),e.listItemFactory=function(e,t,i){return a(('\n            <div style="white-space:nowrap" class="item">\n                <label style="cursor:pointer">\n                    <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->\n                    <span style="margin-left: 5px;vertical-align:middle" class="display-container">\n                        <span style="display:inline-block;overflow:hidden" class="category-container">\n                            <span class="matchPrefix">'+(e||"")+'</span>\n                            <span class="match">'+(t||"")+'</span>\n                            <span class="matchSuffix">'+(i||"")+'</span>\n                        </span>\n                        <span style="display:inline-block" class="value-container">\n                            <span style="display:inline-block;width:0px" class="value-display">&nbsp;<span class="value"></span></span>\n                        </span>\n                    </span>\n                </label>\n            </div>\n        ').trim().replace(/\n/g,""))},e}();t.AttributeSlicer=r},function(e,t){"use strict";e.exports=function i(e,t){var n,a,s=/(^([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)?$|^0x[0-9a-f]+$|\d+)/gi,r=/(^[ ]*|[ ]*$)/g,l=/(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,o=/^0x[0-9a-f]+$/i,c=/^0/,h=function(e){return i.insensitive&&(""+e).toLowerCase()||""+e},d=h(e).replace(r,"")||"",p=h(t).replace(r,"")||"",u=d.replace(s,"\x00$1\x00").replace(/\0$/,"").replace(/^\0/,"").split("\x00"),f=p.replace(s,"\x00$1\x00").replace(/\0$/,"").replace(/^\0/,"").split("\x00"),m=parseInt(d.match(o),16)||1!==u.length&&d.match(l)&&Date.parse(d),g=parseInt(p.match(o),16)||m&&p.match(l)&&Date.parse(p)||null;if(g){if(g>m)return-1;if(m>g)return 1}for(var v=0,y=Math.max(u.length,f.length);y>v;v++){if(n=!(u[v]||"").match(c)&&parseFloat(u[v])||u[v]||0,a=!(f[v]||"").match(c)&&parseFloat(f[v])||f[v]||0,isNaN(n)!==isNaN(a))return isNaN(n)?1:-1;if(typeof n!=typeof a&&(n+="",a+=""),a>n)return-1;if(n>a)return 1}return 0}},function(e,t){"use strict";var i=function(){function e(){this.listeners={}}return e.prototype.on=function(e,t){var i=this,n=this.listeners[e]=this.listeners[e]||[];return n.push(t),{destroy:function(){i.off(e,t)}}},e.prototype.off=function(e,t){var i=this.listeners[e];if(i){var n=i.indexOf(t);n>=0&&i.splice(n,1)}},e.prototype.raiseEvent=function(e){for(var t=this,i=[],n=1;n<arguments.length;n++)i[n-1]=arguments[n];var a=this.listeners[e];a&&a.forEach(function(e){e.apply(t,i)})},e}();Object.defineProperty(t,"__esModule",{value:!0}),t["default"]=i},function(t,i){t.exports=e}])});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("jQuery"));
+	else if(typeof define === 'function' && define.amd)
+		define(["jQuery"], factory);
+	else {
+		var a = typeof exports === 'object' ? factory(require("jQuery")) : factory(root["jQuery"]);
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function(__WEBPACK_EXTERNAL_MODULE_3__) {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var EventEmitter_1 = __webpack_require__(2);
+	var $ = __webpack_require__(3);
+	var naturalSort = __webpack_require__(1);
+	/**
+	 * Represents an advanced slicer to help slice through data
+	 */
+	var AttributeSlicer = (function () {
+	    /**
+	     * Constructor for the advanced slicer
+	     */
+	    function AttributeSlicer(element) {
+	        var _this = this;
+	        /**
+	         * The data contained in this slicer
+	         */
+	        this._data = [];
+	        /**
+	         * Our event emitter
+	         */
+	        this._eventEmitter = new EventEmitter_1.default();
+	        /**
+	         * Whether or not we are loading the search box
+	         */
+	        this.loadingSearch = false;
+	        /**
+	         * Setter for server side search
+	         */
+	        this._serverSideSearch = true;
+	        /**
+	         * The list of selected items
+	         */
+	        this._selectedItems = [];
+	        /**
+	         * A boolean indicating whether or not the list is loading more data
+	         */
+	        this._loadingMoreData = false; // Don't use this directly
+	        this.element = element;
+	        this.listContainer = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
+	        this.listEle = this.listContainer.find(".list");
+	        this.listEle.scroll(function () { return _this.checkLoadMoreData(); });
+	        this.selectionsEle = element.find(".selections");
+	        this.checkAllEle = element.find(".check-all").on("click", function () { return _this.toggleSelectAll(); });
+	        this.clearAllEle = element.find(".clear-all").on("click", function () { return _this.clearSelection(); });
+	        this.attachEvents();
+	        // These two are here because the devtools call init more than once
+	        this.loadingMoreData = true;
+	    }
+	    Object.defineProperty(AttributeSlicer.prototype, "serverSideSearch", {
+	        /**
+	         * Getter for server side search
+	         */
+	        get: function () {
+	            return this._serverSideSearch;
+	        },
+	        set: function (value) {
+	            this._serverSideSearch = value;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "events", {
+	        /**
+	         * Gets our event emitter
+	         */
+	        get: function () {
+	            return this._eventEmitter;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "dimensions", {
+	        /**
+	         * Sets the dimension of the slicer
+	         */
+	        set: function (dims) {
+	            this.listEle.find(".display-container").css({ width: "100%" });
+	            this.listEle.css({ width: "100%", height: dims.height - this.element.find(".slicer-options").height() - 10 });
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "showValues", {
+	        /**
+	         * Setter for showing the values column
+	         */
+	        set: function (show) {
+	            this.element.toggleClass("has-values", show);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "showSelections", {
+	        /**
+	         * Setter for showing the selections area
+	         */
+	        set: function (show) {
+	            this.element.toggleClass("show-selections", show);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "showHighlight", {
+	        /**
+	         * Gets whether or not we are showing the highlights
+	         */
+	        get: function () {
+	            return this.element.hasClass("show-highlight");
+	        },
+	        /**
+	         * Toggles whether or not to show highlights
+	         */
+	        set: function (highlight) {
+	            this.element.toggleClass("show-highlight", !!highlight);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "data", {
+	        /**
+	         * Gets the data behind the slicer
+	         */
+	        get: function () {
+	            return this._data;
+	        },
+	        /**
+	         * Sets the slicer data
+	         */
+	        set: function (newData) {
+	            this.listEle.empty();
+	            // If some one sets the data, then clearly we are no longer loading data
+	            this.loadingMoreData = false;
+	            if (newData && newData.length) {
+	                this.listEle.append(newData.map(function (item) {
+	                    var ele = AttributeSlicer.listItemFactory(item.matchPrefix, item.match, item.matchSuffix);
+	                    var renderedValue = item.renderedValue;
+	                    if (renderedValue) {
+	                        var valueDisplayEle = ele.find(".value-display");
+	                        valueDisplayEle.css({ width: (renderedValue + "%") });
+	                        valueDisplayEle.find(".value").html('' + item.value);
+	                    }
+	                    ele[item.selected ? "hide" : "show"].call(ele);
+	                    ele.find("input").prop('checked', item.selected);
+	                    ele.data("item", item);
+	                    return ele;
+	                }));
+	                this.loadingSearch = true;
+	                this.element.find(".searchbox").val(this.searchString);
+	                this.loadingSearch = false;
+	            }
+	            this._data = newData;
+	            this.updateSelectAllButtonState();
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "selectedItems", {
+	        get: function () {
+	            return this._selectedItems;
+	        },
+	        /**
+	         * Sets the set of selected items
+	         */
+	        set: function (value) {
+	            var _this = this;
+	            var oldSelection = this.selectedItems.slice(0);
+	            this._selectedItems = value;
+	            // HACK: They are all selected if it is the same length as our dataset
+	            var allChecked = value && value.length === this.data.length;
+	            var someChecked = value && value.length > 0 && !allChecked;
+	            this.syncItemVisiblity();
+	            if (value) {
+	                this.selectionsEle.find(".token").remove();
+	                value.map(function (v) { return _this.createSelectionToken(v); }).forEach(function (n) { return n.insertBefore(_this.element.find(".clear-all")); });
+	            }
+	            this.raiseSelectionChanged(this.selectedItems, oldSelection);
+	            this.checkAllEle.prop("checked", someChecked);
+	            this.checkAllEle.prop('indeterminate', someChecked);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "searchString", {
+	        /**
+	         * Gets the current serch value
+	         */
+	        get: function () {
+	            return this.element.find(".searchbox").val();
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    /**j
+	     * Sorts the slicer
+	     */
+	    AttributeSlicer.prototype.sort = function (toSort, desc) {
+	        this.data.sort(function (a, b) {
+	            var sortVal = naturalSort(a[toSort], b[toSort]);
+	            return desc ? -1 * sortVal : sortVal;
+	        });
+	    };
+	    Object.defineProperty(AttributeSlicer.prototype, "loadingMoreData", {
+	        get: function () {
+	            return this._loadingMoreData;
+	        },
+	        /**
+	         * Setter for loadingMoreData
+	         */
+	        set: function (value) {
+	            this._loadingMoreData = value;
+	            this.element.toggleClass("loading", value);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    /**
+	     * Syncs the item elements state with the current set of selected items and the search
+	     */
+	    AttributeSlicer.prototype.syncItemVisiblity = function () {
+	        var value = this.selectedItems;
+	        var eles = this.element.find(".item");
+	        var me = this;
+	        var isMatch = function (item, value) {
+	            return ((item.match + "") || "").indexOf(value) >= 0 ||
+	                ((item.matchPrefix + "") || "").indexOf(value) >= 0 ||
+	                ((item.matchSuffix + "") || "").indexOf(value) >= 0;
+	        };
+	        eles.each(function () {
+	            var item = $(this).data("item");
+	            var isVisible = !(!!value && value.filter(function (b) { return b.equals(item); }).length > 0);
+	            // Update the search
+	            if (isVisible && !me.serverSideSearch && me.searchString) {
+	                isVisible = isMatch(item, me.searchString);
+	            }
+	            $(this).toggle(isVisible);
+	        });
+	    };
+	    /**
+	     * Toggle the select all state
+	     */
+	    AttributeSlicer.prototype.toggleSelectAll = function () {
+	        var checked = this.checkAllEle.prop('checked');
+	        if (!!checked) {
+	            this.selectedItems = this._data.slice(0);
+	        }
+	        else {
+	            this.selectedItems = [];
+	        }
+	    };
+	    /**
+	     * Creates a new selection token element
+	     */
+	    AttributeSlicer.prototype.createSelectionToken = function (v) {
+	        var _this = this;
+	        var newEle = $('<div/>');
+	        var text = (v.matchPrefix || "") + v.match + (v.matchSuffix || "");
+	        newEle
+	            .addClass("token")
+	            .attr("title", text)
+	            .data("item", v)
+	            .on("click", function () {
+	            newEle.remove();
+	            var item = _this.selectedItems.filter(function (n) { return n.equals(v); })[0];
+	            _this.selectedItems.splice(_this.selectedItems.indexOf(item), 1);
+	            _this.selectedItems = _this.selectedItems.slice(0);
+	        })
+	            .text(text);
+	        return newEle;
+	    };
+	    /**
+	     * Clears the selection
+	     */
+	    AttributeSlicer.prototype.clearSelection = function () {
+	        this.selectedItems = [];
+	    };
+	    /**
+	     * Updates the select all button state to match the data
+	     */
+	    AttributeSlicer.prototype.updateSelectAllButtonState = function () {
+	        this.checkAllEle.prop('indeterminate', this.selectedItems.length > 0 && this._data.length !== this.selectedItems.length);
+	        this.checkAllEle.prop('checked', this.selectedItems.length > 0);
+	    };
+	    /**
+	     * Attaches all the necessary events
+	     */
+	    AttributeSlicer.prototype.attachEvents = function () {
+	        var _this = this;
+	        this.element.find(".searchbox").on("input", _.debounce(function () {
+	            if (!_this.loadingSearch) {
+	                if (_this.serverSideSearch) {
+	                    setTimeout(function () { return _this.checkLoadMoreDataBasedOnSearch(); }, 10);
+	                }
+	                // this is required because when the list is done searching it adds back in cached elements with selected flags
+	                _this.syncItemVisiblity();
+	                _this.element.toggleClass("has-search", !!_this.searchString);
+	            }
+	        }, AttributeSlicer.SEARCH_DEBOUNCE));
+	        this.listEle.on("click", function (evt) {
+	            // var checkbox = $(evt.target);
+	            var ele = $(evt.target).parents(".item");
+	            if (ele.length > 0) {
+	                var item = ele.data("item");
+	                _this.selectedItems.push(item);
+	                _this.selectedItems = _this.selectedItems.slice(0);
+	                _this.updateSelectAllButtonState();
+	            }
+	            evt.stopImmediatePropagation();
+	            evt.stopPropagation();
+	        });
+	    };
+	    /**
+	     * Loads more data based on search
+	     * @param force Force the loading of new data, if it can
+	     */
+	    AttributeSlicer.prototype.checkLoadMoreDataBasedOnSearch = function () {
+	        // Only need to load if:
+	        // 1. There is more data. 2. There is not too much stuff on the screen (not causing a scroll)
+	        if (this.raiseCanLoadMoreData(true)) {
+	            if (this.loadPromise) {
+	                this.loadPromise['cancel'] = true;
+	            }
+	            // We're not currently loading data, cause we cancelled
+	            this.loadingMoreData = false;
+	            this.raiseLoadMoreData(true);
+	        }
+	    };
+	    /**
+	     * Listener for the list scrolling
+	     */
+	    AttributeSlicer.prototype.checkLoadMoreData = function () {
+	        var scrollElement = this.listEle[0];
+	        var scrollHeight = scrollElement.scrollHeight;
+	        var top = scrollElement.scrollTop;
+	        var shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200 && scrollHeight >= 200;
+	        if (shouldScrollLoad && !this.loadingMoreData && this.raiseCanLoadMoreData()) {
+	            this.raiseLoadMoreData(false);
+	        }
+	    };
+	    /**
+	     * Raises the event to load more data
+	     */
+	    AttributeSlicer.prototype.raiseLoadMoreData = function (isNewSearch) {
+	        var _this = this;
+	        var item = {};
+	        this.events.raiseEvent("loadMoreData", item, isNewSearch, this.searchString);
+	        if (item.result) {
+	            this.loadingMoreData = true;
+	            var promise_1 = this.loadPromise = item.result.then(function (items) {
+	                // If this promise hasn't been cancelled
+	                if (!promise_1['cancel']) {
+	                    _this.loadingMoreData = false;
+	                    _this.loadPromise = undefined;
+	                    if (isNewSearch) {
+	                        _this.data = items;
+	                    }
+	                    else {
+	                        _this.data = _this.data.concat(items);
+	                    }
+	                    // Make sure we don't need to load more after this, in case it doesn't all fit on the screen
+	                    setTimeout(function () { return _this.checkLoadMoreData(); }, 10);
+	                    return items;
+	                }
+	            }, function () {
+	                _this.data = [];
+	                _this.loadingMoreData = false;
+	            });
+	            return promise_1;
+	        }
+	    };
+	    /**
+	     * Raises the event 'can
+	     * '
+	     */
+	    AttributeSlicer.prototype.raiseCanLoadMoreData = function (isSearch) {
+	        if (isSearch === void 0) { isSearch = false; }
+	        var item = {
+	            result: false
+	        };
+	        this.events.raiseEvent('canLoadMoreData', item, isSearch);
+	        return item.result;
+	    };
+	    /**
+	     * Raises the selectionChanged event
+	     */
+	    AttributeSlicer.prototype.raiseSelectionChanged = function (newItems, oldItems) {
+	        this.events.raiseEvent('selectionChanged', newItems, oldItems);
+	    };
+	    /**
+	     * The number of milliseconds before running the search, after a user stops typing.
+	     */
+	    AttributeSlicer.SEARCH_DEBOUNCE = 500;
+	    /**
+	     * The template for this visual
+	     */
+	    AttributeSlicer.template = "\n        <div class=\"advanced-slicer\">\n            <div class=\"slicer-options\">\n                <input class=\"searchbox\" placeholder=\"Search\" />\n                <div style=\"margin:0;padding:0;margin-top:5px;\">\n                <div class=\"selection-container\">\n                    <div class=\"selections\">\n                        <span class=\"clear-all\">Clear All</span>\n                    </div>\n                </div>\n                <!-- Disabled -->\n                <label style=\"display:none;vertical-align:middle\"><input class=\"check-all\" type=\"checkbox\" style=\"margin-right:5px;vertical-align:middle\"/>&nbsp;Select All</label>\n                </div>\n                <hr/>\n            </div>\n            <div class=\"list\" style=\"overflow:hidden;overflow-y:auto\"></div>\n            <div class='load-spinner' style='transform:scale(0.6);'><div>\n        </div>\n    ".trim().replace(/\n/g, '');
+	    /**
+	     * The template used to render list items
+	     */
+	    AttributeSlicer.listItemFactory = function (matchPrefix, match, matchSuffix) {
+	        return $(("\n            <div style=\"white-space:nowrap\" class=\"item\">\n                <label style=\"cursor:pointer\">\n                    <!--<input style=\"vertical-align:middle;cursor:pointer\" type=\"checkbox\">-->\n                    <span style=\"margin-left: 5px;vertical-align:middle\" class=\"display-container\">\n                        <span style=\"display:inline-block;overflow:hidden\" class=\"category-container\">\n                            <span class=\"matchPrefix\">" + (matchPrefix || "") + "</span>\n                            <span class=\"match\">" + (match || "") + "</span>\n                            <span class=\"matchSuffix\">" + (matchSuffix || "") + "</span>\n                        </span>\n                        <span style=\"display:inline-block\" class=\"value-container\">\n                            <span style=\"display:inline-block;width:0px\" class=\"value-display\">&nbsp;<span class=\"value\"></span></span>\n                        </span>\n                    </span>\n                </label>\n            </div>\n        ").trim().replace(/\n/g, ''));
+	    };
+	    return AttributeSlicer;
+	}());
+	exports.AttributeSlicer = AttributeSlicer;
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	/*
+	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
+	 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
+	 */
+	/*jshint unused:false */
+	'use strict';
+
+	module.exports = function naturalSort(a, b) {
+		"use strict";
+		var re = /(^([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)?$|^0x[0-9a-f]+$|\d+)/gi,
+		    sre = /(^[ ]*|[ ]*$)/g,
+		    dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
+		    hre = /^0x[0-9a-f]+$/i,
+		    ore = /^0/,
+		    i = function i(s) {
+			return naturalSort.insensitive && ('' + s).toLowerCase() || '' + s;
+		},
+		   
+		// convert all to strings strip whitespace
+		x = i(a).replace(sre, '') || '',
+		    y = i(b).replace(sre, '') || '',
+		   
+		// chunk/tokenize
+		xN = x.replace(re, '\0$1\0').replace(/\0$/, '').replace(/^\0/, '').split('\0'),
+		    yN = y.replace(re, '\0$1\0').replace(/\0$/, '').replace(/^\0/, '').split('\0'),
+		   
+		// numeric, hex or date detection
+		xD = parseInt(x.match(hre), 16) || xN.length !== 1 && x.match(dre) && Date.parse(x),
+		    yD = parseInt(y.match(hre), 16) || xD && y.match(dre) && Date.parse(y) || null,
+		    oFxNcL,
+		    oFyNcL;
+		// first try and sort Hex codes or Dates
+		if (yD) {
+			if (xD < yD) {
+				return -1;
+			} else if (xD > yD) {
+				return 1;
+			}
+		}
+		// natural sorting through split numeric strings and default strings
+		for (var cLoc = 0, numS = Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
+			// find floats not starting with '0', string or 0 if not defined (Clint Priest)
+			oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc]) || xN[cLoc] || 0;
+			oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc]) || yN[cLoc] || 0;
+			// handle numeric vs string comparison - number < string - (Kyle Adams)
+			if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
+				return isNaN(oFxNcL) ? 1 : -1;
+			}
+			// rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
+			else if (typeof oFxNcL !== typeof oFyNcL) {
+					oFxNcL += '';
+					oFyNcL += '';
+				}
+			if (oFxNcL < oFyNcL) {
+				return -1;
+			}
+			if (oFxNcL > oFyNcL) {
+				return 1;
+			}
+		}
+		return 0;
+	};
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+	/**
+	 * A mixin that adds support for event emitting
+	 */
+	var EventEmitter = (function () {
+	    function EventEmitter() {
+	        this.listeners = {};
+	    }
+	    /**
+	     * Adds an event listener for the given event
+	     */
+	    EventEmitter.prototype.on = function (name, handler) {
+	        var _this = this;
+	        var listeners = this.listeners[name] = this.listeners[name] || [];
+	        listeners.push(handler);
+	        return {
+	            destroy: function () {
+	                _this.off(name, handler);
+	            }
+	        };
+	    };
+	    /**
+	     * Removes an event listener for the given event
+	     */
+	    EventEmitter.prototype.off = function (name, handler) {
+	        var listeners = this.listeners[name];
+	        if (listeners) {
+	            var idx = listeners.indexOf(handler);
+	            if (idx >= 0) {
+	                listeners.splice(idx, 1);
+	            }
+	        }
+	    };
+	    /**
+	     * Raises the given event
+	     */
+	    /*protected*/ EventEmitter.prototype.raiseEvent = function (name) {
+	        var _this = this;
+	        var args = [];
+	        for (var _i = 1; _i < arguments.length; _i++) {
+	            args[_i - 1] = arguments[_i];
+	        }
+	        var listeners = this.listeners[name];
+	        if (listeners) {
+	            listeners.forEach(function (l) {
+	                l.apply(_this, args);
+	            });
+	        }
+	    };
+	    return EventEmitter;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = EventEmitter;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ }
+/******/ ])
+});
+;
