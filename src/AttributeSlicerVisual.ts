@@ -1,7 +1,7 @@
-/// <reference path="../../base/references.d.ts"/>
+/// <reference path="../base/references.d.ts"/>
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
-import { VisualBase, ExternalCssResource } from "../../base/VisualBase";
-import { default as Utils, Visual } from "../../base/Utils";
+import { VisualBase, ExternalCssResource } from "../base/VisualBase";
+import { default as Utils, Visual } from "../base/Utils";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
