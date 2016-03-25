@@ -143,6 +143,22 @@ export class AttributeSlicer {
     }
 
     /**
+     * Gets whether or not the search is case insensitive
+     */
+    private _caseInsentitive = true;
+    public get caseInsensitive() {
+        return this._caseInsentitive;
+    }
+
+    /**
+     * Setter for case insensitive
+     */
+    public set caseInsensitive(value: boolean) {
+        this._caseInsentitive = value;
+        this.syncItemVisiblity();
+    }
+
+    /**
      * Gets our event emitter
      */
     public get events() {
@@ -264,6 +280,14 @@ export class AttributeSlicer {
         return this.element.find(".searchbox").val();
     }
 
+    /**
+     * Gets the current serch value
+     */
+    public set searchString(value: string) {
+        this.element.find(".searchbox").val(value);
+        this.handleSearchChanged();
+    }
+
     /**j
      * Sorts the slicer
      */
@@ -298,9 +322,9 @@ export class AttributeSlicer {
         let eles = this.element.find(".item");
         let me = this;
         const isMatch = (item: SlicerItem, value: string) => {
-            return ((item.match + "") || "").indexOf(value) >= 0 ||
-                ((item.matchPrefix + "") || "").indexOf(value) >= 0 ||
-                ((item.matchSuffix + "") || "").indexOf(value) >= 0;
+            const regex = new RegExp(value, this.caseInsensitive ? "i" : "");
+            const pretty = (val: string) => ((val || "") + "");
+            return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
         };
         eles.each(function() {
             let item = $(this).data("item");
@@ -368,12 +392,7 @@ export class AttributeSlicer {
     private attachEvents() {
         this.element.find(".searchbox").on("input", _.debounce(() => {
             if (!this.loadingSearch) {
-                if (this.serverSideSearch) {
-                    setTimeout(() => this.checkLoadMoreDataBasedOnSearch(), 10);
-                }
-                // this is required because when the list is done searching it adds back in cached elements with selected flags
-                this.syncItemVisiblity();
-                this.element.toggleClass("has-search", !!this.searchString);
+                this.handleSearchChanged();
             }
         }, AttributeSlicer.SEARCH_DEBOUNCE));
 
@@ -389,6 +408,18 @@ export class AttributeSlicer {
             evt.stopImmediatePropagation();
             evt.stopPropagation();
         });
+    }
+
+    /**
+     * Handles when the search is changed
+     */
+    private handleSearchChanged() {
+        if (this.serverSideSearch) {
+            setTimeout(() => this.checkLoadMoreDataBasedOnSearch(), 10);
+        }
+        // this is required because when the list is done searching it adds back in cached elements with selected flags
+        this.syncItemVisiblity();
+        this.element.toggleClass("has-search", !!this.searchString);
     }
 
     /**

@@ -88,6 +88,15 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         }
                     },
                 },
+            },
+            search: {
+                displayName: "Search",
+                properties: {
+                    caseInsensitive: {
+                        displayName: "Case Insensitive",
+                        type: { bool: true }
+                    }
+                }
             }
             /*,
             sorting: {
@@ -105,7 +114,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     });
 
     private loadDeferred : JQueryDeferred<SlicerItem[]>;
-    
+
     /**
      * The current category that the user added
      */
@@ -140,14 +149,20 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             const categories = categorical && categorical.categories;
             const hasCategories = !!(categories && categories.length > 0);
             const catName = hasCategories && categorical.categories[0].source.queryName;
-            
+            const objects = this.dataView.metadata.objects;
+
+            // Sync search option
+            if (objects && objects['search']) {
+                this.mySlicer.caseInsensitive = !!objects['search']['caseInsensitive'];
+            }
+
             // if the user has changed the categories, then selection is done for
             if (!hasCategories || this.currentCategory !== categorical.categories[0].source.queryName) {
                 this.mySlicer.selectedItems = [];
             }
-            
+
             this.currentCategory = catName;
-            
+
             var newData = AttributeSlicer.converter(this.dataView, this.selectionManager);
             if (this.loadDeferred && this.mySlicer.data) {
 
@@ -221,16 +236,19 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
         return converted;
     }
-    
+
     /**
      * Enumerates the instances for the objects that appear in the power bi panel
      */
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] {
         let instances = super.enumerateObjectInstances(options) || [{
-            selector: null, 
+            selector: null,
             objectName: options.objectName,
             properties: {}
         }];
+        if (options.objectName === "search") {
+            instances[0].properties['caseInsensitive'] = this.mySlicer.caseInsensitive;
+        }
         return instances;
     }
 
