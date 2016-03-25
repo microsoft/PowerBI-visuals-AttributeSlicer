@@ -84,6 +84,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        this._serverSideSearch = true;
 	        /**
+	         * Gets whether or not the search is case insensitive
+	         */
+	        this._caseInsentitive = true;
+	        /**
 	         * The list of selected items
 	         */
 	        this._selectedItems = [];
@@ -111,6 +115,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        set: function (value) {
 	            this._serverSideSearch = value;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(AttributeSlicer.prototype, "caseInsensitive", {
+	        get: function () {
+	            return this._caseInsentitive;
+	        },
+	        /**
+	         * Setter for case insensitive
+	         */
+	        set: function (value) {
+	            this._caseInsentitive = value;
+	            this.syncItemVisiblity();
 	        },
 	        enumerable: true,
 	        configurable: true
@@ -243,6 +261,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        get: function () {
 	            return this.element.find(".searchbox").val();
 	        },
+	        /**
+	         * Gets the current serch value
+	         */
+	        set: function (value) {
+	            this.element.find(".searchbox").val(value);
+	            this.handleSearchChanged();
+	        },
 	        enumerable: true,
 	        configurable: true
 	    });
@@ -273,13 +298,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Syncs the item elements state with the current set of selected items and the search
 	     */
 	    AttributeSlicer.prototype.syncItemVisiblity = function () {
+	        var _this = this;
 	        var value = this.selectedItems;
 	        var eles = this.element.find(".item");
 	        var me = this;
 	        var isMatch = function (item, value) {
-	            return ((item.match + "") || "").indexOf(value) >= 0 ||
-	                ((item.matchPrefix + "") || "").indexOf(value) >= 0 ||
-	                ((item.matchSuffix + "") || "").indexOf(value) >= 0;
+	            var regex = new RegExp(value, _this.caseInsensitive ? "i" : "");
+	            var pretty = function (val) { return ((val || "") + ""); };
+	            return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
 	        };
 	        eles.each(function () {
 	            var item = $(this).data("item");
@@ -343,12 +369,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this = this;
 	        this.element.find(".searchbox").on("input", _.debounce(function () {
 	            if (!_this.loadingSearch) {
-	                if (_this.serverSideSearch) {
-	                    setTimeout(function () { return _this.checkLoadMoreDataBasedOnSearch(); }, 10);
-	                }
-	                // this is required because when the list is done searching it adds back in cached elements with selected flags
-	                _this.syncItemVisiblity();
-	                _this.element.toggleClass("has-search", !!_this.searchString);
+	                _this.handleSearchChanged();
 	            }
 	        }, AttributeSlicer.SEARCH_DEBOUNCE));
 	        this.listEle.on("click", function (evt) {
@@ -363,6 +384,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            evt.stopImmediatePropagation();
 	            evt.stopPropagation();
 	        });
+	    };
+	    /**
+	     * Handles when the search is changed
+	     */
+	    AttributeSlicer.prototype.handleSearchChanged = function () {
+	        var _this = this;
+	        if (this.serverSideSearch) {
+	            setTimeout(function () { return _this.checkLoadMoreDataBasedOnSearch(); }, 10);
+	        }
+	        // this is required because when the list is done searching it adds back in cached elements with selected flags
+	        this.syncItemVisiblity();
+	        this.element.toggleClass("has-search", !!this.searchString);
 	    };
 	    /**
 	     * Loads more data based on search
