@@ -238,6 +238,7 @@ export class AttributeSlicer {
         }
 
         this._data = newData;
+        this.syncItemVisiblity();
         this.updateSelectAllButtonState();
     }
 
@@ -313,6 +314,13 @@ export class AttributeSlicer {
         this._loadingMoreData = value;
         this.element.toggleClass("loading", value);
     }
+    
+    /**
+     * Escapes RegExp
+     */
+    private static escapeRegExp(str: string) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    }
 
     /**
      * Syncs the item elements state with the current set of selected items and the search
@@ -322,8 +330,15 @@ export class AttributeSlicer {
         let eles = this.element.find(".item");
         let me = this;
         const isMatch = (item: SlicerItem, value: string) => {
-            const regex = new RegExp(value, this.caseInsensitive ? "i" : "");
+            const searchStr = value || "";
+            const flags = this.caseInsensitive ? "i" : "";
             const pretty = (val: string) => ((val || "") + "");
+            let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
+            // if (searchStr.indexOf("#R:") === 0) {
+            //     try {
+            //         regex = new RegExp(searchStr.substring(3), flags);
+            //     } catch (e) { }
+            // } 
             return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
         };
         eles.each(function() {
@@ -470,6 +485,7 @@ export class AttributeSlicer {
                     } else {
                         this.data = this.data.concat(items);
                     }
+                    this.syncItemVisiblity();
                     // Make sure we don't need to load more after this, in case it doesn't all fit on the screen
                     setTimeout(() => this.checkLoadMoreData(), 10);
                     return items;

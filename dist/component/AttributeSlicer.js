@@ -223,6 +223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.loadingSearch = false;
 	            }
 	            this._data = newData;
+	            this.syncItemVisiblity();
 	            this.updateSelectAllButtonState();
 	        },
 	        enumerable: true,
@@ -295,6 +296,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	    });
 	    /**
+	     * Escapes RegExp
+	     */
+	    AttributeSlicer.escapeRegExp = function (str) {
+	        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+	    };
+	    /**
 	     * Syncs the item elements state with the current set of selected items and the search
 	     */
 	    AttributeSlicer.prototype.syncItemVisiblity = function () {
@@ -303,8 +310,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var eles = this.element.find(".item");
 	        var me = this;
 	        var isMatch = function (item, value) {
-	            var regex = new RegExp(value, _this.caseInsensitive ? "i" : "");
+	            var searchStr = value || "";
+	            var flags = _this.caseInsensitive ? "i" : "";
 	            var pretty = function (val) { return ((val || "") + ""); };
+	            var regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
+	            // if (searchStr.indexOf("#R:") === 0) {
+	            //     try {
+	            //         regex = new RegExp(searchStr.substring(3), flags);
+	            //     } catch (e) { }
+	            // } 
 	            return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
 	        };
 	        eles.each(function () {
@@ -445,6 +459,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    else {
 	                        _this.data = _this.data.concat(items);
 	                    }
+	                    _this.syncItemVisiblity();
 	                    // Make sure we don't need to load more after this, in case it doesn't all fit on the screen
 	                    setTimeout(function () { return _this.checkLoadMoreData(); }, 10);
 	                    return items;
