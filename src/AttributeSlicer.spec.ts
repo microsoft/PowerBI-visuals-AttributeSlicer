@@ -76,7 +76,7 @@ describe("AttributeSlicer", () => {
             expect(itemEles.length).to.eq(2);
             const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
             expect(resultText).to.be.deep.equal(['M', 'm']);
-        });
+        }); 
 
         it("should show filtered data when caseInsensitive is false", () => {
             let { instance, element } = createInstance();
@@ -91,8 +91,6 @@ describe("AttributeSlicer", () => {
             expect(resultText).to.be.deep.equal(['M']);
         });
     });
-
-    it("should set case in")
 
     describe("serverSideSearch", () => {
         it("should return the property when set", () => {
