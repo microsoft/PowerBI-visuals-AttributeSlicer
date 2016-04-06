@@ -1,7 +1,7 @@
-import { DocumentViewer } from "./DocumentViewer";
-import { DocumentViewer as DocumentViewerReact } from "./DocumentViewer";
+import { AttributeSlicer } from "./AttributeSlicer";
+import { AttributeSlicer as AttributeSlicerReact } from "./AttributeSlicer";
 
 export = {
-    DocumentViewer,
-    DocumentViewerReact,
+    AttributeSlicer,
+    AttributeSlicerReact,
 };

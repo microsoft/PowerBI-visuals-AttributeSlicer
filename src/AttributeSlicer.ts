@@ -1,5 +1,5 @@
 import EventEmitter from '../base/EventEmitter';
-import Utils from '../base/Utils';
+import Utils from '../base/powerbi/Utils';
 const $ : JQueryStatic = require("jquery");
 const naturalSort = require("javascript-natural-sort");
 

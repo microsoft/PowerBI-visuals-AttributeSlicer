@@ -1,7 +1,7 @@
-/// <reference path="../base/references.d.ts"/>
+/// <reference path="../base/powerbi/references.d.ts"/>
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
-import { VisualBase, ExternalCssResource } from "../base/VisualBase";
-import { default as Utils, Visual } from "../base/Utils";
+import { VisualBase, ExternalCssResource } from "../base/powerbi/VisualBase";
+import { default as Utils, Visual } from "../base/powerbi/Utils";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
@@ -331,4 +331,4 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 /**
  * Represents a list item
  */
-interface ListItem extends SlicerItem, SelectableDataPoint {}
+export interface ListItem extends SlicerItem, SelectableDataPoint {}
