@@ -3,6 +3,8 @@ import * as ReactDOM from "react-dom";
 const $ = require("jquery");
 import { AttributeSlicer as AttributeSlicerImpl } from "./AttributeSlicer";
 
+require("./css/AttributeSlicer.scss");
+
 export interface IAttributeSlicerProps {
     data: any[];
     serverSideSearch?: boolean;
