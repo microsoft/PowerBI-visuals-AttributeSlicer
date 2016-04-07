@@ -6,8 +6,7 @@
     "class-name": true,
     "comment-format": [
       true,
-      "check-space",
-      "check-lowercase"
+      "check-space"
     ],
     "curly": true,
     "eofline": true,
@@ -16,7 +15,6 @@
       true,
       "spaces"
     ],
-    "interface-name": true,
     "jsdoc-format": true,
     "label-position": true,
     "label-undefined": true,
@@ -131,3 +129,4 @@
     ]
   }
 }
+
