@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-const $ = require("jquery");
+import * as $ from "jquery";
 import { AttributeSlicer as AttributeSlicerImpl } from "./AttributeSlicer";
 
-require("./css/AttributeSlicer.scss");
+import "./css/AttributeSlicer.scss";
 
 export interface IAttributeSlicerProps {
     data: any[];
@@ -12,9 +12,9 @@ export interface IAttributeSlicerProps {
     showValues?: boolean;
     showSelections?: boolean;
     showHighlight?: boolean;
-    onLoadMoreData(item: { result: boolean; }, isSearch: boolean, searchString: string) : any;
-    onCanLoadMoreData(item: { result: boolean; }, isSearch: boolean) : any;
-    onSelectionChanged(newItems: any[], oldItems: any[]) : any;
+    onLoadMoreData(item: { result: boolean; }, isSearch: boolean, searchString: string): any;
+    onCanLoadMoreData(item: { result: boolean; }, isSearch: boolean): any;
+    onSelectionChanged(newItems: any[], oldItems: any[]): any;
 };
 
 export interface IAttributeSlicerState { }
@@ -23,25 +23,25 @@ export interface IAttributeSlicerState { }
  * Thin wrapper around LineUp
  */
 export class AttributeSlicer extends React.Component<IAttributeSlicerProps, IAttributeSlicerState> {
+    public props: IAttributeSlicerProps;
     private mySlicer: AttributeSlicerImpl;
     private node: any;
-    public props : IAttributeSlicerProps;
 
-    componentDidMount() {
+    public componentDidMount() {
         this.node = ReactDOM.findDOMNode(this);
         this.mySlicer = new AttributeSlicerImpl($(this.node));
         this.attachEvents();
         this.renderContent();
     }
 
-    componentWillReceiveProps(newProps : IAttributeSlicerProps) {
+    public componentWillReceiveProps(newProps: IAttributeSlicerProps) {
         this.renderContent(newProps);
     }
 
     /**
      * Renders this component
      */
-    render() {
+    public render() {
         return <div className="advanced-slicer-container" style={{width:"100%", height:"100%"}}></div>;
     }
 
@@ -49,8 +49,8 @@ export class AttributeSlicer extends React.Component<IAttributeSlicerProps, IAtt
      * Attaches events to the slicer
      */
     private attachEvents() {
-        const guardedEventer = (evtName) => {
-            return (...args) => {
+        const guardedEventer = (evtName: string) => {
+            return (...args: any[]) => {
                 if (this.props[evtName]) {
                     this.props[evtName].apply(this, args);
                 }
@@ -61,7 +61,7 @@ export class AttributeSlicer extends React.Component<IAttributeSlicerProps, IAtt
         this.mySlicer.events.on("selectionChanged", guardedEventer("onSelectionChanged"));
     }
 
-    private renderContent(props? : IAttributeSlicerProps) {
+    private renderContent(props?: IAttributeSlicerProps) {
         // if called from `componentWillReceiveProps`, then we use the new
         // props, otherwise use what we already have.
         props = props || this.props;

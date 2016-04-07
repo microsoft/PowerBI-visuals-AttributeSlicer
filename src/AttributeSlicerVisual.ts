@@ -1,6 +1,6 @@
 /// <reference path="../base/powerbi/references.d.ts"/>
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
-import { VisualBase, ExternalCssResource } from "../base/powerbi/VisualBase";
+import { VisualBase } from "../base/powerbi/VisualBase";
 import { default as Utils, Visual } from "../base/powerbi/Utils";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
@@ -18,74 +18,49 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 export default class AttributeSlicer extends VisualBase implements IVisual {
 
     /**
-     * The current dataView
-     */
-    private dataView: DataView;
-
-    /**
-     * The host of the visual
-     */
-    private host: IVisualHostServices;
-
-    /**
-     * A reference to the loading element
-     */
-    private loadingElement: JQuery;
-
-    /**
-     * The selection manager
-     */
-    private selectionManager: SelectionManager;
-
-    /**
-     * My AttributeSlicer
-     */
-    private mySlicer : AttributeSlicerImpl;
-
-    /**
      * The set of capabilities for the visual
      */
     public static capabilities: VisualCapabilities = $.extend(true, {}, VisualBase.capabilities, {
         dataRoles: [
             {
-                name: 'Category',
+                name: "Category",
                 kind: VisualDataRoleKind.Grouping,
-                displayName: powerbi.data.createDisplayNameGetter('Role_DisplayName_Field'),
-                description: data.createDisplayNameGetter('Role_DisplayName_FieldDescription')
+                displayName: powerbi.data.createDisplayNameGetter("Role_DisplayName_Field"),
+                description: data.createDisplayNameGetter("Role_DisplayName_FieldDescription"),
             }, {
-                name: 'Values',
-                kind: VisualDataRoleKind.Measure
+                name: "Values",
+                kind: VisualDataRoleKind.Measure,
             },
         ],
         dataViewMappings: [{
-            conditions: [{ 'Category': { max: 1, min: 0 }, 'Values': { max: 1, min: 0 }}],
+            conditions: [{ "Category": { max: 1, min: 0 }, "Values": { max: 1, min: 0 }}],
             categorical: {
                 categories: {
-                    for: { in: 'Category' },
-                    dataReductionAlgorithm: { window: {} }
+                    for: { in: "Category" },
+                    dataReductionAlgorithm: { window: {} },
                 },
                 values: {
                     select: [{ bind: { to: "Values" } }]
                 },
                 includeEmptyGroups: true,
-            }
-        }],
-        // Sort this crap by default
+            },
+        }, ],
+        // sort this crap by default
         sorting: {
-            default:{}
+            default: {}
         },
         objects: {
             general: {
-                displayName: data.createDisplayNameGetter('Visual_General'),
+                displayName: data.createDisplayNameGetter("Visual_General"),
                 properties: {
                     filter: {
                         type: { filter: {} },
                         rule: {
                             output: {
-                                property: 'selected',
-                                selector: ['Values'],
-                            }
-                        }
+                                property: "selected",
+                                selector: ["Values"],
+                            },
+                        },
                     },
                 },
             },
@@ -94,10 +69,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 properties: {
                     caseInsensitive: {
                         displayName: "Case Insensitive",
-                        type: { bool: true }
-                    }
-                }
-            }
+                        type: { bool: true },
+                    },
+                },
+            },
             /*,
             sorting: {
                 displayName: "Sorting",
@@ -110,29 +85,99 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     }
                 }
             }*/
-        }
+        },
     });
 
-    private loadDeferred : JQueryDeferred<SlicerItem[]>;
+    /**
+     * The current dataView
+     */
+    private dataView: DataView;
+
+    /**
+     * The host of the visual
+     */
+    private host: IVisualHostServices;
+
+    /**
+     * The selection manager
+     */
+    private selectionManager: SelectionManager;
+
+    /**
+     * My AttributeSlicer
+     */
+    private mySlicer: AttributeSlicerImpl;
+
+    private loadDeferred: JQueryDeferred<SlicerItem[]>;
 
     /**
      * The current category that the user added
      */
-    private currentCategory;
+    private currentCategory: any;
+
+    /**
+     * Updates the data filter based on the selection
+     */
+    private onSelectionChanged = _.debounce(
+        (selectedItems: ListItem[]) => {
+            this.selectionManager.clear();
+            selectedItems.forEach((item) => {
+                this.selectionManager.select(item.identity, true);
+            });
+            this.updateSelectionFilter();
+        },
+        100);
+
+    /**
+     * Converts the given dataview into a list of listitems
+     */
+    public static converter(dataView: DataView, selectionManager: SelectionManager): ListItem[] {
+        let converted: ListItem[];
+        let selectedIds = selectionManager.getSelectionIds() || [];
+        let categorical = dataView && dataView.categorical;
+        let values: any[] = [];
+        if (categorical && categorical.values && categorical.values.length) {
+            values = categorical.values[0].values;
+        }
+        let maxValue = 0;
+        if (categorical && categorical.categories && categorical.categories.length > 0) {
+            converted = <any>categorical.categories[0].values.map((category, i) => {
+                let id = SelectionId.createWithId(categorical.categories[0].identity[i]);
+                let item = {
+                    match: category,
+                    identity: id,
+                    selected: !!_.find(selectedIds, (oId) => oId.equals(id)),
+                    value: values[i] || 0,
+                    renderedValue: <any>undefined,
+                    equals: (b: { identity: any }) => id.equals((<ListItem>b).identity),
+                };
+                if (item.value > maxValue) {
+                    maxValue = item.value;
+                }
+                return item;
+            });
+            converted.forEach((c) => {
+                c.renderedValue = c.value ? (c.value / maxValue) * 100 : undefined;
+            });
+        }
+        return converted;
+    }
 
     /**
      * Called when the visual is being initialized
      */
     public init(options: powerbi.VisualInitOptions): void {
-        super.init(options, '<div></div>');
+        super.init(options, "<div></div>");
         this.host = options.host;
         this.mySlicer = new AttributeSlicerImpl(this.element);
         this.mySlicer.serverSideSearch = false;
         this.mySlicer.showSelections = true;
         this.selectionManager = new SelectionManager({ hostServices: this.host });
-        this.mySlicer.events.on("loadMoreData", item => this.onLoadMoreData(item));
-        this.mySlicer.events.on("canLoadMoreData", (item, isSearch) => item.result = isSearch || !!this.dataView.metadata.segment);
-        this.mySlicer.events.on("selectionChanged", (newItems, oldItems) => this.onSelectionChanged(newItems));
+        this.mySlicer.events.on("loadMoreData", (item: any) => this.onLoadMoreData(item));
+        this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
+            return item.result = isSearch || !!this.dataView.metadata.segment;
+        });
+        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => this.onSelectionChanged(newItems));
     }
 
     /**
@@ -151,9 +196,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             const catName = hasCategories && categorical.categories[0].source.queryName;
             const objects = this.dataView.metadata.objects;
 
-            // Sync search option
-            if (objects && objects['search']) {
-                this.mySlicer.caseInsensitive = !!objects['search']['caseInsensitive'];
+            // sync search option
+            if (objects && objects["search"]) {
+                this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
             }
 
             // if the user has changed the categories, then selection is done for
@@ -163,11 +208,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
             this.currentCategory = catName;
 
-            var newData = AttributeSlicer.converter(this.dataView, this.selectionManager);
+            let newData = AttributeSlicer.converter(this.dataView, this.selectionManager);
             if (this.loadDeferred && this.mySlicer.data) {
 
-                let added = [];
-                let anyRemoved = false;
+                let added: ListItem[] = [];
                 Utils.listDiff(this.mySlicer.data.slice(0), newData, {
                     /**
                      * Returns true if item one equals item two
@@ -177,23 +221,27 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     /**
                      * Gets called when the given item was added
                      */
-                    onAdd: (item) => added.push(item)
+                    onAdd: (item: ListItem) => added.push(item),
                 });
 
-                // We only need to give it the new items
+                // we only need to give it the new items
                 this.loadDeferred.resolve(added);
                 delete this.loadDeferred;
-            } else if (newData && Utils.hasDataChanged(newData.slice(0), this.mySlicer.data, (a, b) => a.match === b.match && a.renderedValue === b.renderedValue)) {
+            } else if (newData &&
+                Utils.hasDataChanged(
+                    newData.slice(0),
+                    this.mySlicer.data,
+                    (a, b) => a.match === b.match && a.renderedValue === b.renderedValue)) {
                 this.mySlicer.data = newData;
             } else if (!newData || newData.length === 0) {
                 this.mySlicer.data = [];
             }
             this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
 
-            var sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
+            let sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
             if (sortedColumns.length) {
-                var lastColumn = sortedColumns[sortedColumns.length - 1];
-                this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles['Category'] ? 'match' : 'value', lastColumn.sort != 1);
+                let lastColumn = sortedColumns[sortedColumns.length - 1];
+                this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
             }
         } else {
             this.mySlicer.data = [];
@@ -202,52 +250,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Converts the given dataview into a list of listitems
-     */
-    public static converter(dataView: DataView, selectionManager: SelectionManager): ListItem[] {
-        var converted: ListItem[];
-        var selectedIds = selectionManager.getSelectionIds() || [];
-        var categorical = dataView && dataView.categorical;
-        var values = [];
-        if (categorical && categorical.values && categorical.values.length) {
-            values = categorical.values[0].values;
-        }
-        var maxValue = 0;
-        if (categorical && categorical.categories && categorical.categories.length > 0) {
-            converted = categorical.categories[0].values.map((category, i) => {
-                var id = SelectionId.createWithId(categorical.categories[0].identity[i]);
-                var item = {
-                    match: category,
-                    identity: id,
-                    selected: !!_.find(selectedIds, (oId) => oId.equals(id)),
-                    value: values[i] || 0,
-                    renderedValue: undefined,
-                    equals: (b) => id.equals((<ListItem>b).identity)
-                };
-                if (item.value > maxValue) {
-                    maxValue = item.value;
-                }
-                return item;
-            });
-            var percentage = maxValue < 100 ? true: false;
-            converted.forEach((c) => {
-                c.renderedValue = c.value ? (c.value / maxValue) * 100 : undefined;
-            });
-        }
-        return converted;
-    }
-
-    /**
      * Enumerates the instances for the objects that appear in the power bi panel
      */
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] {
         let instances = super.enumerateObjectInstances(options) || [{
-            selector: null,
+            /*tslint:disable */selector: null/* tslint:enable */,
             objectName: options.objectName,
-            properties: {}
-        }];
+            properties: {},
+        }, ];
         if (options.objectName === "search") {
-            instances[0].properties['caseInsensitive'] = this.mySlicer.caseInsensitive;
+            instances[0].properties["caseInsensitive"] = this.mySlicer.caseInsensitive;
         }
         return instances;
     }
@@ -255,7 +267,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Gets the inline css used for this element
      */
-    protected getCss() : string[] {
+    protected getCss(): string[] {
         return super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
     }
 
@@ -278,26 +290,14 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Updates the data filter based on the selection
      */
-    private onSelectionChanged = _.debounce((selectedItems: ListItem[]) => {
-        var filter;
-        this.selectionManager.clear();
-        selectedItems.forEach((item) => {
-            this.selectionManager.select(item.identity, true);
-        });
-        this.updateSelectionFilter();
-    }, 100);
-
-    /**
-     * Updates the data filter based on the selection
-     */
     private updateSelectionFilter() {
-        var filter;
+        let filter: data.SemanticFilter;
         if (this.selectionManager.hasSelection()) {
-            var selectors = this.selectionManager.getSelectionIds().map((id) => id.getSelector());
+            let selectors = this.selectionManager.getSelectionIds().map((id) => id.getSelector());
             filter = data.Selector.filterFromSelector(selectors);
         }
 
-        var objects: powerbi.VisualObjectInstancesToPersist = { };
+        let objects: powerbi.VisualObjectInstancesToPersist = { };
         if (filter) {
             $.extend(objects, {
                 merge: [
@@ -306,9 +306,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         selector: undefined,
                         properties: {
                             "filter": filter
-                        }
-                    }
-                ]
+                        },
+                    },
+                ],
             });
         } else {
             $.extend(objects, {
@@ -318,9 +318,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         selector: undefined,
                         properties: {
                             "filter": filter
-                        }
-                    }
-                ]
+                        },
+                    },
+                ],
             });
         }
 
@@ -331,4 +331,5 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 /**
  * Represents a list item
  */
+/* tslint:disable */
 export interface ListItem extends SlicerItem, SelectableDataPoint {}

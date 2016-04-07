@@ -1,45 +1,42 @@
-require("../base/testSetup");
+import "../base/testSetup";
 
 import { expect } from "chai";
 import { AttributeSlicer } from "./AttributeSlicer";
 import * as $ from "jquery";
 
 describe("AttributeSlicer", () => {
-    var parentEle;
+    let parentEle: JQuery;
     beforeEach(() => {
-        global['$'] = require("jquery");
-        global['d3'] = require("d3");
-        global['_'] = require("underscore");
-        parentEle = $('<div></div>');
+        parentEle = $("<div></div>");
     });
 
     afterEach(() => {
         if (parentEle) {
             parentEle.remove();
         }
-        parentEle = null;
+        parentEle = undefined;
     });
 
-    var createInstance = () => {
-        let ele = $('<div>');
+    const createInstance = () => {
+        let ele = $("<div>");
         parentEle.append(ele);
-        var result = {
+        let result = {
             instance: new AttributeSlicer(ele),
-            element: ele
+            element: ele,
         };
         return result;
     };
 
-    const createData = (...items) => {
-        return items.map(n => ({
+    const createData = (...items: string[]) => {
+        return items.map((n: string) => ({
             match: n,
             value: n,
             selected: false,
-            equals: b => b.match === n
+            equals: (b: any) => b.match === n,
         }));
     };
 
-    const SIMPLE_DATA = createData('M', 'm', 'N', 'n');
+    const SIMPLE_DATA = createData("M", "m", "N", "n");
 
     it("should load", () => {
         createInstance();
@@ -51,12 +48,14 @@ describe("AttributeSlicer", () => {
             instance.data = SIMPLE_DATA;
             const itemEles = element.find(".item");
             expect(itemEles.length).to.eq(SIMPLE_DATA.length);
-            const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
+            const resultText = itemEles.map((i: number, ele: Element) => $(ele).text().trim()).toArray();
             expect(resultText).to.be.deep.equal(SIMPLE_DATA.map(n => n.match));
         });
     });
 
-    const getVisibleItems = (element) => element.find(".item").filter((i, ele) => ele['style'].display !== "none");
+    const getVisibleItems = (element: JQuery) => {
+        return element.find(".item").filter((i: number, ele: HTMLElement) => ele.style.display !== "none");
+    };
 
     describe("case insensitivity", () => {
 
@@ -75,8 +74,8 @@ describe("AttributeSlicer", () => {
             const itemEles = getVisibleItems(element);
             expect(itemEles.length).to.eq(2);
             const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
-            expect(resultText).to.be.deep.equal(['M', 'm']);
-        }); 
+            expect(resultText).to.be.deep.equal(["M", "m"]);
+        });
 
         it("should show filtered data when caseInsensitive is false", () => {
             let { instance, element } = createInstance();
@@ -88,7 +87,7 @@ describe("AttributeSlicer", () => {
             const itemEles = getVisibleItems(element);
             expect(itemEles.length).to.eq(1);
             const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
-            expect(resultText).to.be.deep.equal(['M']);
+            expect(resultText).to.be.deep.equal(["M"]);
         });
     });
 

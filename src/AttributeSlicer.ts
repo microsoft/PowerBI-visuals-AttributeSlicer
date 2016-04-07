@@ -1,7 +1,9 @@
-import EventEmitter from '../base/EventEmitter';
-import Utils from '../base/powerbi/Utils';
-const $ : JQueryStatic = require("jquery");
+import EventEmitter from "../base/EventEmitter";
+import * as $ from "jquery";
+
+/* tslint:disable */
 const naturalSort = require("javascript-natural-sort");
+/* tslint:enable */
 
 /**
  * Represents an advanced slicer to help slice through data
@@ -27,19 +29,21 @@ export class AttributeSlicer {
                     </div>
                 </div>
                 <!-- Disabled -->
-                <label style="display:none;vertical-align:middle"><input class="check-all" type="checkbox" style="margin-right:5px;vertical-align:middle"/>&nbsp;Select All</label>
+                <label style="display:none;vertical-align:middle">
+                    <input class="check-all" type="checkbox" style="margin-right:5px;vertical-align:middle"/>&nbsp;Select All
+                </label>
                 </div>
                 <hr/>
             </div>
             <div class="list" style="overflow:hidden;overflow-y:auto"></div>
             <div class='load-spinner' style='transform:scale(0.6);'><div>
         </div>
-    `.trim().replace(/\n/g, '');
+    `.trim().replace(/\n/g, "");
 
     /**
      * The template used to render list items
      */
-    private static listItemFactory = (matchPrefix, match, matchSuffix) => {
+    private static listItemFactory = (matchPrefix: string, match: string, matchSuffix: string) => {
         return $(`
             <div style="white-space:nowrap" class="item">
                 <label style="cursor:pointer">
@@ -56,7 +60,7 @@ export class AttributeSlicer {
                     </span>
                 </label>
             </div>
-        `.trim().replace(/\n/g, ''));
+        `.trim().replace(/\n/g, ""));
     };
 
     /**
@@ -87,22 +91,22 @@ export class AttributeSlicer {
     /**
      * The data contained in this slicer
      */
-    private _data : SlicerItem[] = [];
+    private _data: SlicerItem[] = [];
 
     /**
      * Our event emitter
      */
-    private _eventEmitter : EventEmitter = new EventEmitter();
+    private _eventEmitter: EventEmitter = new EventEmitter();
 
     /**
      * Container for the selections
      */
-    private selectionsEle : JQuery;
+    private selectionsEle: JQuery;
 
     /**
      * Stores the currently loading promise
      */
-    private loadPromise : PromiseLike<any>;
+    private loadPromise: PromiseLike<any>;
 
     /**
      * Whether or not we are loading the search box
@@ -123,7 +127,7 @@ export class AttributeSlicer {
         this.clearAllEle = element.find(".clear-all").on("click", () => this.clearSelection());
         this.attachEvents();
 
-        // These two are here because the devtools call init more than once
+        // these two are here because the devtools call init more than once
         this.loadingMoreData = true;
     }
 
@@ -170,7 +174,7 @@ export class AttributeSlicer {
      */
     public set dimensions(dims: { width: number; height: number }) {
         this.listEle.find(".display-container").css({ width: "100%" });
-        this.listEle.css({ width: "100%", height: dims.height - this.element.find(".slicer-options").height()- 10 });
+        this.listEle.css({ width: "100%", height: dims.height - this.element.find(".slicer-options").height() - 10 });
     }
 
     /**
@@ -212,22 +216,22 @@ export class AttributeSlicer {
      * Sets the slicer data
      */
     public set data(newData: SlicerItem[]) {
-       this.listEle.empty();
+        this.listEle.empty();
 
-        // If some one sets the data, then clearly we are no longer loading data
+        // if some one sets the data, then clearly we are no longer loading data
         this.loadingMoreData = false;
 
         if (newData && newData.length) {
             this.listEle.append(newData.map(item => {
                 const ele = AttributeSlicer.listItemFactory(item.matchPrefix, item.match, item.matchSuffix);
-                var renderedValue = item.renderedValue;
+                let renderedValue = item.renderedValue;
                 if (renderedValue) {
                     let valueDisplayEle = ele.find(".value-display");
                     valueDisplayEle.css({ width: (renderedValue + "%") });
-                    valueDisplayEle.find(".value").html('' + item.value);
+                    valueDisplayEle.find(".value").html("" + item.value);
                 }
                 ele[item.selected ? "hide" : "show"].call(ele);
-                ele.find("input").prop('checked', item.selected);
+                ele.find("input").prop("checked", item.selected);
                 ele.data("item", item);
                 return ele;
             }));
@@ -245,8 +249,8 @@ export class AttributeSlicer {
     /**
      * The list of selected items
      */
-    private _selectedItems : SlicerItem[] = [];
-    public get selectedItems() : SlicerItem[] {
+    private _selectedItems: SlicerItem[] = [];
+    public get selectedItems(): SlicerItem[] {
         return this._selectedItems;
     }
 
@@ -254,7 +258,7 @@ export class AttributeSlicer {
      * Sets the set of selected items
      */
     public set selectedItems (value: SlicerItem[]) {
-        var oldSelection = this.selectedItems.slice(0);
+        let oldSelection = this.selectedItems.slice(0);
         this._selectedItems = value;
 
         // HACK: They are all selected if it is the same length as our dataset
@@ -271,7 +275,7 @@ export class AttributeSlicer {
         this.raiseSelectionChanged(this.selectedItems, oldSelection);
 
         this.checkAllEle.prop("checked", someChecked);
-        this.checkAllEle.prop('indeterminate', someChecked);
+        this.checkAllEle.prop("indeterminate", someChecked);
     }
 
     /**
@@ -289,20 +293,10 @@ export class AttributeSlicer {
         this.handleSearchChanged();
     }
 
-    /**j
-     * Sorts the slicer
-     */
-    public sort(toSort: string, desc?: boolean) {
-        this.data.sort((a, b) => {
-            const sortVal = naturalSort(a[toSort], b[toSort]);
-            return desc ? -1 * sortVal : sortVal;
-        });
-    }
-
     /**
      * A boolean indicating whether or not the list is loading more data
      */
-    private _loadingMoreData = false; // Don't use this directly
+    private _loadingMoreData = false; // don't use this directly
     protected get loadingMoreData() {
         return this._loadingMoreData;
     }
@@ -314,7 +308,7 @@ export class AttributeSlicer {
         this._loadingMoreData = value;
         this.element.toggleClass("loading", value);
     }
-    
+
     /**
      * Escapes RegExp
      */
@@ -322,6 +316,77 @@ export class AttributeSlicer {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
 
+    /**j
+     * Sorts the slicer
+     */
+    public sort(toSort: string, desc?: boolean) {
+        this.data.sort((a, b) => {
+            const sortVal = naturalSort((<any>a)[toSort], (<any>b)[toSort]);
+            return desc ? -1 * sortVal : sortVal;
+        });
+    }
+    /**
+     * Listener for the list scrolling
+     */
+    protected checkLoadMoreData() {
+        let scrollElement = this.listEle[0];
+        let scrollHeight = scrollElement.scrollHeight;
+        let top = scrollElement.scrollTop;
+        let shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200 && scrollHeight >= 200;
+        if (shouldScrollLoad && !this.loadingMoreData && this.raiseCanLoadMoreData()) {
+            this.raiseLoadMoreData(false);
+        }
+    }
+
+    /**
+     * Raises the event to load more data
+     */
+    protected raiseLoadMoreData(isNewSearch: boolean): PromiseLike<SlicerItem[]> {
+        let item: { result?: PromiseLike<SlicerItem[]> } = { };
+        this.events.raiseEvent("loadMoreData", item, isNewSearch, this.searchString);
+        if (item.result) {
+            this.loadingMoreData = true;
+            let promise = this.loadPromise = item.result.then((items) => {
+                // if this promise hasn't been cancelled
+                if (!promise["cancel"]) {
+                    this.loadingMoreData = false;
+                    this.loadPromise = undefined;
+                    if (isNewSearch) {
+                        this.data = items;
+                    } else {
+                        this.data = this.data.concat(items);
+                    }
+                    this.syncItemVisiblity();
+                    // make sure we don't need to load more after this, in case it doesn't all fit on the screen
+                    setTimeout(() => this.checkLoadMoreData(), 10);
+                    return items;
+                }
+            }, () => {
+                this.data = [];
+                this.loadingMoreData = false;
+            });
+            return promise;
+        }
+    }
+
+    /**
+     * Raises the event 'can
+     * '
+     */
+    protected raiseCanLoadMoreData(isSearch: boolean = false): boolean {
+        let item = {
+            result: false
+        };
+        this.events.raiseEvent("canLoadMoreData", item, isSearch);
+        return item.result;
+    }
+
+    /**
+     * Raises the selectionChanged event
+     */
+    protected raiseSelectionChanged(newItems: SlicerItem[], oldItems: SlicerItem[]) {
+        this.events.raiseEvent("selectionChanged", newItems, oldItems);
+    }
     /**
      * Syncs the item elements state with the current set of selected items and the search
      */
@@ -329,8 +394,8 @@ export class AttributeSlicer {
         let value = this.selectedItems;
         let eles = this.element.find(".item");
         let me = this;
-        const isMatch = (item: SlicerItem, value: string) => {
-            const searchStr = value || "";
+        const isMatch = (item: SlicerItem, matchValue: string) => {
+            const searchStr = matchValue || "";
             const flags = this.caseInsensitive ? "i" : "";
             const pretty = (val: string) => ((val || "") + "");
             let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
@@ -345,7 +410,7 @@ export class AttributeSlicer {
             let item = $(this).data("item");
             let isVisible = !(!!value && value.filter(b => b.equals(item)).length > 0);
 
-            // Update the search
+            // update the search
             if (isVisible && !me.serverSideSearch && me.searchString) {
                 isVisible = isMatch(item, me.searchString);
             }
@@ -358,7 +423,7 @@ export class AttributeSlicer {
      * Toggle the select all state
      */
     private toggleSelectAll() {
-        var checked = this.checkAllEle.prop('checked');
+        let checked = this.checkAllEle.prop("checked");
         if (!!checked) {
             this.selectedItems = this._data.slice(0);
         } else {
@@ -370,7 +435,7 @@ export class AttributeSlicer {
      * Creates a new selection token element
      */
     private createSelectionToken(v: SlicerItem): JQuery {
-        const newEle = $('<div/>');
+        const newEle = $("<div/>");
         const text = (v.matchPrefix || "") + v.match + (v.matchSuffix || "");
         newEle
             .addClass("token")
@@ -397,8 +462,8 @@ export class AttributeSlicer {
      * Updates the select all button state to match the data
      */
     private updateSelectAllButtonState() {
-        this.checkAllEle.prop('indeterminate', this.selectedItems.length > 0 && this._data.length !== this.selectedItems.length);
-        this.checkAllEle.prop('checked', this.selectedItems.length > 0);
+        this.checkAllEle.prop("indeterminate", this.selectedItems.length > 0 && this._data.length !== this.selectedItems.length);
+        this.checkAllEle.prop("checked", this.selectedItems.length > 0);
     }
 
     /**
@@ -412,10 +477,10 @@ export class AttributeSlicer {
         }, AttributeSlicer.SEARCH_DEBOUNCE));
 
         this.listEle.on("click", (evt) => {
-            // var checkbox = $(evt.target);
-            var ele = $((<HTMLElement>evt.target)).parents(".item");
+            // let checkbox = $(evt.target);
+            let ele = $((<HTMLElement>evt.target)).parents(".item");
             if (ele.length > 0) {
-                let item : any = ele.data("item");
+                let item: any = ele.data("item");
                 this.selectedItems.push(item);
                 this.selectedItems = this.selectedItems.slice(0);
                 this.updateSelectAllButtonState();
@@ -442,79 +507,16 @@ export class AttributeSlicer {
      * @param force Force the loading of new data, if it can
      */
     private checkLoadMoreDataBasedOnSearch() {
-        // Only need to load if:
+        // only need to load if:
         // 1. There is more data. 2. There is not too much stuff on the screen (not causing a scroll)
         if (/*!this.loadingMoreData && */this.raiseCanLoadMoreData(true)) {
             if (this.loadPromise) {
-                this.loadPromise['cancel'] = true;
+                this.loadPromise["cancel"] = true;
             }
-            // We're not currently loading data, cause we cancelled
+            // we're not currently loading data, cause we cancelled
             this.loadingMoreData = false;
             this.raiseLoadMoreData(true);
         }
-    }
-
-    /**
-     * Listener for the list scrolling
-     */
-    protected checkLoadMoreData() {
-        var scrollElement = this.listEle[0];
-        var scrollHeight = scrollElement.scrollHeight;
-        var top = scrollElement.scrollTop;
-        var shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200 && scrollHeight >= 200;
-        if (shouldScrollLoad && !this.loadingMoreData && this.raiseCanLoadMoreData()) {
-            this.raiseLoadMoreData(false);
-        }
-    }
-
-    /**
-     * Raises the event to load more data
-     */
-    protected raiseLoadMoreData(isNewSearch: boolean) : PromiseLike<SlicerItem[]> {
-        var item : { result?: PromiseLike<SlicerItem[]> } = { };
-        this.events.raiseEvent("loadMoreData", item, isNewSearch, this.searchString);
-        if (item.result) {
-            this.loadingMoreData = true;
-            let promise = this.loadPromise = item.result.then((items) => {
-                // If this promise hasn't been cancelled
-                if (!promise['cancel']) {
-                    this.loadingMoreData = false;
-                    this.loadPromise = undefined;
-                    if (isNewSearch) {
-                        this.data = items;
-                    } else {
-                        this.data = this.data.concat(items);
-                    }
-                    this.syncItemVisiblity();
-                    // Make sure we don't need to load more after this, in case it doesn't all fit on the screen
-                    setTimeout(() => this.checkLoadMoreData(), 10);
-                    return items;
-                }
-            }, () => {
-                this.data = [];
-                this.loadingMoreData = false;
-            });
-            return promise;
-        }
-    }
-
-    /**
-     * Raises the event 'can
-     * '
-     */
-    protected raiseCanLoadMoreData(isSearch: boolean = false) : boolean {
-        var item = {
-            result: false
-        };
-        this.events.raiseEvent('canLoadMoreData', item, isSearch);
-        return item.result;
-    }
-
-    /**
-     * Raises the selectionChanged event
-     */
-    protected raiseSelectionChanged(newItems: SlicerItem[], oldItems: SlicerItem[]) {
-        this.events.raiseEvent('selectionChanged', newItems, oldItems);
     }
 }
 
