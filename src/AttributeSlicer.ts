@@ -311,6 +311,22 @@ export class AttributeSlicer {
     }
 
     /**
+     * Determines if the given slice item matches the given string value
+     */
+    public static isMatch(item: SlicerItem, matchValue: string, caseInsensitive: boolean) {
+        const searchStr = matchValue || "";
+        const flags = caseInsensitive ? "i" : "";
+        const pretty = (val: string) => ((val || "") + "");
+        let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
+        // if (searchStr.indexOf("#R:") === 0) {
+        //     try {
+        //         regex = new RegExp(searchStr.substring(3), flags);
+        //     } catch (e) { }
+        // } 
+        return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
+    }
+
+    /**
      * Escapes RegExp
      */
     private static escapeRegExp(str: string) {
@@ -349,7 +365,7 @@ export class AttributeSlicer {
             this.loadingMoreData = true;
             let promise = this.loadPromise = item.result.then((items) => {
                 // if this promise hasn't been cancelled
-                if (!promise["cancel"]) {
+                if (!promise || !promise["cancel"]) {
                     this.loadingMoreData = false;
                     this.loadPromise = undefined;
                     if (isNewSearch) {
@@ -395,25 +411,13 @@ export class AttributeSlicer {
         let value = this.selectedItems;
         let eles = this.element.find(".item");
         let me = this;
-        const isMatch = (item: SlicerItem, matchValue: string) => {
-            const searchStr = matchValue || "";
-            const flags = this.caseInsensitive ? "i" : "";
-            const pretty = (val: string) => ((val || "") + "");
-            let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
-            // if (searchStr.indexOf("#R:") === 0) {
-            //     try {
-            //         regex = new RegExp(searchStr.substring(3), flags);
-            //     } catch (e) { }
-            // } 
-            return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
-        };
         eles.each(function() {
             let item = $(this).data("item");
             let isVisible = !(!!value && value.filter(b => b.equals(item)).length > 0);
 
             // update the search
             if (isVisible && !me.serverSideSearch && me.searchString) {
-                isVisible = isMatch(item, me.searchString);
+                isVisible = AttributeSlicer.isMatch(item, me.searchString, me.caseInsensitive);
             }
 
             $(this).toggle(isVisible);

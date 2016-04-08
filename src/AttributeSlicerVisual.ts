@@ -120,6 +120,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     private loadingData = false;
 
+    /*
+     * The current set of cacheddata
+     */
+    private data: SlicerItem[];
+
     /**
      * Updates the data filter based on the selection
      */
@@ -174,10 +179,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         super.init(options, "<div></div>");
         this.host = options.host;
         this.mySlicer = new AttributeSlicerImpl(this.element);
-        this.mySlicer.serverSideSearch = false;
+        this.mySlicer.serverSideSearch = true;
         this.mySlicer.showSelections = true;
         this.selectionManager = new SelectionManager({ hostServices: this.host });
-        this.mySlicer.events.on("loadMoreData", (item: any) => this.onLoadMoreData(item));
+        this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || !!this.dataView.metadata.segment;
         });
@@ -217,11 +222,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
             this.currentCategory = catName;
 
-            let newData = AttributeSlicer.converter(this.dataView);
+            this.data = AttributeSlicer.converter(this.dataView);
+            let filteredData = this.getFilteredDataBasedOnSearch(this.data);
             if (this.loadDeferred && this.mySlicer.data) {
 
                 let added: ListItem[] = [];
-                Utils.listDiff(this.mySlicer.data.slice(0), newData, {
+                Utils.listDiff(this.mySlicer.data.slice(0), filteredData, {
                     /**
                      * Returns true if item one equals item two
                      */
@@ -236,13 +242,13 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 // we only need to give it the new items
                 this.loadDeferred.resolve(added);
                 delete this.loadDeferred;
-            } else if (newData &&
+            } else if (filteredData &&
                 Utils.hasDataChanged(
-                    newData.slice(0),
+                    filteredData.slice(0),
                     this.mySlicer.data,
                     (a, b) => a.match === b.match && a.renderedValue === b.renderedValue)) {
-                this.mySlicer.data = newData;
-            } else if (!newData || newData.length === 0) {
+                this.mySlicer.data = filteredData;
+            } else if (!filteredData || filteredData.length === 0) {
                 this.mySlicer.data = [];
             }
             this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
@@ -279,6 +285,19 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Returns an array containing a filtered set of data based on the search string
+     */
+    public getFilteredDataBasedOnSearch(data: SlicerItem[]) {
+        data = data || [];
+        if (this.mySlicer.searchString) {
+            const search = this.mySlicer.searchString;
+            const ci = this.mySlicer.caseInsensitive;
+            data = data.filter(n => AttributeSlicerImpl.isMatch(n, search, ci));
+        }
+        return data;
+    }
+
+    /**
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
@@ -288,16 +307,24 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Listener for when loading more data
      */
-    private onLoadMoreData(item: any) {
-        if (this.dataView.metadata.segment) {
+    private onLoadMoreData(item: any, isSearch: boolean) {
+        if (isSearch && this.data && this.data.length) {
+            let defer = $.Deferred();
+            defer.resolve(this.getFilteredDataBasedOnSearch(this.data));
+            item.result = defer.promise();
+        } else if (this.dataView.metadata.segment) {
+            let alreadyLoading = !!this.loadDeferred;
             if (this.loadDeferred) {
                 this.loadDeferred.reject();
             }
 
             this.loadDeferred = $.Deferred();
             item.result = this.loadDeferred.promise();
-
-            this.host.loadMoreData();
+            if (!alreadyLoading) {
+                setTimeout(() => {
+                    this.host.loadMoreData();
+                }, 10);
+            }
         }
     }
 
