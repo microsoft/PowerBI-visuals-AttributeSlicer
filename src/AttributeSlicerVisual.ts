@@ -116,6 +116,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private currentCategory: any;
 
     /**
+     * Whether or not we are currently loading data
+     */
+    private loadingData = false;
+
+    /**
      * Updates the data filter based on the selection
      */
     private onSelectionChanged = _.debounce(
@@ -131,9 +136,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Converts the given dataview into a list of listitems
      */
-    public static converter(dataView: DataView, selectionManager: SelectionManager): ListItem[] {
+    public static converter(dataView: DataView): ListItem[] {
         let converted: ListItem[];
-        let selectedIds = selectionManager.getSelectionIds() || [];
         let categorical = dataView && dataView.categorical;
         let values: any[] = [];
         if (categorical && categorical.values && categorical.values.length) {
@@ -146,7 +150,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 let item = {
                     match: category,
                     identity: id,
-                    selected: !!_.find(selectedIds, (oId) => oId.equals(id)),
+                    selected: false,
                     value: values[i] || 0,
                     renderedValue: <any>undefined,
                     equals: (b: { identity: any }) => id.equals((<ListItem>b).identity),
@@ -177,7 +181,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || !!this.dataView.metadata.segment;
         });
-        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => this.onSelectionChanged(newItems));
+        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
+            if (!this.loadingData) {
+                this.onSelectionChanged(newItems);
+            }
+        });
     }
 
     /**
@@ -188,6 +196,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         this.mySlicer.dimensions = options.viewport;
 
+        this.loadingData = true;
         this.dataView = options.dataViews && options.dataViews[0];
         if (this.dataView) {
             const categorical = this.dataView && this.dataView.categorical;
@@ -208,7 +217,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
             this.currentCategory = catName;
 
-            let newData = AttributeSlicer.converter(this.dataView, this.selectionManager);
+            let newData = AttributeSlicer.converter(this.dataView);
             if (this.loadDeferred && this.mySlicer.data) {
 
                 let added: ListItem[] = [];
@@ -237,16 +246,21 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 this.mySlicer.data = [];
             }
             this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
-
             let sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
             if (sortedColumns.length) {
                 let lastColumn = sortedColumns[sortedColumns.length - 1];
                 this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
             }
+
+            let selectedIds = this.selectionManager.getSelectionIds() || [];
+            this.mySlicer.selectedItems = this.mySlicer.data.filter((n: ListItem) => {
+                return !!_.find(selectedIds, (oId) => oId.equals(n.identity));
+            });
         } else {
             this.mySlicer.data = [];
             this.mySlicer.selectedItems = [];
         }
+        this.loadingData = false;
     }
 
     /**
