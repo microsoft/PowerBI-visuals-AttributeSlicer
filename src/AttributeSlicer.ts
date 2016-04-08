@@ -217,6 +217,7 @@ export class AttributeSlicer {
      */
     public set data(newData: SlicerItem[]) {
         this.listEle.empty();
+        this.selectedItems = [];
 
         // if some one sets the data, then clearly we are no longer loading data
         this.loadingMoreData = false;
