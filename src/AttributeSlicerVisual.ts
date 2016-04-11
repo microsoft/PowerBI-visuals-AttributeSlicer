@@ -37,7 +37,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             categorical: {
                 categories: {
                     for: { in: "Category" },
-                    dataReductionAlgorithm: { window: {} },
+                    dataReductionAlgorithm: { window: { count: 500 } },
                 },
                 values: {
                     select: [{ bind: { to: "Values" } }]
@@ -64,6 +64,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     },
                 },
             },
+            data: {
+                displayName: "Data",
+                properties: {
+                    limit: {
+                        displayName: "Max number of items",
+                        description: "The maximum number of items to load from PowerBI",
+                        type: { numeric: true },
+                    },
+                },
+            },
             search: {
                 displayName: "Search",
                 properties: {
@@ -87,6 +97,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             }*/
         },
     });
+
+    /**
+     * The max number of items to load from PBI
+     */
+    private static DEFAULT_MAX_NUMBER_OF_ITEMS: number = 10000;
 
     /**
      * The current dataView
@@ -119,6 +134,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Whether or not we are currently loading data
      */
     private loadingData = false;
+
+    /*
+     * The current set of cacheddata
+     */
+    private data: SlicerItem[];
+
+    /**
+     * The number of items to load from PBI
+     */
+    private maxNumberOfItems: number = AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
 
     /**
      * Updates the data filter based on the selection
@@ -174,12 +199,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         super.init(options, "<div></div>");
         this.host = options.host;
         this.mySlicer = new AttributeSlicerImpl(this.element);
-        this.mySlicer.serverSideSearch = false;
+        this.mySlicer.serverSideSearch = true;
         this.mySlicer.showSelections = true;
         this.selectionManager = new SelectionManager({ hostServices: this.host });
-        this.mySlicer.events.on("loadMoreData", (item: any) => this.onLoadMoreData(item));
+        this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
-            return item.result = isSearch || !!this.dataView.metadata.segment;
+            return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
         });
         this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
             if (!this.loadingData) {
@@ -194,73 +219,87 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     public update(options: powerbi.VisualUpdateOptions) {
         super.update(options);
 
-        this.mySlicer.dimensions = options.viewport;
+        // Make sure the slicer has some sort of dimensions
+        if (!this.mySlicer.dimensions) {
+            this.mySlicer.dimensions = options.viewport;
+        }
 
-        this.loadingData = true;
-        this.dataView = options.dataViews && options.dataViews[0];
-        if (this.dataView) {
-            const categorical = this.dataView && this.dataView.categorical;
-            const categories = categorical && categorical.categories;
-            const hasCategories = !!(categories && categories.length > 0);
-            const catName = hasCategories && categorical.categories[0].source.queryName;
-            const objects = this.dataView.metadata.objects;
+        // Assume that if the dimensions have changed, that thats it.
+        if (this.mySlicer.dimensions.height !== options.viewport.height ||
+            this.mySlicer.dimensions.width !== options.viewport.width) {
+            this.mySlicer.dimensions = options.viewport;
+        } else {
+            this.loadingData = true;
+            this.dataView = options.dataViews && options.dataViews[0];
+            if (this.dataView) {
+                const categorical = this.dataView && this.dataView.categorical;
+                const categories = categorical && categorical.categories;
+                const hasCategories = !!(categories && categories.length > 0);
+                const catName = hasCategories && categorical.categories[0].source.queryName;
+                const objects = this.dataView.metadata.objects;
 
-            // sync search option
-            if (objects && objects["search"]) {
-                this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
-            }
+                // sync search option
+                if (objects && objects["search"]) {
+                    this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
+                }
 
-            // if the user has changed the categories, then selection is done for
-            if (!hasCategories || this.currentCategory !== categorical.categories[0].source.queryName) {
+                // sync search option
+                if (objects && objects["data"]) {
+                    this.maxNumberOfItems = objects["data"]["limit"];
+                }
+
+                // Default the number if necessary
+                const currMax = this.maxNumberOfItems;
+                this.maxNumberOfItems = !!currMax && currMax > 0 ? currMax : AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
+
+                // if the user has changed the categories, then selection is done for
+                if (!hasCategories || this.currentCategory !== categorical.categories[0].source.queryName) {
+                    this.mySlicer.selectedItems = [];
+                }
+
+                this.currentCategory = catName;
+
+                const prevLength = this.data ? this.data.length : 0;
+                this.data = AttributeSlicer.converter(this.dataView).slice(0, this.maxNumberOfItems);
+
+                // If we are appending data for the attribute slicer
+                if (this.loadDeferred && this.mySlicer.data) {
+                    // Only add newly filtered data
+                    const filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(prevLength));
+
+                    // we only need to give it the new items
+                    this.loadDeferred.resolve(filteredData);
+                    delete this.loadDeferred;
+                } else {
+                    const filteredData = this.getFilteredDataBasedOnSearch(this.data);
+                    if (this.data &&
+                        Utils.hasDataChanged(
+                            filteredData.slice(0),
+                            this.mySlicer.data,
+                            (a, b) => a.match === b.match && a.renderedValue === b.renderedValue)) {
+                        this.mySlicer.data = filteredData;
+                    } else if (!filteredData || filteredData.length === 0) {
+                        this.mySlicer.data = [];
+                    }
+                }
+
+                this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+                let sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
+                if (sortedColumns.length) {
+                    let lastColumn = sortedColumns[sortedColumns.length - 1];
+                    this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
+                }
+
+                let selectedIds = this.selectionManager.getSelectionIds() || [];
+                this.mySlicer.selectedItems = this.mySlicer.data.filter((n: ListItem) => {
+                    return !!_.find(selectedIds, (oId) => oId.equals(n.identity));
+                });
+            } else {
+                this.mySlicer.data = [];
                 this.mySlicer.selectedItems = [];
             }
-
-            this.currentCategory = catName;
-
-            let newData = AttributeSlicer.converter(this.dataView);
-            if (this.loadDeferred && this.mySlicer.data) {
-
-                let added: ListItem[] = [];
-                Utils.listDiff(this.mySlicer.data.slice(0), newData, {
-                    /**
-                     * Returns true if item one equals item two
-                     */
-                    equals: (one, two) => one.match === two.match,
-
-                    /**
-                     * Gets called when the given item was added
-                     */
-                    onAdd: (item: ListItem) => added.push(item),
-                });
-
-                // we only need to give it the new items
-                this.loadDeferred.resolve(added);
-                delete this.loadDeferred;
-            } else if (newData &&
-                Utils.hasDataChanged(
-                    newData.slice(0),
-                    this.mySlicer.data,
-                    (a, b) => a.match === b.match && a.renderedValue === b.renderedValue)) {
-                this.mySlicer.data = newData;
-            } else if (!newData || newData.length === 0) {
-                this.mySlicer.data = [];
-            }
-            this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
-            let sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
-            if (sortedColumns.length) {
-                let lastColumn = sortedColumns[sortedColumns.length - 1];
-                this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
-            }
-
-            let selectedIds = this.selectionManager.getSelectionIds() || [];
-            this.mySlicer.selectedItems = this.mySlicer.data.filter((n: ListItem) => {
-                return !!_.find(selectedIds, (oId) => oId.equals(n.identity));
-            });
-        } else {
-            this.mySlicer.data = [];
-            this.mySlicer.selectedItems = [];
+            this.loadingData = false;
         }
-        this.loadingData = false;
     }
 
     /**
@@ -275,7 +314,23 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (options.objectName === "search") {
             instances[0].properties["caseInsensitive"] = this.mySlicer.caseInsensitive;
         }
+        if (options.objectName === "data") {
+            instances[0].properties["limit"] = this.maxNumberOfItems;
+        }
         return instances;
+    }
+
+    /**
+     * Returns an array containing a filtered set of data based on the search string
+     */
+    public getFilteredDataBasedOnSearch(data: SlicerItem[]) {
+        data = data || [];
+        if (this.mySlicer.searchString) {
+            const search = this.mySlicer.searchString;
+            const ci = this.mySlicer.caseInsensitive;
+            data = data.filter(n => AttributeSlicerImpl.isMatch(n, search, ci));
+        }
+        return data;
     }
 
     /**
@@ -288,16 +343,22 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Listener for when loading more data
      */
-    private onLoadMoreData(item: any) {
-        if (this.dataView.metadata.segment) {
+    private onLoadMoreData(item: any, isSearch: boolean) {
+        if (isSearch && this.data && this.data.length) {
+            let defer = $.Deferred();
+            defer.resolve(this.getFilteredDataBasedOnSearch(this.data));
+            item.result = defer.promise();
+        } else if (this.maxNumberOfItems > this.data.length && this.dataView.metadata.segment) {
+            let alreadyLoading = !!this.loadDeferred;
             if (this.loadDeferred) {
                 this.loadDeferred.reject();
             }
 
             this.loadDeferred = $.Deferred();
             item.result = this.loadDeferred.promise();
-
-            this.host.loadMoreData();
+            if (!alreadyLoading) {
+                this.host.loadMoreData();
+            }
         }
     }
 
