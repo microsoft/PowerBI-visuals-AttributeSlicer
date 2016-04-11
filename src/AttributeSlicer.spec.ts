@@ -19,10 +19,19 @@ describe("AttributeSlicer", () => {
 
     const createInstance = () => {
         let ele = $("<div>");
+        let fakeVL: any = function() {
+            this.container = $("<div>");
+            this.setItems = function(items: any) {
+                this.items = items;
+            };
+            this.rerender = function() /* tslint:disable */ {}; /* tslint:enable */
+        };
+        let vList = new fakeVL();
         parentEle.append(ele);
         let result = {
-            instance: new AttributeSlicer(ele),
+            instance: new AttributeSlicer(ele, vList),
             element: ele,
+            vlist: vList,
         };
         return result;
     };
@@ -44,18 +53,12 @@ describe("AttributeSlicer", () => {
 
     describe("data", () => {
         it("should show data", () => {
-            let { instance, element } = createInstance();
+            let { instance, vlist } = createInstance();
             instance.data = SIMPLE_DATA;
-            const itemEles = element.find(".item");
-            expect(itemEles.length).to.eq(SIMPLE_DATA.length);
-            const resultText = itemEles.map((i: number, ele: Element) => $(ele).text().trim()).toArray();
-            expect(resultText).to.be.deep.equal(SIMPLE_DATA.map(n => n.match));
+            expect(vlist.items.length).to.eq(SIMPLE_DATA.length);
+            expect(vlist.items).to.be.deep.equal(SIMPLE_DATA);
         });
     });
-
-    const getVisibleItems = (element: JQuery) => {
-        return element.find(".item").filter((i: number, ele: HTMLElement) => ele.style.display !== "none");
-    };
 
     describe("case insensitivity", () => {
 
@@ -66,28 +69,22 @@ describe("AttributeSlicer", () => {
         });
 
         it("should show filtered data when caseInsensitive is true", () => {
-            let { instance, element } = createInstance();
+            let { instance, vlist } = createInstance();
             instance.serverSideSearch = false;
             instance.data = SIMPLE_DATA;
             instance.searchString = "M";
 
-            const itemEles = getVisibleItems(element);
-            expect(itemEles.length).to.eq(2);
-            const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
-            expect(resultText).to.be.deep.equal(["M", "m"]);
+            expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(["M", "m"]);
         });
 
         it("should show filtered data when caseInsensitive is false", () => {
-            let { instance, element } = createInstance();
+            let { instance, vlist } = createInstance();
             instance.serverSideSearch = false;
             instance.data = SIMPLE_DATA;
             instance.caseInsensitive = false;
             instance.searchString = "M";
 
-            const itemEles = getVisibleItems(element);
-            expect(itemEles.length).to.eq(1);
-            const resultText = itemEles.map((n, ele) => $(ele).text().trim()).toArray();
-            expect(resultText).to.be.deep.equal(["M"]);
+            expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(["M"]);
         });
     });
 

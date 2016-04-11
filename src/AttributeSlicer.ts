@@ -3,6 +3,7 @@ import * as $ from "jquery";
 
 /* tslint:disable */
 const naturalSort = require("javascript-natural-sort");
+const VirtualList = require("./lib/VirtualList");
 /* tslint:enable */
 
 /**
@@ -35,7 +36,8 @@ export class AttributeSlicer {
                 </div>
                 <hr/>
             </div>
-            <div class="list" style="overflow:hidden;overflow-y:auto"></div>
+            <div class="list">
+            </div>
             <div class='load-spinner' style='transform:scale(0.6);'><div>
         </div>
     `.trim().replace(/\n/g, "");
@@ -64,9 +66,9 @@ export class AttributeSlicer {
     };
 
     /**
-     * The list container
+     * The slicer element
      */
-    private listContainer: JQuery;
+    private slicerEle: JQuery;
 
     /**
      * The actual list element
@@ -114,13 +116,44 @@ export class AttributeSlicer {
     private loadingSearch = false;
 
     /**
+     * The virtual list
+     */
+    private virtualList: any;
+
+    /**
+     * The virtual list element
+     */
+    private virtualListEle: any;
+
+    /**
      * Constructor for the advanced slicer
      */
-    constructor(element: JQuery) {
+    constructor(element: JQuery, vlist?: any) {
         this.element = element;
-        this.listContainer = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
-        this.listEle = this.listContainer.find(".list");
-        this.listEle.scroll(() => this.checkLoadMoreData());
+        this.slicerEle = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
+        this.listEle = this.slicerEle.find(".list");
+        this.virtualList = vlist || new VirtualList({
+            itemHeight: 22,
+            generatorFn: (i: number) => {
+                const item = this.virtualList.items[i];
+                const ele = AttributeSlicer.listItemFactory(item.matchPrefix, item.match, item.matchSuffix);
+                let renderedValue = item.renderedValue;
+                if (renderedValue) {
+                    let valueDisplayEle = ele.find(".value-display");
+                    valueDisplayEle.css({ width: (renderedValue + "%") });
+                    valueDisplayEle.find(".value").html("" + item.value);
+                }
+                // ele[item.selected ? "hide" : "show"].call(ele);
+                // ele.find("input").prop("checked", item.selected);
+                ele.data("item", item);
+                return ele[0];
+            },
+        });
+
+        this.virtualListEle = this.virtualList.container;
+        this.virtualListEle.scroll(() => this.checkLoadMoreData());
+
+        this.listEle.append(this.virtualListEle);
 
         this.selectionsEle = element.find(".selections");
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
@@ -170,11 +203,21 @@ export class AttributeSlicer {
     }
 
     /**
+     * The actual dimensions
+     */
+    private _dimensions: { width: number; height: number };
+    public get dimensions() {
+        return this._dimensions;
+    }
+
+    /**
      * Sets the dimension of the slicer
      */
     public set dimensions(dims: { width: number; height: number }) {
-        this.listEle.find(".display-container").css({ width: "100%" });
-        this.listEle.css({ width: "100%", height: dims.height - this.element.find(".slicer-options").height() - 10 });
+        this._dimensions = dims;
+        const height = dims.height - this.element.find(".slicer-options").height() - 10;
+        this.listEle.css({ width: "100%", height: height });
+        this.virtualList.setHeight(height);
     }
 
     /**
@@ -216,35 +259,23 @@ export class AttributeSlicer {
      * Sets the slicer data
      */
     public set data(newData: SlicerItem[]) {
-        this.listEle.empty();
         this.selectedItems = [];
 
-        // if some one sets the data, then clearly we are no longer loading data
-        this.loadingMoreData = false;
-
         if (newData && newData.length) {
-            this.listEle.append(newData.map(item => {
-                const ele = AttributeSlicer.listItemFactory(item.matchPrefix, item.match, item.matchSuffix);
-                let renderedValue = item.renderedValue;
-                if (renderedValue) {
-                    let valueDisplayEle = ele.find(".value-display");
-                    valueDisplayEle.css({ width: (renderedValue + "%") });
-                    valueDisplayEle.find(".value").html("" + item.value);
-                }
-                ele[item.selected ? "hide" : "show"].call(ele);
-                ele.find("input").prop("checked", item.selected);
-                ele.data("item", item);
-                return ele;
-            }));
-
             this.loadingSearch = true;
             this.element.find(".searchbox").val(this.searchString);
             this.loadingSearch = false;
         }
 
         this._data = newData;
+
+        this.virtualList.setItems(newData);
+
         this.syncItemVisiblity();
         this.updateSelectAllButtonState();
+
+        // if some one sets the data, then clearly we are no longer loading data
+        this.loadingMoreData = false;
     }
 
     /**
@@ -305,9 +336,15 @@ export class AttributeSlicer {
     /**
      * Setter for loadingMoreData
      */
+    private _toggleClass = _.debounce(() => this.element.toggleClass("loading", this.loadingMoreData), 100);
     protected set loadingMoreData(value: boolean) {
         this._loadingMoreData = value;
-        this.element.toggleClass("loading", value);
+        // Little janky, but what this does is ensures that if we are loading, to set the loading flag immediately.
+        // We also want to remove the load flag slowly, in case we are loading stuff a bunch (ie, scroll load)
+        if (value) {
+            this.element.addClass("loading");
+        }
+        this._toggleClass();
     }
 
     /**
@@ -346,10 +383,10 @@ export class AttributeSlicer {
      * Listener for the list scrolling
      */
     protected checkLoadMoreData() {
-        let scrollElement = this.listEle[0];
+        let scrollElement = this.virtualListEle[0];
         let scrollHeight = scrollElement.scrollHeight;
         let top = scrollElement.scrollTop;
-        let shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200 && scrollHeight >= 200;
+        let shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200;
         if (shouldScrollLoad && !this.loadingMoreData && this.raiseCanLoadMoreData()) {
             this.raiseLoadMoreData(false);
         }
@@ -366,16 +403,20 @@ export class AttributeSlicer {
             let promise = this.loadPromise = item.result.then((items) => {
                 // if this promise hasn't been cancelled
                 if (!promise || !promise["cancel"]) {
-                    this.loadingMoreData = false;
                     this.loadPromise = undefined;
                     if (isNewSearch) {
                         this.data = items;
                     } else {
                         this.data = this.data.concat(items);
                     }
-                    this.syncItemVisiblity();
+
                     // make sure we don't need to load more after this, in case it doesn't all fit on the screen
-                    setTimeout(() => this.checkLoadMoreData(), 10);
+                    setTimeout(() => {
+                        this.checkLoadMoreData();
+                        if (!this.loadPromise) {
+                            this.loadingMoreData = false;
+                        }
+                    }, 10);
                     return items;
                 }
             }, () => {
@@ -404,24 +445,28 @@ export class AttributeSlicer {
     protected raiseSelectionChanged(newItems: SlicerItem[], oldItems: SlicerItem[]) {
         this.events.raiseEvent("selectionChanged", newItems, oldItems);
     }
+
     /**
      * Syncs the item elements state with the current set of selected items and the search
      */
     private syncItemVisiblity() {
-        let value = this.selectedItems;
-        let eles = this.element.find(".item");
-        let me = this;
-        eles.each(function() {
-            let item = $(this).data("item");
-            let isVisible = !(!!value && value.filter(b => b.equals(item)).length > 0);
+        let filteredData: SlicerItem[] = [];
+        if (this.data &&  this.data.length) {
+            filteredData = this.data.filter((n, i) => {
+                const item = this.data[i];
+                let isVisible = !(!!this.selectedItems && this.selectedItems.filter(b => b.equals(item)).length > 0);
 
-            // update the search
-            if (isVisible && !me.serverSideSearch && me.searchString) {
-                isVisible = AttributeSlicer.isMatch(item, me.searchString, me.caseInsensitive);
-            }
-
-            $(this).toggle(isVisible);
-        });
+                // update the search
+                if (isVisible && !this.serverSideSearch && this.searchString) {
+                    isVisible = AttributeSlicer.isMatch(item, this.searchString, this.caseInsensitive);
+                }
+                return isVisible;
+            });
+        }
+        this.virtualList.setItems(filteredData);
+        if (this.virtualList) {
+            this.virtualList.rerender();
+        }
     }
 
     /**
@@ -538,7 +583,7 @@ export interface SlicerItem {
     matchSuffix?: any;
 
     value: any;
-    selected: boolean;
+    // selected: boolean;
 
     /**
      * Returns true if this == b
