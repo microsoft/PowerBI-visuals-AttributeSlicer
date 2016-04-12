@@ -83,7 +83,8 @@ VirtualList.prototype.setHeight = function (height) {
     
     this.lastRepaintY = undefined;
     if (this.items) {
-        this._renderChunk(this.container, 0);
+        var first = parseInt(this.container[0].scrollTop / this.itemHeight) - this.screenItemsLen;
+        this._renderChunk(this.container, first < 0 ? 0 : first);
     }
 };
 
