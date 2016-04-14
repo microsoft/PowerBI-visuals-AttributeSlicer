@@ -2,6 +2,7 @@
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
 import { VisualBase } from "../base/powerbi/VisualBase";
 import { default as Utils, Visual } from "../base/powerbi/Utils";
+import * as _ from "lodash";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
@@ -273,7 +274,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     delete this.loadDeferred;
                 } else {
                     const filteredData = this.getFilteredDataBasedOnSearch(this.data);
-                    if (!oldData || !oldData[oldData.length - 1].equals(this.data[this.data.length - 1])) {
+                    if (!oldData || !_.isEqual(oldData[oldData.length - 1], this.data[this.data.length - 1])) {
                         this.mySlicer.data = filteredData;
                     } else if (!filteredData || filteredData.length === 0) {
                         this.mySlicer.data = [];

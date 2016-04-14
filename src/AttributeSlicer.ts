@@ -353,7 +353,7 @@ export class AttributeSlicer {
     public static isMatch(item: SlicerItem, matchValue: string, caseInsensitive: boolean) {
         const searchStr = matchValue || "";
         const flags = caseInsensitive ? "i" : "";
-        const pretty = (val: string) => ((val || "") + "");
+        const pretty = (val: string) => val === null || val === undefined ? "" : val + "";
         let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
         // if (searchStr.indexOf("#R:") === 0) {
         //     try {
