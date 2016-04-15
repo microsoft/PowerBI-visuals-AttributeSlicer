@@ -1,7 +1,8 @@
 /// <reference path="../base/powerbi/references.d.ts"/>
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
 import { VisualBase } from "../base/powerbi/VisualBase";
-import { default as Utils, Visual } from "../base/powerbi/Utils";
+import { Visual } from "../base/powerbi/Utils";
+import * as _ from "lodash";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
@@ -261,7 +262,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
                 const prevLength = this.data ? this.data.length : 0;
                 const oldData = this.data;
-                this.data = AttributeSlicer.converter(this.dataView).slice(0, this.maxNumberOfItems);
+                let newData = this.data = AttributeSlicer.converter(this.dataView) || [];
+                if (newData && newData.length) {
+                    newData = newData.slice(0, this.maxNumberOfItems);
+                }
 
                 // If we are appending data for the attribute slicer
                 if (this.loadDeferred && this.mySlicer.data) {
@@ -273,7 +277,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     delete this.loadDeferred;
                 } else {
                     const filteredData = this.getFilteredDataBasedOnSearch(this.data);
-                    if (!oldData || !oldData[oldData.length - 1].equals(this.data[this.data.length - 1])) {
+                    if (!oldData || !_.isEqual(oldData[oldData.length - 1], this.data[this.data.length - 1])) {
                         this.mySlicer.data = filteredData;
                     } else if (!filteredData || filteredData.length === 0) {
                         this.mySlicer.data = [];

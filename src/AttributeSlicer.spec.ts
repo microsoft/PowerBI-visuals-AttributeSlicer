@@ -60,6 +60,34 @@ describe("AttributeSlicer", () => {
         });
     });
 
+
+    describe("prettyPrintValue", () => {
+        it ("should display '0' for 0", () => {
+            expect(AttributeSlicer.prettyPrintValue(0)).to.eq("0");
+        });
+        it ("should display '0' for '0'", () => {
+            expect(AttributeSlicer.prettyPrintValue("0")).to.eq("0");
+        });
+        it ("should display 'false' for false", () => {
+            expect(AttributeSlicer.prettyPrintValue(false)).to.eq("false");
+        });
+        it ("should display 'false' for 'false'", () => {
+            expect(AttributeSlicer.prettyPrintValue("false")).to.eq("false");
+        });
+        it ("should display '' for null", () => {
+            expect(AttributeSlicer.prettyPrintValue(/* tslint:disable */null/* tslint:enable */)).to.eq("");
+        });
+        it ("should display '' for undefined", () => {
+            expect(AttributeSlicer.prettyPrintValue(undefined)).to.eq("");
+        });
+        it ("should display '11/12/2013 12:12PM' for same date", () => {
+            expect(AttributeSlicer.prettyPrintValue(new Date(2013, 10, 12, 12, 12))).to.eq("11/12/2013 12:12PM");
+        });
+        it ("should display '1/2/2012 6:12AM' for same date", () => {
+            expect(AttributeSlicer.prettyPrintValue(new Date(2012, 0, 2, 6, 12))).to.eq("1/2/2012 6:12AM");
+        });
+    });
+
     describe("case insensitivity", () => {
 
         it("should set when set", () => {
