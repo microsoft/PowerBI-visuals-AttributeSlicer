@@ -168,6 +168,14 @@
   height: 200px;
   left: 0;
   top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  transform: scale(0.6);
+}
+
+.list {
+    position: relative;
 }
 
 .loading {

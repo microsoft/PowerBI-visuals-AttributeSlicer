@@ -37,8 +37,8 @@ export class AttributeSlicer {
                 <hr/>
             </div>
             <div class="list">
+                <div class='load-spinner'><div>
             </div>
-            <div class='load-spinner' style='transform:scale(0.6);'><div>
         </div>
     `.trim().replace(/\n/g, "");
 
