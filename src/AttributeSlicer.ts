@@ -46,15 +46,16 @@ export class AttributeSlicer {
      * The template used to render list items
      */
     private static listItemFactory = (matchPrefix: string, match: string, matchSuffix: string) => {
+        const pretty = AttributeSlicer.prettyPrintValue;
         return $(`
             <div style="white-space:nowrap" class="item">
                 <label style="cursor:pointer">
                     <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->
                     <span style="margin-left: 5px;vertical-align:middle" class="display-container">
                         <span style="display:inline-block;overflow:hidden" class="category-container">
-                            <span class="matchPrefix">${matchPrefix || ""}</span>
-                            <span class="match">${match || ""}</span>
-                            <span class="matchSuffix">${matchSuffix || ""}</span>
+                            <span class="matchPrefix">${pretty(matchPrefix)}</span>
+                            <span class="match">${pretty(match)}</span>
+                            <span class="matchSuffix">${pretty(matchSuffix)}</span>
                         </span>
                         <span style="display:inline-block" class="value-container">
                             <span style="display:inline-block;width:0px" class="value-display">&nbsp;<span class="value"></span></span>
@@ -348,12 +349,19 @@ export class AttributeSlicer {
     }
 
     /**
+     * Pretty prints a value
+     */
+    public static prettyPrintValue (val: any) {
+        return /* tslint:disable */ val === null /* tslint:enable */|| val === undefined ? "" : val + "";
+    }
+
+    /**
      * Determines if the given slice item matches the given string value
      */
     public static isMatch(item: SlicerItem, matchValue: string, caseInsensitive: boolean) {
-        const searchStr = matchValue || "";
+        const pretty = AttributeSlicer.prettyPrintValue;
+        const searchStr = pretty(matchValue);
         const flags = caseInsensitive ? "i" : "";
-        const pretty = (val: string) => val === null || val === undefined ? "" : val + "";
         let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
         // if (searchStr.indexOf("#R:") === 0) {
         //     try {
@@ -486,7 +494,8 @@ export class AttributeSlicer {
      */
     private createSelectionToken(v: SlicerItem): JQuery {
         const newEle = $("<div/>");
-        const text = (v.matchPrefix || "") + v.match + (v.matchSuffix || "");
+        const pretty = AttributeSlicer.prettyPrintValue;
+        const text = pretty(v.matchPrefix) + pretty(v.match) + pretty(v.matchSuffix);
         newEle
             .addClass("token")
             .attr("title", text)

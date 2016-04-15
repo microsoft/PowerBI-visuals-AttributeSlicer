@@ -1,7 +1,7 @@
 /// <reference path="../base/powerbi/references.d.ts"/>
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
 import { VisualBase } from "../base/powerbi/VisualBase";
-import { default as Utils, Visual } from "../base/powerbi/Utils";
+import { Visual } from "../base/powerbi/Utils";
 import * as _ from "lodash";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;

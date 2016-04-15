@@ -60,6 +60,28 @@ describe("AttributeSlicer", () => {
         });
     });
 
+
+    describe("prettyPrintValue", () => {
+        it ("should display '0' for 0", () => {
+            expect(AttributeSlicer.prettyPrintValue(0)).to.eq("0");
+        });
+        it ("should display '0' for '0'", () => {
+            expect(AttributeSlicer.prettyPrintValue("0")).to.eq("0");
+        });
+        it ("should display 'false' for false", () => {
+            expect(AttributeSlicer.prettyPrintValue(false)).to.eq("false");
+        });
+        it ("should display 'false' for 'false'", () => {
+            expect(AttributeSlicer.prettyPrintValue("false")).to.eq("false");
+        });
+        it ("should display '' for null", () => {
+            expect(AttributeSlicer.prettyPrintValue(/* tslint:disable */null/* tslint:enable */)).to.eq("");
+        });
+        it ("should display '' for undefined", () => {
+            expect(AttributeSlicer.prettyPrintValue(undefined)).to.eq("");
+        });
+    });
+
     describe("case insensitivity", () => {
 
         it("should set when set", () => {
