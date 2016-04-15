@@ -262,7 +262,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
                 const prevLength = this.data ? this.data.length : 0;
                 const oldData = this.data;
-                this.data = AttributeSlicer.converter(this.dataView).slice(0, this.maxNumberOfItems);
+                let newData = this.data = AttributeSlicer.converter(this.dataView) || [];
+                if (newData && newData.length) {
+                    newData = newData.slice(0, this.maxNumberOfItems);
+                }
 
                 // If we are appending data for the attribute slicer
                 if (this.loadDeferred && this.mySlicer.data) {
