@@ -63,6 +63,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                             },
                         },
                     },
+                    selection: {
+                        type: { text: {} }
+                    }
                 },
             },
             data: {
@@ -155,7 +158,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             selectedItems.forEach((item) => {
                 this.selectionManager.select(item.identity, true);
             });
-            this.updateSelectionFilter();
+            this.updateSelectionFilter(selectedItems);
         },
         100);
 
@@ -173,14 +176,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (categorical && categorical.categories && categorical.categories.length > 0) {
             converted = <any>categorical.categories[0].values.map((category, i) => {
                 let id = SelectionId.createWithId(categorical.categories[0].identity[i]);
-                let item = {
-                    match: category,
-                    identity: id,
-                    selected: false,
-                    value: values[i] || 0,
-                    renderedValue: <any>undefined,
-                    equals: (b: { identity: any }) => id.equals((<ListItem>b).identity),
-                };
+                let item = AttributeSlicer.createItem(category, values[i], id);
                 if (item.value > maxValue) {
                     maxValue = item.value;
                 }
@@ -191,6 +187,20 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             });
         }
         return converted;
+    }
+
+    /**
+     * Creates an item
+     */
+    public static createItem(category: string, value: any, id: SelectionId, renderedValue?: any) {
+        return {
+            match: category,
+            identity: id,
+            selected: false,
+            value: value || 0,
+            renderedValue: renderedValue,
+            equals: (b: { identity: any }) => id.equals((<ListItem>b).identity),
+        };
     }
 
     /**
@@ -229,72 +239,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (this.mySlicer.dimensions.height !== options.viewport.height ||
             this.mySlicer.dimensions.width !== options.viewport.width) {
             this.mySlicer.dimensions = options.viewport;
-        } else {
+
+        // If we are not just resizing, then there has to be some sort of data change
+        } else if (!options.resizeMode) {
             this.loadingData = true;
             this.dataView = options.dataViews && options.dataViews[0];
             if (this.dataView) {
-                const categorical = this.dataView && this.dataView.categorical;
-                const categories = categorical && categorical.categories;
-                const hasCategories = !!(categories && categories.length > 0);
-                const catName = hasCategories && categorical.categories[0].source.queryName;
-                const objects = this.dataView.metadata.objects;
-
-                // sync search option
-                if (objects && objects["search"]) {
-                    this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
-                }
-
-                // sync search option
-                if (objects && objects["data"]) {
-                    this.maxNumberOfItems = objects["data"]["limit"];
-                }
-
-                // Default the number if necessary
-                const currMax = this.maxNumberOfItems;
-                this.maxNumberOfItems = !!currMax && currMax > 0 ? currMax : AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
-
-                // if the user has changed the categories, then selection is done for
-                if (!hasCategories || this.currentCategory !== categorical.categories[0].source.queryName) {
-                    this.mySlicer.selectedItems = [];
-                }
-
-                this.currentCategory = catName;
-
-                const prevLength = this.data ? this.data.length : 0;
-                const oldData = this.data;
-                let newData = this.data = AttributeSlicer.converter(this.dataView) || [];
-                if (newData && newData.length) {
-                    newData = newData.slice(0, this.maxNumberOfItems);
-                }
-
-                // If we are appending data for the attribute slicer
-                if (this.loadDeferred && this.mySlicer.data) {
-                    // Only add newly filtered data
-                    const filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(prevLength));
-
-                    // we only need to give it the new items
-                    this.loadDeferred.resolve(filteredData);
-                    delete this.loadDeferred;
-                } else {
-                    const filteredData = this.getFilteredDataBasedOnSearch(this.data);
-                    if (!oldData || !_.isEqual(oldData[oldData.length - 1], this.data[this.data.length - 1])) {
-                        this.mySlicer.data = filteredData;
-                    } else if (!filteredData || filteredData.length === 0) {
-                        this.mySlicer.data = [];
-                    }
-                }
-
-                this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
-                let sortedColumns = this.dataView.metadata.columns.filter((c) => !!c.sort);
-                if (sortedColumns.length) {
-                    let lastColumn = sortedColumns[sortedColumns.length - 1];
-                    this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
-                }
-
-                let selectedIds = this.selectionManager.getSelectionIds() || [];
-                this.mySlicer.selectedItems = this.mySlicer.data.filter((n: ListItem) => {
-                    return !!_.find(selectedIds, (oId) => oId.equals(n.identity));
-                });
+                this.loadSettingsFromPowerBI(this.dataView);
+                this.loadDataFromPowerBI(this.dataView);
+                this.loadSortFromPowerBI(this.dataView);
+                this.loadSelectionFromPowerBI(this.dataView);
             } else {
                 this.mySlicer.data = [];
                 this.mySlicer.selectedItems = [];
@@ -364,9 +318,133 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Loads the data from the dataview
+     */
+    private loadDataFromPowerBI(dataView: powerbi.DataView) {
+        const prevLength = this.data ? this.data.length : 0;
+        const oldData = this.data;
+        let newData = this.data = AttributeSlicer.converter(dataView) || [];
+        if (newData && newData.length) {
+            newData = newData.slice(0, this.maxNumberOfItems);
+        }
+
+        // If we are appending data for the attribute slicer
+        if (this.loadDeferred && this.mySlicer.data) {
+            // Only add newly filtered data
+            const filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(prevLength));
+
+            // we only need to give it the new items
+            this.loadDeferred.resolve(filteredData);
+            delete this.loadDeferred;
+        } else {
+            const filteredData = this.getFilteredDataBasedOnSearch(this.data);
+            if (!oldData || !this.areBasicallyEqual(oldData[oldData.length - 1], this.data[this.data.length - 1])) {
+                this.mySlicer.data = filteredData;
+            } else if (!filteredData || filteredData.length === 0) {
+                this.mySlicer.data = [];
+            }
+        }
+
+        // Default the number if necessary
+        const categorical = dataView.categorical;
+        const categories = categorical && categorical.categories;
+        const hasCategories = !!(categories && categories.length > 0);
+        const catName = hasCategories && categorical.categories[0].source.queryName;
+
+        // if the user has changed the categories, then selection is done for
+        if (!hasCategories || (this.currentCategory && this.currentCategory !== categorical.categories[0].source.queryName)) {
+            this.mySlicer.selectedItems = [];
+            this.selectionManager.clear();
+            this.updateSelectionFilter([]);
+        }
+
+        this.currentCategory = catName;
+    }
+
+    /**
+     * Returns true if item1 is basically equal to item2
+     */
+    private areBasicallyEqual(item1: ListItem|SlicerItem, item2: ListItem|SlicerItem) {
+        let clone1: ListItem = $.extend(true, {}, item1);
+        let clone2: ListItem = $.extend(true, {}, item2);
+        return clone1.identity.equals(clone2.identity) &&
+               clone2.value === clone2.value &&
+               clone1.renderedValue === clone2.renderedValue;
+    }
+
+    /**
+     * Loads the selection from PowerBI
+     */
+    private loadSelectionFromPowerBI(dataView: powerbi.DataView) {
+        const objects = dataView && dataView.metadata && dataView.metadata.objects;
+        if (objects) {
+            // HAX: Stupid crap to restore selection
+            let filter = objects["general"] && objects["general"]["filter"];
+            let whereItems = filter && filter.whereItems;
+            let condition = whereItems && whereItems[0] && whereItems[0].condition;
+            let values = condition && condition.values;
+            let args = condition && condition.args;
+            if (values && args && values.length && args.length) {
+                const selectionItems: ListItem[] = JSON.parse(objects["general"]["selection"]);
+                let sourceExpr = filter.whereItems[0].condition.args[0];
+                this.selectionManager.clear();
+                values.forEach((n: any) => {
+                    let selId = SelectionId.createWithId(powerbi.data.createDataViewScopeIdentity(
+                        powerbi.data.SQExprBuilder.compare(data.QueryComparisonKind.Equal,
+                            sourceExpr,
+                            n[0]
+                        )
+                    ));
+                    this.selectionManager.select(selId, true);
+                });
+                this.mySlicer.selectedItems = <any>this.selectionManager.getSelectionIds().map((n, i) => {
+                    const slimItem = selectionItems[i];
+                    return AttributeSlicer.createItem(slimItem.match, slimItem.value, n, slimItem.renderedValue);
+                });
+            }
+        }
+    }
+
+    /**
+     * Loads our settings from the powerbi objects
+     */
+    private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
+        const objects = dataView && dataView.metadata && dataView.metadata.objects;
+        const categorical = dataView && dataView.categorical;
+        if (objects) {
+            // sync search option
+            if (objects["search"]) {
+                this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
+            }
+
+            // sync search option
+            if (objects["data"]) {
+                this.maxNumberOfItems = objects["data"]["limit"];
+            }
+
+            this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+
+            const currMax = this.maxNumberOfItems;
+            this.maxNumberOfItems = !!currMax && currMax > 0 ? currMax : AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
+        }
+    }
+
+    /**
+     * Loads the sort from powerbi 
+     */
+    private loadSortFromPowerBI(dataView: powerbi.DataView) {
+        const metadata = dataView && dataView.metadata;
+        let sortedColumns = metadata.columns.filter((c) => !!c.sort);
+        if (sortedColumns.length) {
+            let lastColumn = sortedColumns[sortedColumns.length - 1];
+            this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
+        }
+    }
+
+    /**
      * Updates the data filter based on the selection
      */
-    private updateSelectionFilter() {
+    private updateSelectionFilter(items: ListItem[]) {
         let filter: data.SemanticFilter;
         if (this.selectionManager.hasSelection()) {
             let selectors = this.selectionManager.getSelectionIds().map((id) => id.getSelector());
@@ -384,6 +462,17 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                             "filter": filter
                         },
                     },
+                    <powerbi.VisualObjectInstance>{
+                        objectName: "general",
+                        selector: undefined,
+                        properties: {
+                            "selection": JSON.stringify(items.map(n => ({
+                                match: n.match,
+                                value: n.value,
+                                renderedValue: n.renderedValue
+                            })))
+                        },
+                    },
                 ],
             });
         } else {
@@ -394,6 +483,13 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         selector: undefined,
                         properties: {
                             "filter": filter
+                        },
+                    },
+                    <powerbi.VisualObjectInstance>{
+                        objectName: "general",
+                        selector: undefined,
+                        properties: {
+                            "selection": undefined
                         },
                     },
                 ],
