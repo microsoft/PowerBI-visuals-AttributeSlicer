@@ -260,7 +260,12 @@ export class AttributeSlicer {
      * Sets the slicer data
      */
     public set data(newData: SlicerItem[]) {
-        this.selectedItems = [];
+
+        // If the user is straight up just setting new data, then clear the selected item
+        // Otherwise, we are appending from a search/page action, it doesn't make sense to clear it. 
+        if (!this.loadingMoreData) {
+            this.selectedItems = [];
+        }
 
         if (newData && newData.length) {
             this.loadingSearch = true;
