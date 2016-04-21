@@ -123,4 +123,8 @@ describe("AttributeSlicer", () => {
             expect(instance.serverSideSearch).to.eq(true);
         });
     });
+
+    it("should adjust element width when valueWidthPercentage changes");
+    it("should default valueWidthPercentage to a reasonable value");
+    it("should default valueWidthPercentage to a reasonable value when the value passed to valueWidthPercentage is invalid");
 });
