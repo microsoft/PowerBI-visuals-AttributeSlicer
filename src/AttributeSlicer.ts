@@ -52,13 +52,13 @@ export class AttributeSlicer {
      */
     private static listItemFactory = (matchPrefix: string, match: string, matchSuffix: string, valueWidthPercentage: number) => {
         const pretty = AttributeSlicer.prettyPrintValue;
-        const categoryWidth = 100 - valueWidthPercentage;
+        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${100 - valueWidthPercentage}%`;
         return $(`
             <div style="white-space:nowrap" class="item">
                 <label style="cursor:pointer">
                     <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->
                     <span style="margin-left: 5px;vertical-align:middle" class="display-container">
-                        <span style="display:inline-block;overflow:hidden;max-width:${categoryWidth}%" class="category-container">
+                        <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
                             <span class="matchPrefix">${pretty(matchPrefix)}</span>
                             <span class="match">${pretty(match)}</span>
                             <span class="matchSuffix">${pretty(matchSuffix)}</span>
