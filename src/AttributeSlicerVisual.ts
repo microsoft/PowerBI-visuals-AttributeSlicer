@@ -65,7 +65,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     },
                     selection: {
                         type: { text: {} }
-                    }
+                    },
                 },
             },
             data: {
@@ -469,8 +469,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                             "selection": JSON.stringify(items.map(n => ({
                                 match: n.match,
                                 value: n.value,
-                                renderedValue: n.renderedValue
-                            })))
+                                renderedValue: n.renderedValue,
+                            }))),
                         },
                     },
                 ],
