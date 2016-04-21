@@ -210,12 +210,12 @@
 
 .has-values .category-container {
     @extend .boxsized;
-    max-width: 33%;
+    // max-width: 33%;
     text-align: right;
 }
 .has-values .value-container {
     @extend .boxsized;
-    max-width: 66%;
+    // max-width: 66%;
     display: inline-block;
 }
 

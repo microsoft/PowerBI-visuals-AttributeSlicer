@@ -87,6 +87,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     },
                 },
             },
+            display: {
+                displayName: "Display",
+                properties: {
+                    valueColumnWidth: {
+                        displayName: "Value Width %",
+                        description: "The percentage of the width that the value column should take up",
+                        type: { numeric: true }
+                    }
+                }
+            }
             /*,
             sorting: {
                 displayName: "Sorting",
@@ -272,6 +282,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (options.objectName === "data") {
             instances[0].properties["limit"] = this.maxNumberOfItems;
         }
+        if (options.objectName === "display") {
+            instances[0].properties["valueColumnWidth"] = this.mySlicer.valueWidthPercentage;
+        }
         return instances;
     }
 
@@ -422,11 +435,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 this.maxNumberOfItems = objects["data"]["limit"];
             }
 
-            this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+            // Sync display
+            if (objects["display"]) {
+                this.mySlicer.valueWidthPercentage = objects["display"]["valueColumnWidth"];
+            }
 
             const currMax = this.maxNumberOfItems;
             this.maxNumberOfItems = !!currMax && currMax > 0 ? currMax : AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
         }
+
+        this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
     }
 
     /**
