@@ -53,7 +53,7 @@ function VirtualList(config) {
   // the nodes that are not used anymore
   this.rmNodeInterval = setInterval(function() {
     if (Date.now() - this.lastScrolled > 100) {
-      var badNodes = self.container.find('[data-rm="1"]');
+      var badNodes = self.container.find('[data-rm]');
       if (badNodes.length) {
           badNodes.remove();
       }
@@ -122,6 +122,7 @@ VirtualList.prototype.createRow = function(i) {
 VirtualList.prototype.rerender = function() {
     var first = parseInt(this.container[0].scrollTop / this.itemHeight) - this.screenItemsLen;
     this._renderChunk(this.container, first < 0 ? 0 : first);
+    this.lastScrolled = 0;
 };
 
 /**
