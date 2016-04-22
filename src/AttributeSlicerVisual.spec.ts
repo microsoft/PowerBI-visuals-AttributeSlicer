@@ -19,4 +19,5 @@ describe("AttributeSlicerVisual", () => {
     it("should not clear selection if search is changed");
     it("should adjust the width of the value column, when the PBI config changes");
     it("should show values if there is a values field passed into PBI");
+    it("should show more than 2 items, after you change the max items to 2, then change it to 100");
 });

@@ -222,9 +222,7 @@ export class AttributeSlicer {
      */
     public set dimensions(dims: { width: number; height: number }) {
         this._dimensions = dims;
-        const height = dims.height - this.element.find(".slicer-options").height() - 10;
-        this.listEle.css({ width: "100%", height: height });
-        this.virtualList.setHeight(height);
+        this.updateListHeight();
     }
 
     /**
@@ -339,6 +337,7 @@ export class AttributeSlicer {
             value.map((v) => this.createSelectionToken(v)).forEach(n => n.insertBefore(this.element.find(".clear-all")));
         }
 
+        this.updateListHeight();
         this.raiseSelectionChanged(this.selectedItems, oldSelection);
 
         this.checkAllEle.prop("checked", someChecked);
@@ -529,6 +528,15 @@ export class AttributeSlicer {
         } else {
             this.selectedItems = [];
         }
+    }
+
+    /**
+     * Updates the list height
+     */
+    private updateListHeight() {
+        const height = this.dimensions.height - this.element.find(".slicer-options").height() - 10;
+        this.listEle.css({ width: "100%", height: height });
+        this.virtualList.setHeight(height);
     }
 
     /**

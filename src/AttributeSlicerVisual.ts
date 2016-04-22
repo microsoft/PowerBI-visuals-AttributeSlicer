@@ -340,18 +340,20 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (newData && newData.length) {
             newData = newData.slice(0, this.maxNumberOfItems);
         }
-
         // If we are appending data for the attribute slicer
         if (this.loadDeferred && this.mySlicer.data) {
             // Only add newly filtered data
-            const filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(prevLength));
+            const filteredData = this.getFilteredDataBasedOnSearch(newData.slice(prevLength));
 
             // we only need to give it the new items
             this.loadDeferred.resolve(filteredData);
             delete this.loadDeferred;
         } else {
-            const filteredData = this.getFilteredDataBasedOnSearch(this.data);
-            if (!oldData || !this.areBasicallyEqual(oldData[oldData.length - 1], this.data[this.data.length - 1])) {
+            const filteredData = this.getFilteredDataBasedOnSearch(newData);
+            const oldSlicerData = this.mySlicer.data || [];
+
+            // if there is no previous data OR if the data contained within the slicer differs from the filtered set
+            if (!oldData || !this.areBasicallyEqual(oldSlicerData[oldSlicerData.length - 1], filteredData[filteredData.length - 1])) {
                 this.mySlicer.data = filteredData;
             } else if (!filteredData || filteredData.length === 0) {
                 this.mySlicer.data = [];
