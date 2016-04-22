@@ -83,7 +83,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     limit: {
                         displayName: "Search Limit",
                         description:
-                            `The maximum number of items to search in PowerBI in increments of ${AttributeSlicer.DATA_WINDOW_SIZE}`,
+                            `The maximum number of items to search in PowerBI. (increments of ${AttributeSlicer.DATA_WINDOW_SIZE})`,
                         type: { numeric: true },
                     },
                 },
@@ -93,7 +93,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 properties: {
                     valueColumnWidth: {
                         displayName: "Value Width %",
-                        description: "The percentage of the width that the value column should take up",
+                        description: "The percentage of the width that the value column should take up.",
                         type: { numeric: true },
                     },
                 },
