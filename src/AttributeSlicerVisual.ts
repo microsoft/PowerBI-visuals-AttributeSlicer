@@ -17,7 +17,7 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 
 @Visual(require("./build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
-    
+
     /**
      * The number of items to load from PBI at any one time
      */
