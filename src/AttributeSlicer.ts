@@ -469,10 +469,14 @@ export class AttributeSlicer {
                     return items;
                 }
             }, () => {
-                this.data = [];
+                // If we are rejected,  we don't  need to clear the data, 
+                // this just means the retrieval for more data failed, leave the data 
+                // this.data = [];
                 this.loadingMoreData = false;
             });
             return promise;
+        }  else {
+            this.loadingMoreData = false;
         }
     }
 

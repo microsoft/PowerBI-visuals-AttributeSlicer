@@ -17,6 +17,11 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 
 @Visual(require("./build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
+    
+    /**
+     * The number of items to load from PBI at any one time
+     */
+    public static DATA_WINDOW_SIZE = 500;
 
     /**
      * The set of capabilities for the visual
@@ -38,7 +43,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             categorical: {
                 categories: {
                     for: { in: "Category" },
-                    dataReductionAlgorithm: { window: { count: 500 } },
+                    dataReductionAlgorithm: { window: { count: AttributeSlicer.DATA_WINDOW_SIZE } },
                 },
                 values: {
                     select: [{ bind: { to: "Values" } }]
@@ -68,22 +73,18 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     },
                 },
             },
-            data: {
-                displayName: "Data",
-                properties: {
-                    limit: {
-                        displayName: "Max number of items",
-                        description: "The maximum number of items to load from PowerBI",
-                        type: { numeric: true },
-                    },
-                },
-            },
             search: {
                 displayName: "Search",
                 properties: {
                     caseInsensitive: {
                         displayName: "Case Insensitive",
                         type: { bool: true },
+                    },
+                    limit: {
+                        displayName: "Search Limit",
+                        description:
+                            `The maximum number of items to search in PowerBI. (increments of ${AttributeSlicer.DATA_WINDOW_SIZE})`,
+                        type: { numeric: true },
                     },
                 },
             },
@@ -92,7 +93,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 properties: {
                     valueColumnWidth: {
                         displayName: "Value Width %",
-                        description: "The percentage of the width that the value column should take up",
+                        description: "The percentage of the width that the value column should take up.",
                         type: { numeric: true },
                     },
                 },
@@ -278,8 +279,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }, ];
         if (options.objectName === "search") {
             instances[0].properties["caseInsensitive"] = this.mySlicer.caseInsensitive;
-        }
-        if (options.objectName === "data") {
             instances[0].properties["limit"] = this.maxNumberOfItems;
         }
         if (options.objectName === "display") {
@@ -291,14 +290,14 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Returns an array containing a filtered set of data based on the search string
      */
-    public getFilteredDataBasedOnSearch(data: SlicerItem[]) {
+    public getFilteredDataBasedOnSearch(data: ListItem[]|SlicerItem[]): ListItem[] {
         data = data || [];
         if (this.mySlicer.searchString) {
             const search = this.mySlicer.searchString;
             const ci = this.mySlicer.caseInsensitive;
             data = data.filter(n => AttributeSlicerImpl.isMatch(n, search, ci));
         }
-        return data;
+        return <ListItem[]>data;
     }
 
     /**
@@ -334,22 +333,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Loads the data from the dataview
      */
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
-        const prevLength = this.data ? this.data.length : 0;
         const oldData = this.data;
-        let newData = this.data = AttributeSlicer.converter(dataView) || [];
-        if (newData && newData.length) {
-            newData = newData.slice(0, this.maxNumberOfItems);
-        }
+        this.data = AttributeSlicer.converter(dataView) || [];
+        let filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(0));
+
         // If we are appending data for the attribute slicer
         if (this.loadDeferred && this.mySlicer.data) {
-            // Only add newly filtered data
-            const filteredData = this.getFilteredDataBasedOnSearch(newData.slice(prevLength));
-
             // we only need to give it the new items
-            this.loadDeferred.resolve(filteredData);
+            this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
             delete this.loadDeferred;
         } else {
-            const filteredData = this.getFilteredDataBasedOnSearch(newData);
             const oldSlicerData = this.mySlicer.data || [];
 
             // if there is no previous data OR if the data contained within the slicer differs from the filtered set
@@ -360,7 +353,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             }
         }
 
-        // Default the number if necessary
+        // Default the number if necessary 
         const categorical = dataView.categorical;
         const categories = categorical && categorical.categories;
         const hasCategories = !!(categories && categories.length > 0);
@@ -382,7 +375,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private areBasicallyEqual(item1: ListItem|SlicerItem, item2: ListItem|SlicerItem) {
         let clone1: ListItem = $.extend(true, {}, item1);
         let clone2: ListItem = $.extend(true, {}, item2);
-        return clone1.identity.equals(clone2.identity) &&
+        return item1 && item2 &&
+               clone1.identity.equals(clone2.identity) &&
                clone2.value === clone2.value &&
                clone1.renderedValue === clone2.renderedValue;
     }
@@ -421,31 +415,36 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Return the value if not undefined/null otherwise returns the default value
+     */
+    private getOrDefault(value: any, def: any) {
+        /* tslint:disable */
+        return value === null || typeof value === "undefined" ? def : value;
+        /* tslint:enable */
+    }
+
+    /**
+     * Synchronizes the given
+     */
+    private syncSettingWithPBI(objects: any, objectName: string, property: string, def: any) {
+        if (objects && objects[objectName]) {
+            return this.getOrDefault(objects[objectName][property], def);
+        }
+        return def;
+    }
+
+    /**
      * Loads our settings from the powerbi objects
      */
     private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
         const categorical = dataView && dataView.categorical;
-        if (objects) {
-            // sync search option
-            if (objects["search"]) {
-                this.mySlicer.caseInsensitive = !!objects["search"]["caseInsensitive"];
-            }
+        this.mySlicer.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true);
 
-            // sync search option
-            if (objects["data"]) {
-                this.maxNumberOfItems = objects["data"]["limit"];
-            }
-
-            // Sync display
-            if (objects["display"]) {
-                this.mySlicer.valueWidthPercentage = objects["display"]["valueColumnWidth"];
-            }
-
-            const currMax = this.maxNumberOfItems;
-            this.maxNumberOfItems = !!currMax && currMax > 0 ? currMax : AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
-        }
-
+        const size = AttributeSlicer.DATA_WINDOW_SIZE;
+        this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
+        this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
+        this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
     }
 
