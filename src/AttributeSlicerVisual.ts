@@ -93,10 +93,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     valueColumnWidth: {
                         displayName: "Value Width %",
                         description: "The percentage of the width that the value column should take up",
-                        type: { numeric: true }
-                    }
-                }
-            }
+                        type: { numeric: true },
+                    },
+                },
+            },
             /*,
             sorting: {
                 displayName: "Sorting",
