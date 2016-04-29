@@ -48,31 +48,6 @@ export class AttributeSlicer {
     `.trim().replace(/\n/g, "");
 
     /**
-     * The template used to render list items
-     */
-    private static listItemFactory = (matchPrefix: string, match: string, matchSuffix: string, valueWidthPercentage: number) => {
-        const pretty = AttributeSlicer.prettyPrintValue;
-        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${100 - valueWidthPercentage}%`;
-        return $(`
-            <div style="white-space:nowrap" class="item">
-                <label style="cursor:pointer">
-                    <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->
-                    <span style="margin-left: 5px;vertical-align:middle" class="display-container">
-                        <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
-                            <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                            <span class="match">${pretty(match)}</span>
-                            <span class="matchSuffix">${pretty(matchSuffix)}</span>
-                        </span>
-                        <span style="display:inline-block;max-width:${valueWidthPercentage}%" class="value-container">
-                            <span style="display:inline-block;width:0px" class="value-display">&nbsp;<span class="value"></span></span>
-                        </span>
-                    </span>
-                </label>
-            </div>
-        `.trim().replace(/\n/g, ""));
-    };
-
-    /**
      * The slicer element
      */
     private slicerEle: JQuery;
@@ -133,6 +108,32 @@ export class AttributeSlicer {
     private virtualListEle: any;
 
     /**
+     * The template used to render list items
+     */
+    private listItemFactory = (matchPrefix: string, match: string, matchSuffix: string, valueWidthPercentage: number) => {
+        const pretty = AttributeSlicer.prettyPrintValue;
+        const sizes = this.calcColumnSizes();
+        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
+        return $(`
+            <div style="white-space:nowrap" class="item">
+                <label style="cursor:pointer">
+                    <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->
+                    <span style="margin-left: 5px;vertical-align:middle" class="display-container">
+                        <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
+                            <span class="matchPrefix">${pretty(matchPrefix)}</span>
+                            <span class="match">${pretty(match)}</span>
+                            <span class="matchSuffix">${pretty(matchSuffix)}</span>
+                        </span>
+                        <span style="display:inline-block;max-width:${sizes.value}%" class="value-container">
+                            <span style="display:inline-block;width:0px" class="value-display">&nbsp;<span class="value"></span></span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+        `.trim().replace(/\n/g, ""));
+    };
+
+    /**
      * Constructor for the advanced slicer
      */
     constructor(element: JQuery, vlist?: any) {
@@ -143,7 +144,7 @@ export class AttributeSlicer {
             itemHeight: 22,
             generatorFn: (i: number) => {
                 const item = this.virtualList.items[i];
-                const ele = AttributeSlicer.listItemFactory(item.matchPrefix, item.match, item.matchSuffix, this.valueWidthPercentage);
+                const ele = this.listItemFactory(item.matchPrefix, item.match, item.matchSuffix, this.valueWidthPercentage);
                 let renderedValue = item.renderedValue;
                 if (renderedValue) {
                     let valueDisplayEle = ele.find(".value-display");
@@ -239,20 +240,23 @@ export class AttributeSlicer {
     public set valueWidthPercentage(value: number) {
         value = value ? Math.max(Math.min(value, 100), 10) : AttributeSlicer.DEFAULT_VALUE_WIDTH;
         this._valueWidthPercentage = value;
-        const remaining = 100 - value;
-        this.element.find(".value-container").css({
-            maxWidth: value + "%"
-        });
-        this.element.find(".category-container").css({
-            maxWidth: remaining + "%"
-        });
+        this.resizeColumns();
     }
 
     /**
      * Setter for showing the values column
      */
+    private _showValues = false;
     public set showValues(show: boolean) {
+        this._showValues = show;
         this.element.toggleClass("has-values", show);
+    }
+
+    /**
+     * Getter for show values
+     */
+    public get showValues(): boolean {
+        return this._showValues;
     }
 
     /**
@@ -497,6 +501,30 @@ export class AttributeSlicer {
      */
     protected raiseSelectionChanged(newItems: SlicerItem[], oldItems: SlicerItem[]) {
         this.events.raiseEvent("selectionChanged", newItems, oldItems);
+    }
+
+    /**
+     * Resizes all of the visible columns
+     */
+    private resizeColumns() {
+        let sizes = this.calcColumnSizes();
+        this.element.find(".value-container").css({
+            maxWidth: sizes.value + "%"
+        });
+        this.element.find(".category-container").css({
+            maxWidth: sizes.category + "%"
+        });
+    }
+
+    /**
+     * Calculates the column sizes for both the value and category columns
+     */
+    private calcColumnSizes() {
+        let remaining = 100 - this.valueWidthPercentage;
+        return {
+            value: this.showValues ? this.valueWidthPercentage : 0,
+            category: this.showValues ? remaining : 100
+        };
     }
 
     /**
