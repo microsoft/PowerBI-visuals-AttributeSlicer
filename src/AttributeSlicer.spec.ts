@@ -127,4 +127,5 @@ describe("AttributeSlicer", () => {
     it("should adjust element width when valueWidthPercentage changes");
     it("should default valueWidthPercentage to a reasonable value");
     it("should default valueWidthPercentage to a reasonable value when the value passed to valueWidthPercentage is invalid");
+    it("should adjust the category column to be full width when showValues is false");
 });
