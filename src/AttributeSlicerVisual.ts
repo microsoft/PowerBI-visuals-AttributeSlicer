@@ -44,11 +44,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             {
                 name: "Category",
                 kind: VisualDataRoleKind.Grouping,
-                displayName: powerbi.data.createDisplayNameGetter("Role_DisplayName_Field"),
-                description: data.createDisplayNameGetter("Role_DisplayName_FieldDescription"),
+                displayName: "Category"
             }, {
                 name: "Values",
                 kind: VisualDataRoleKind.Measure,
+                displayName: "Values"
             },
         ],
         dataViewMappings: [{
@@ -270,12 +270,15 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
         });
+        // TODO: Move to VisualBase
         this.element.append($(`<div class="logArea"></div>`));
         this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
             if (!this.loadingData) {
                 this.onSelectionChanged(newItems);
             }
         });
+
+        log("Loading Custom Sandbox: ", this.sandboxed);
     }
 
     /**
