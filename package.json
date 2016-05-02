@@ -39,6 +39,7 @@
     "babel-loader": "6.x",
     "chai": "3.4.1",
     "css-loader": "0.23.1",
+    "debug": "^2.2.0",
     "del": "2.2.0",
     "es6-promise": "^3.0.2",
     "exports-loader": "^0.6.2",

@@ -28,6 +28,9 @@ module.exports = {
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.ProvidePlugin({
             'Promise': 'exports?global.Promise!es6-promise'
+        }),
+        new webpack.DefinePlugin({
+            'process.env.DEBUG': "\"" + (process.env.DEBUG || "") + "\""
         })
     ],
 };

@@ -1,4 +1,18 @@
 /// <reference path="../base/powerbi/references.d.ts"/>
+/* tslint:disable */
+const debug = require("debug");
+debug.save = function(){};
+
+// TODO: #IF DEBUG
+if (process.env.DEBUG) {
+    debug.enable(process.env.DEBUG);
+} else {
+    debug.enabled = function() { return false; };
+}
+
+const log = debug("AttributeSlicer:AttributeSlicerVisual");
+/* tslint:enable */
+
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
 import { VisualBase } from "../base/powerbi/VisualBase";
 import { Visual } from "../base/powerbi/Utils";
@@ -11,7 +25,6 @@ import SelectionId = powerbi.visuals.SelectionId;
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
 import data = powerbi.data;
 import SelectableDataPoint = powerbi.visuals.SelectableDataPoint;
-import SelectionManager = powerbi.visuals.utility.SelectionManager;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 
@@ -129,11 +142,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private host: IVisualHostServices;
 
     /**
-     * The selection manager
-     */
-    private selectionManager: SelectionManager;
-
-    /**
      * My AttributeSlicer
      */
     private mySlicer: AttributeSlicerImpl;
@@ -165,10 +173,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     private onSelectionChanged = _.debounce(
         (selectedItems: ListItem[]) => {
-            this.selectionManager.clear();
-            selectedItems.forEach((item) => {
-                this.selectionManager.select(item.identity, true);
-            });
+            log("onSelectionChanged");
             this.updateSelectionFilter(selectedItems);
         },
         100);
@@ -215,19 +220,57 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Constructor for the visual
+     */
+    constructor() {
+        super();
+
+        /**
+         * Logs any message to the logging area
+         * TODO: Port this over to our base project
+         */
+        log.log = (...toLog: any[]) => {
+            const logger = this.element.find(".logArea");
+            logger.css({ display: "block" });
+
+            let logStr: string;
+            if (toLog && toLog.length > 1) {
+                logStr = `<span>${toLog[0]}</span>`;
+                for (let i = 1; i < toLog.length; i++) {
+                    let value = toLog[i];
+                    let cIdx = logStr.indexOf("%c");
+                    if (cIdx >= 0) {
+                        let beginningPart = logStr.substring(0, cIdx);
+                        if (cIdx > 0) {
+                            beginningPart += "</span>";
+                        }
+                        logStr =  `${beginningPart}<span style="${value}">${logStr.substring(cIdx + 2)}</span>`;
+                    }  else {
+                        logStr += value;
+                    }
+                }
+            } else {
+                logStr = toLog.join("");
+            }
+            logger.prepend($("<div>" + logStr + "</div>"));
+            console.log.apply(console, toLog);
+        };
+    }
+
+    /**
      * Called when the visual is being initialized
      */
     public init(options: powerbi.VisualInitOptions): void {
-        super.init(options, "<div></div>");
+        super.init(options, `<div></div>`.trim());
         this.host = options.host;
         this.mySlicer = new AttributeSlicerImpl(this.element);
         this.mySlicer.serverSideSearch = true;
         this.mySlicer.showSelections = true;
-        this.selectionManager = new SelectionManager({ hostServices: this.host });
         this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
         });
+        this.element.append($(`<div class="logArea"></div>`));
         this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
             if (!this.loadingData) {
                 this.onSelectionChanged(newItems);
@@ -325,6 +368,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             item.result = this.loadDeferred.promise();
             if (!alreadyLoading) {
                 this.host.loadMoreData();
+                log("Loading more data");
             }
         }
     }
@@ -333,6 +377,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Loads the data from the dataview
      */
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
+        log("Loading data from PBI");
         const oldData = this.data;
         this.data = AttributeSlicer.converter(dataView) || [];
         let filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(0));
@@ -361,8 +406,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         // if the user has changed the categories, then selection is done for
         if (!hasCategories || (this.currentCategory && this.currentCategory !== categorical.categories[0].source.queryName)) {
+            log("Clearing Selection, Categories Changed");
             this.mySlicer.selectedItems = [];
-            this.selectionManager.clear();
             this.updateSelectionFilter([]);
         }
 
@@ -396,17 +441,15 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             if (values && args && values.length && args.length) {
                 const selectionItems: ListItem[] = JSON.parse(objects["general"]["selection"]);
                 let sourceExpr = filter.whereItems[0].condition.args[0];
-                this.selectionManager.clear();
-                values.forEach((n: any) => {
-                    let selId = SelectionId.createWithId(powerbi.data.createDataViewScopeIdentity(
+                const selectionIds = values.map((n: any) => {
+                    return SelectionId.createWithId(powerbi.data.createDataViewScopeIdentity(
                         powerbi.data.SQExprBuilder.compare(data.QueryComparisonKind.Equal,
                             sourceExpr,
                             n[0]
                         )
                     ));
-                    this.selectionManager.select(selId, true);
                 });
-                this.mySlicer.selectedItems = <any>this.selectionManager.getSelectionIds().map((n, i) => {
+                this.mySlicer.selectedItems = <any>selectionIds.map((n: any, i: number) => {
                     const slimItem = selectionItems[i];
                     return AttributeSlicer.createItem(slimItem.match, slimItem.value, n, slimItem.renderedValue);
                 });
@@ -464,9 +507,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Updates the data filter based on the selection
      */
     private updateSelectionFilter(items: ListItem[]) {
+        log("updateSelectionFilter");
         let filter: data.SemanticFilter;
-        if (this.selectionManager.hasSelection()) {
-            let selectors = this.selectionManager.getSelectionIds().map((id) => id.getSelector());
+        if (items && items.length) {
+            let selectors = items.map(n => n.identity.getSelector());
             filter = data.Selector.filterFromSelector(selectors);
         }
 
@@ -516,6 +560,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
 
         this.host.persistProperties(objects);
+        // Stolen from PBI's timeline
+        this.host.onSelect({ data: [] });
     }
 }
 
