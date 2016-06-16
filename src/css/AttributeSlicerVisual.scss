@@ -1,4 +1,4 @@
-@import "../../base/powerbi/css/main";
+@import "../../node_modules/essex.powerbi.base/css/main";
 @import "./Base";
 
 .value-display {
@@ -11,16 +11,4 @@
 
 .token {
     background-color: $neutralLightColor;
-}
-
-.logArea {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 200px;
-    overflow: auto;
-    background-color: white;
-    border-top: 1px solid gray;
-    display:none;
 }

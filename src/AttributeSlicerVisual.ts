@@ -1,21 +1,11 @@
-/// <reference path="../base/powerbi/references.d.ts"/>
 /* tslint:disable */
-const debug = require("debug");
-debug.save = function(){};
+import { logger, updateTypeGetter, UpdateType } from "essex.powerbi.base";
 
-// TODO: #IF DEBUG
-if (process.env.DEBUG) {
-    debug.enable(process.env.DEBUG);
-} else {
-    debug.enabled = function() { return false; };
-}
-
-const log = debug("AttributeSlicer:AttributeSlicerVisual");
+const log = logger("essex:widget:AttributeSlicerVisual");
 /* tslint:enable */
 
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
-import { VisualBase } from "../base/powerbi/VisualBase";
-import { Visual } from "../base/powerbi/Utils";
+import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
@@ -179,6 +169,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         100);
 
     /**
+     * Getter for the update type
+     */
+    private updateType = updateTypeGetter(this);
+
+    /**
      * Converts the given dataview into a list of listitems
      */
     public static converter(dataView: DataView): ListItem[] {
@@ -220,44 +215,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Constructor for the visual
-     */
-    constructor() {
-        super();
-
-        /**
-         * Logs any message to the logging area
-         * TODO: Port this over to our base project
-         */
-        log.log = (...toLog: any[]) => {
-            const logger = this.element.find(".logArea");
-            logger.css({ display: "block" });
-
-            let logStr: string;
-            if (toLog && toLog.length > 1) {
-                logStr = `<span>${toLog[0]}</span>`;
-                for (let i = 1; i < toLog.length; i++) {
-                    let value = toLog[i];
-                    let cIdx = logStr.indexOf("%c");
-                    if (cIdx >= 0) {
-                        let beginningPart = logStr.substring(0, cIdx);
-                        if (cIdx > 0) {
-                            beginningPart += "</span>";
-                        }
-                        logStr =  `${beginningPart}<span style="${value}">${logStr.substring(cIdx + 2)}</span>`;
-                    }  else {
-                        logStr += value;
-                    }
-                }
-            } else {
-                logStr = toLog.join("");
-            }
-            logger.prepend($("<div>" + logStr + "</div>"));
-            console.log.apply(console, toLog);
-        };
-    }
-
-    /**
      * Called when the visual is being initialized
      */
     public init(options: powerbi.VisualInitOptions): void {
@@ -270,8 +227,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
         });
-        // TODO: Move to VisualBase
-        this.element.append($(`<div class="logArea"></div>`));
         this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
             if (!this.loadingData) {
                 this.onSelectionChanged(newItems);
@@ -285,6 +240,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Called when the visual is being updated
      */
     public update(options: powerbi.VisualUpdateOptions) {
+        const updateType = this.updateType();
         super.update(options);
 
         // Make sure the slicer has some sort of dimensions
@@ -292,20 +248,26 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             this.mySlicer.dimensions = options.viewport;
         }
 
-        // Assume that if the dimensions have changed, that thats it.
-        if (this.mySlicer.dimensions.height !== options.viewport.height ||
-            this.mySlicer.dimensions.width !== options.viewport.width) {
+        if ((updateType & UpdateType.Resize) === UpdateType.Resize) {
             this.mySlicer.dimensions = options.viewport;
-
-        // If we are not just resizing, then there has to be some sort of data change
-        } else if (!options.resizeMode) {
+        } else {
             this.loadingData = true;
-            this.dataView = options.dataViews && options.dataViews[0];
-            if (this.dataView) {
-                this.loadSettingsFromPowerBI(this.dataView);
-                this.loadDataFromPowerBI(this.dataView);
-                this.loadSortFromPowerBI(this.dataView);
-                this.loadSelectionFromPowerBI(this.dataView);
+            const dv = this.dataView = options.dataViews && options.dataViews[0];
+            if (dv) {
+                if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
+                    this.loadSettingsFromPowerBI(dv);
+                }
+
+                // We should show values if there are actually values
+                // IMPORTANT: This stays before loadDataFromPowerBI, otherwise the values don't display
+                const categorical = dv && dv.categorical;
+                this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+
+                if ((updateType & UpdateType.Data) === UpdateType.Data) {
+                    this.loadDataFromPowerBI(dv);
+                }
+                this.loadSortFromPowerBI(dv);
+                this.loadSelectionFromPowerBI(dv);
             } else {
                 this.mySlicer.data = [];
                 this.mySlicer.selectedItems = [];
@@ -381,7 +343,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
         log("Loading data from PBI");
-        const oldData = this.data;
         this.data = AttributeSlicer.converter(dataView) || [];
         let filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(0));
 
@@ -391,14 +352,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
             delete this.loadDeferred;
         } else {
-            const oldSlicerData = this.mySlicer.data || [];
-
-            // if there is no previous data OR if the data contained within the slicer differs from the filtered set
-            if (!oldData || !this.areBasicallyEqual(oldSlicerData[oldSlicerData.length - 1], filteredData[filteredData.length - 1])) {
-                this.mySlicer.data = filteredData;
-            } else if (!filteredData || filteredData.length === 0) {
-                this.mySlicer.data = [];
-            }
+            this.mySlicer.data = filteredData;
         }
 
         // Default the number if necessary 
@@ -484,14 +438,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
-        const categorical = dataView && dataView.categorical;
         this.mySlicer.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true);
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
-        this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
     }
 
     /**
