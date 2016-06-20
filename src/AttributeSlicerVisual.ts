@@ -99,6 +99,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         description: "The percentage of the width that the value column should take up.",
                         type: { numeric: true },
                     },
+                    horizontal: {
+                        displayName: "Horizontal",
+                        description: "Display the attributes horizontally, rather than vertically",
+                        type: { bool: true },
+                    },
                 },
             },
             /*,
@@ -291,6 +296,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
         if (options.objectName === "display") {
             instances[0].properties["valueColumnWidth"] = this.mySlicer.valueWidthPercentage;
+            instances[0].properties["horizontal"] = this.mySlicer.renderHorizontal;
         }
         return instances;
     }
@@ -444,6 +450,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
+        this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
     }
 
     /**

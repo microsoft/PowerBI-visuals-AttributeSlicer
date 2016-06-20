@@ -172,6 +172,7 @@ VirtualList.createContainer = function(w, h) {
 
 VirtualList.createScroller = function(h) {
     var ele = $('<div>');   
+    ele.addClass("vlist-scroller");
     ele.css({
         opacity: 0,
         position: 'absolute',

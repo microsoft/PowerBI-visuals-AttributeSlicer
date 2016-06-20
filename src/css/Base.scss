@@ -3,6 +3,9 @@
     @extend .regularFont;
     @extend .smallFontSize;
     position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .show-highlight.has-search .match {
@@ -261,12 +264,6 @@ body {
   vertical-align: middle;
 }
 
-.token:before {
-  content: "\f00d";
-  font-family: FontAwesome;
-  font-weight: 100;
-  margin-right: 5px;
-}
 .token:hover:before {
   color: #efefef;
 }
@@ -282,4 +279,10 @@ body {
     @extend .boxsized;
     padding-top: 2px;
     padding-bottom: 2px;
+}
+
+.token:before {
+  content: "\2716";
+  font-weight: 100;
+  margin-right: 5px;
 }

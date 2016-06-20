@@ -91,6 +91,7 @@
     "typescript": "^1.7.5",
     "typings": "^0.7.12",
     "underscore": "1.8.3",
+    "url-loader": "^0.5.7",
     "wallaby-webpack": "0.0.16",
     "webpack": "1.12.9",
     "yargs": "3.31.0"

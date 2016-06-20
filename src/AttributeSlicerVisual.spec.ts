@@ -23,6 +23,10 @@ describe("AttributeSlicerVisual", () => {
     it("should adjust the width of the value column, when the PBI config changes");
     it("should not clear the selection if two searches are performed in quick succession, while the first is running");
     it("should not crash when you search for something, then change the maxNumberOfItems setting");
+    it("should go to horizontal view mode, when selected in PBI");
+    it("should scroll properly in horizontal view mode");
+    it("should load additional data properly in horizontal view mode");
+    it("should go to vertical view mode, when selected in PBI");
 
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager 

@@ -211,6 +211,22 @@ export class AttributeSlicer {
     }
 
     /**
+     * Whether or not to render horizontal
+     */
+    private _renderHorizontal = false;
+    public get renderHorizontal() {
+        return this._renderHorizontal;
+    }
+
+    /**
+     * Sets whether or not to render horizontal
+     */
+    public set renderHorizontal(value: boolean) {
+        this._renderHorizontal = value;
+        this.updateListHeight();
+    }
+
+    /**
      * The actual dimensions
      */
     private _dimensions: { width: number; height: number };
@@ -566,9 +582,29 @@ export class AttributeSlicer {
      * Updates the list height
      */
     private updateListHeight() {
-        const height = this.dimensions.height - this.element.find(".slicer-options").height() - 10;
-        this.listEle.css({ width: "100%", height: height });
-        this.virtualList.setHeight(height);
+        if (this.dimensions) {
+            let slicerHeight = Math.floor(this.element.find(".slicer-options").height() - 10);
+            let height = Math.floor(this.dimensions.height - slicerHeight);
+            let width: number|string = "100%";
+            if (this.renderHorizontal) {
+                width = Math.floor(height - 10);
+                height = Math.floor(this.dimensions.width);
+
+                this.listEle.css({
+                    transform: `rotate(-90deg) translateX(-${width as number - 10}px)`,
+                    transformOrigin: "top left"
+                });
+            } else {
+                this.listEle.css({
+                    transform: "",
+                    transformOrigin: ""
+                });
+            }
+
+            this.listEle.css({ width: width, height: height });
+            this.element.find(".virtual-list").css({ width: width, height: height});
+            this.virtualList.setHeight(height);
+        }
     }
 
     /**
