@@ -86,10 +86,10 @@ VirtualList.prototype.setDir = function (horiz) {
     this.scrollProp = "scrollLeft";
     this.scroller.css({
         width: size + 'px',
-        height: '1px',
+        height: '1px'
     });
     this.listContainer.css({
-        transform: `rotate(-90deg) translateX(-${height - 5}px)`,
+        transform: "rotate(-90deg) translateX(-" + (height - 5) + "px)",
         transformOrigin: "0px 0px",
         height: width + "px",
         width: height + "px"
@@ -102,7 +102,7 @@ VirtualList.prototype.setDir = function (horiz) {
     this.scrollProp = "scrollTop";
     this.scroller.css({
         width: '1px',
-        height: size + 'px',
+        height: size + 'px'
     });
     this.listContainer.css({
         transform: "",
@@ -142,7 +142,9 @@ VirtualList.prototype.setHeight = function (height) {
 VirtualList.prototype.setItems = function (items) {
     this.items = items;
     this.totalRows = (items && items.length);
-    this.scroller.css({ [this.horiz ? "width" : "height"]: (this.itemHeight * this.totalRows) + "px" });
+    var sizeObj = {  };
+    sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
+    this.scroller.css(sizeObj);
     this.lastRepaintPos = undefined;
     this._renderChunk(this.listContainer, 0);
 };
@@ -230,7 +232,7 @@ VirtualList.createScroller = function(h) {
         top: 0,
         left: 0,
         width: '1px',
-        height: h + 'px',
+        height: h + 'px'
     });
     return ele;
 };
