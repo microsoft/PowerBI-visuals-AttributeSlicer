@@ -110,7 +110,8 @@ export class AttributeSlicer {
     /**
      * The template used to render list items
      */
-    private listItemFactory = (matchPrefix: string, match: string, matchSuffix: string, valueWidthPercentage: number) => {
+    private listItemFactory = (item: SlicerItem) => {
+        const { match, matchPrefix, matchSuffix, sections, value, renderedValue } = item;
         const pretty = AttributeSlicer.prettyPrintValue;
         const sizes = this.calcColumnSizes();
         const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
@@ -125,7 +126,21 @@ export class AttributeSlicer {
                             <span class="matchSuffix">${pretty(matchSuffix)}</span>
                         </span>
                         <span style="display:inline-block;max-width:${sizes.value}%" class="value-container">
-                            <span style="display:inline-block;width:0px" class="value-display">&nbsp;<span class="value"></span></span>
+                            <span style="display:inline-block;width:${renderedValue}%">
+                            ${
+                                (sections || []).map(s => {
+                                    let color = s.color;
+                                    if (color) {
+                                        color = `background-color:${color};`;
+                                    }
+                                    return `
+                                        <span style="display:inline-block;width:${s.width}%;${color}" title="${s.value || "0"}" class="value-display">
+                                            &nbsp;<span class="value">${s.value || "0"}</span>
+                                        </span>
+                                    `.trim().replace(/\n/g, "");
+                                }).join("")
+                            }
+                            </span>
                         </span>
                     </span>
                 </label>
@@ -143,16 +158,9 @@ export class AttributeSlicer {
         this.virtualList = vlist || new VirtualList({
             itemHeight: 22,
             generatorFn: (i: number) => {
-                const item = this.virtualList.items[i];
-                const ele = this.listItemFactory(item.matchPrefix, item.match, item.matchSuffix, this.valueWidthPercentage);
-                let renderedValue = item.renderedValue;
-                if (renderedValue) {
-                    let valueDisplayEle = ele.find(".value-display");
-                    valueDisplayEle.css({ width: (renderedValue + "%") });
-                    valueDisplayEle.find(".value").html("" + item.value);
-                }
-                // ele[item.selected ? "hide" : "show"].call(ele);
-                // ele.find("input").prop("checked", item.selected);
+                const item: SlicerItem = this.virtualList.items[i];
+                const ele = this.listItemFactory(item);
+                ele.css({ height: "22px" });
                 ele.data("item", item);
                 return ele[0];
             },
@@ -452,10 +460,12 @@ export class AttributeSlicer {
      * Listener for the list scrolling
      */
     protected checkLoadMoreData() {
-        let scrollElement = this.virtualListEle[0];
-        let scrollHeight = scrollElement.scrollHeight;
-        let top = scrollElement.scrollTop;
-        let shouldScrollLoad = scrollHeight - (top + scrollElement.clientHeight) < 200;
+        const scrollElement = this.virtualListEle[0];
+        const sizeProp = this.renderHorizontal ? "Width" : "Height";
+        const posProp = this.renderHorizontal ? "Left" : "Top";
+        const scrollSize = scrollElement["scroll" + sizeProp];
+        const scrollPos = scrollElement["scroll" + posProp];
+        const shouldScrollLoad = scrollSize - (scrollPos + scrollElement["client" + sizeProp]) < 200;
         if (shouldScrollLoad && !this.loadingMoreData && this.raiseCanLoadMoreData()) {
             this.raiseLoadMoreData(false);
         }
@@ -584,26 +594,12 @@ export class AttributeSlicer {
     private updateListHeight() {
         if (this.dimensions) {
             let slicerHeight = Math.floor(this.element.find(".slicer-options").height() - 10);
-            let height = Math.floor(this.dimensions.height - slicerHeight);
+            let height = Math.floor(this.dimensions.height - slicerHeight) - 20;
             let width: number|string = "100%";
-            if (this.renderHorizontal) {
-                width = Math.floor(height - 10);
-                height = Math.floor(this.dimensions.width);
-
-                this.listEle.css({
-                    transform: `rotate(-90deg) translateX(-${width as number - 10}px)`,
-                    transformOrigin: "top left"
-                });
-            } else {
-                this.listEle.css({
-                    transform: "",
-                    transformOrigin: ""
-                });
-            }
-
             this.listEle.css({ width: width, height: height });
-            this.element.find(".virtual-list").css({ width: width, height: height});
+                // .attr("dir", dir);
             this.virtualList.setHeight(height);
+            this.virtualList.setDir(this.renderHorizontal);
         }
     }
 
@@ -709,6 +705,14 @@ export interface SlicerItem {
     matchPrefix?: any;
     matchSuffix?: any;
 
+    /**
+     * The color of the item
+     */
+    color?: string;
+
+    /**
+     * The raw value of this item
+     */
     value: any;
     // selected: boolean;
 
@@ -718,8 +722,30 @@ export interface SlicerItem {
     equals: (b: SlicerItem) => boolean;
 
     /**
+     * The sections that make up this items value, the total of the widths must === 100
+     */
+    sections?: ISlicerValueSection[];
+
+    /**
      * The percentage value that should be displayed (0 - 100)
      * TODO: Better name, basically it is the value that should be displayed in the histogram
      */
     renderedValue?: number;
+}
+
+export interface ISlicerValueSection {
+    /**
+     * The raw value of the section
+     */
+    value: any;
+
+    /**
+     * The percentage width of this section
+     */
+    width: number;
+
+    /** 
+     * The color of this section
+     */
+    color: string;
 }

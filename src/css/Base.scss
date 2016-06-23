@@ -226,6 +226,10 @@
     width: 100%;
 }
 
+.value-display {
+  overflow: hidden;
+}
+
 .item:hover .value-display .value {
     display: inline-block;
 }

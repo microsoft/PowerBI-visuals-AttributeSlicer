@@ -39,8 +39,10 @@ function VirtualList(config) {
   this.generatorFn = config.generatorFn;
 
   var scroller = VirtualList.createScroller(0);
+  var listContainer = this.listContainer = $("<div class='list-display'>");
   this.scroller = scroller;
   this.container = VirtualList.createContainer(width, height);
+  this.container.append(listContainer);
   this.container.append(scroller);
 
 //   var screenItemsLen = Math.ceil(config.h / itemHeight);
@@ -61,11 +63,11 @@ function VirtualList(config) {
   }.bind(this), 300);
 
   var onScroll = function(e) {
-    var scrollTop = e.target.scrollTop; // Triggers reflow
-    if (!this.lastRepaintY || Math.abs(scrollTop - this.lastRepaintY) > this.maxBuffer) {
-      var first = parseInt(scrollTop / itemHeight) - this.screenItemsLen;
-      self._renderChunk(self.container, first < 0 ? 0 : first);
-      this.lastRepaintY = scrollTop;
+    var scrollPos = e.target[this.scrollProp]; // Triggers reflow
+    if (!this.lastRepaintPos || Math.abs(scrollPos - this.lastRepaintPos) > this.maxBuffer) {
+      var first = parseInt(scrollPos / itemHeight) - this.screenItemsLen;
+      self._renderChunk(self.listContainer, first < 0 ? 0 : first);
+      this.lastRepaintPos = scrollPos;
     }
 
     this.lastScrolled = Date.now();
@@ -75,25 +77,74 @@ function VirtualList(config) {
   this.container.on('scroll', onScroll.bind(this));
 }
 
+VirtualList.prototype.setDir = function (horiz) {
+  var size = (this.itemHeight * this.totalRows);
+  var height = this.container.height();
+  var width = this.container.width();
+  if (horiz) {
+    this.horiz = horiz;
+    this.scrollProp = "scrollLeft";
+    this.scroller.css({
+        width: size + 'px',
+        height: '1px',
+    });
+    this.listContainer.css({
+        transform: `rotate(-90deg) translateX(-${height - 5}px)`,
+        transformOrigin: "0px 0px",
+        height: width + "px",
+        width: height + "px"
+    });
+    this.container.css({
+      overflowX: "auto",
+      overflowY: "hidden"
+    }).scrollTop(0);
+  } else {
+    this.scrollProp = "scrollTop";
+    this.scroller.css({
+        width: '1px',
+        height: size + 'px',
+    });
+    this.listContainer.css({
+        transform: "",
+        transformOrigin: ""
+    });
+    this.container.css({
+      overflowX: "hidden",
+      overflowY: "auto"
+    }).scrollLeft(0);
+  }
+  
+  var screenItemsLen = this.screenItemsLen = Math.ceil((this.horiz ? width : height) / this.itemHeight);
+  // Cache 4 times the number of items that fit in the container viewport
+  this.cachedItemsLen = screenItemsLen * 3;
+  this.maxBuffer = screenItemsLen * this.itemHeight;
+  this.lastRepaintPos = undefined;
+  if (this.items) {
+    var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
+    this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+  }
+};
+
 VirtualList.prototype.setHeight = function (height) {
-    var screenItemsLen = this.screenItemsLen = Math.ceil(height / this.itemHeight);
+    this.container.css({ height: height});
+    var screenItemsLen = this.screenItemsLen = Math.ceil((this.horiz ? this.container.width() : height) / this.itemHeight);
     // Cache 4 times the number of items that fit in the container viewport
     this.cachedItemsLen = screenItemsLen * 3;
     this.maxBuffer = screenItemsLen * this.itemHeight;
     
-    this.lastRepaintY = undefined;
+    this.lastRepaintPos = undefined;
     if (this.items) {
-        var first = parseInt(this.container[0].scrollTop / this.itemHeight) - this.screenItemsLen;
-        this._renderChunk(this.container, first < 0 ? 0 : first);
+        var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
+        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
     }
 };
 
 VirtualList.prototype.setItems = function (items) {
     this.items = items;
     this.totalRows = (items && items.length);
-    this.scroller.css({ height: (this.itemHeight * this.totalRows) + "px" });
-    this.lastRepaintY = undefined;
-    this._renderChunk(this.container, 0);
+    this.scroller.css({ [this.horiz ? "width" : "height"]: (this.itemHeight * this.totalRows) + "px" });
+    this.lastRepaintPos = undefined;
+    this._renderChunk(this.listContainer, 0);
 };
 
 VirtualList.prototype.createRow = function(i) {
@@ -120,8 +171,8 @@ VirtualList.prototype.createRow = function(i) {
 };
 
 VirtualList.prototype.rerender = function() {
-    var first = parseInt(this.container[0].scrollTop / this.itemHeight) - this.screenItemsLen;
-    this._renderChunk(this.container, first < 0 ? 0 : first);
+    var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
+    this._renderChunk(this.listContainer, first < 0 ? 0 : first);
     this.lastScrolled = 0;
 };
 

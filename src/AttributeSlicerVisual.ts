@@ -1,5 +1,6 @@
 /* tslint:disable */
 import { logger, updateTypeGetter, UpdateType } from "essex.powerbi.base";
+const colors = require("essex.powerbi.base/src/colors").full;
 
 const log = logger("essex:widget:AttributeSlicerVisual");
 /* tslint:enable */
@@ -38,21 +39,21 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             }, {
                 name: "Values",
                 kind: VisualDataRoleKind.Measure,
-                displayName: "Values"
-            },
+                displayName: "Value"
+            }
         ],
         dataViewMappings: [{
-            conditions: [{ "Category": { max: 1, min: 0 }, "Values": { max: 1, min: 0 }}],
+            conditions: [{ "Category": { max: 1, min: 0 }, "Values": { min: 0 }}],
             categorical: {
                 categories: {
                     for: { in: "Category" },
                     dataReductionAlgorithm: { window: { count: AttributeSlicer.DATA_WINDOW_SIZE } },
                 },
                 values: {
-                    select: [{ bind: { to: "Values" } }]
-                },
-                includeEmptyGroups: true,
-            },
+                    select: [{ for: { in: "Values" }}],
+                    dataReductionAlgorithm: { top: {} }
+                }
+            }
         }, ],
         // sort this crap by default
         sorting: {
@@ -183,24 +184,46 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     public static converter(dataView: DataView): ListItem[] {
         let converted: ListItem[];
-        let categorical = dataView && dataView.categorical;
-        let values: any[] = [];
-        if (categorical && categorical.values && categorical.values.length) {
-            values = categorical.values[0].values;
-        }
+        const categorical = dataView && dataView.categorical;
+        const categories = categorical && categorical.categories;
+        const values = categorical && categorical.values;
         let maxValue = 0;
-        if (categorical && categorical.categories && categorical.categories.length > 0) {
-            converted = <any>categorical.categories[0].values.map((category, i) => {
-                let id = SelectionId.createWithId(categorical.categories[0].identity[i]);
-                let item = AttributeSlicer.createItem(category, values[i], id);
+        if (categories && categories.length && categories[0].values) {
+            converted = categories[0].values.map((category, catIdx) => {
+                let id = SelectionId.createWithId(dataView.table.identity[catIdx]);
+                let total = 0;
+                let sections: any;
+                if (values) {
+                    sections = values.map((v, j) => {
+                        const value = v.values[catIdx];
+                        total += value;
+                        return {
+                            color: colors[j] || "#ccc",
+                            value: value,
+                            width: 0
+                        };
+                    });
+                    sections.forEach((s: any) => {
+                        s.width = (s.value / total) * 100;
+                    });
+                }
+                let item =
+                    AttributeSlicer.createItem(
+                        category,
+                        total,
+                        id,
+                        undefined,
+                        "#ccc");
+                item.sections = sections;
                 if (item.value > maxValue) {
                     maxValue = item.value;
                 }
-                return item;
+                return item as any;
             });
             converted.forEach((c) => {
                 c.renderedValue = c.value ? (c.value / maxValue) * 100 : undefined;
             });
+            return converted;
         }
         return converted;
     }
@@ -208,14 +231,15 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Creates an item
      */
-    public static createItem(category: string, value: any, id: SelectionId, renderedValue?: any) {
+    public static createItem(category: string, value: any, id: SelectionId, renderedValue?: any, color = ""): ListItem {
         return {
             match: category,
             identity: id,
             selected: false,
+            color: color,
             value: value || 0,
             renderedValue: renderedValue,
-            equals: (b: { identity: any }) => id.equals((<ListItem>b).identity),
+            equals: (b: ListItem) => id.equals((<ListItem>b).identity),
         };
     }
 
