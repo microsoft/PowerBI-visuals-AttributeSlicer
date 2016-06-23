@@ -81,8 +81,8 @@ VirtualList.prototype.setDir = function (horiz) {
   var size = (this.itemHeight * this.totalRows);
   var height = this.container.height();
   var width = this.container.width();
+  this.horiz = horiz;
   if (horiz) {
-    this.horiz = horiz;
     this.scrollProp = "scrollLeft";
     this.scroller.css({
         width: size + 'px',
