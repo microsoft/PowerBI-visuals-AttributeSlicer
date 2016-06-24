@@ -18,6 +18,11 @@ import data = powerbi.data;
 import SelectableDataPoint = powerbi.visuals.SelectableDataPoint;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
+import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
+import IValueFormatter = powerbi.visuals.IValueFormatter;
+import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
+import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
+import TooltipManager = powerbi.visuals.TooltipManager;
 
 @Visual(require("./build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
@@ -72,6 +77,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                             },
                         },
                     },
+                    // formatString: StandardObjectProperties.formatString,
                     selection: {
                         type: { text: {} }
                     },
@@ -105,6 +111,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         description: "Display the attributes horizontally, rather than vertically",
                         type: { bool: true },
                     },
+                    labelDisplayUnits: StandardObjectProperties.labelDisplayUnits,
+                    labelPrecision: StandardObjectProperties.labelPrecision
                 },
             },
             /*,
@@ -180,9 +188,29 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private updateType = updateTypeGetter(this);
 
     /**
+     * The display units for the values
+     */
+    private labelDisplayUnits = 0;
+
+    /**
+     * The precision to use with the values
+     */
+    private labelPrecision: number;
+
+    /**
+     * Constructor
+     */
+    constructor() {
+        super();
+
+        // Tell base we should not load sandboxed
+        VisualBase.DEFAULT_SANDBOX_ENABLED = false;
+    }
+
+    /**
      * Converts the given dataview into a list of listitems
      */
-    public static converter(dataView: DataView): ListItem[] {
+    public static converter(dataView: DataView, formatter: IValueFormatter): ListItem[] {
         let converted: ListItem[];
         const categorical = dataView && dataView.categorical;
         const categories = categorical && categorical.categories;
@@ -200,6 +228,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         return {
                             color: colors[j] || "#ccc",
                             value: value,
+                            displayValue: formatter.format(value),
                             width: 0
                         };
                     });
@@ -214,6 +243,15 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         id,
                         undefined,
                         "#ccc");
+                // item.onCreate = (ele: JQuery) => {
+                //     TooltipManager.addTooltip(d3.select(ele[0]), (te) => item.tooltipInfo);
+                // };
+                item.tooltipInfo = (sections || []).map((n: any, j: number) => {
+                    return {
+                        displayName: values[j].source.displayName,
+                        value: n.displayValue,
+                    };
+                });
                 item.sections = sections;
                 if (item.value > maxValue) {
                     maxValue = item.value;
@@ -286,7 +324,23 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 let forceDataLoad = false;
                 if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
                     // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
-                    forceDataLoad = this.loadSettingsFromPowerBI(dv).caseInsensitive;
+                    const changes = this.loadSettingsFromPowerBI(dv);
+                    forceDataLoad = changes.caseInsensitive;
+
+                    // If the displayUnits or precision changed, and we don't have a data update,
+                    // then we need to manually refresh the renderedValue of the items
+                    if ((changes.displayUnits || changes.precision) &&
+                        (updateType & UpdateType.Data) !== UpdateType.Data &&
+                        this.mySlicer.data &&
+                        this.mySlicer.data.length) {
+                        const formatter = this.createValueFormatter();
+                        this.mySlicer.data.forEach(n => {
+                            (n.sections || []).forEach(s => {
+                                s.displayValue = formatter.format(s.value);
+                            });
+                        });
+                        this.mySlicer.refresh();
+                    }
                 }
 
                 // We should show values if there are actually values
@@ -316,13 +370,21 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             objectName: options.objectName,
             properties: {},
         }, ];
+        const instance = instances[0];
+        const props = instance.properties;
         if (options.objectName === "search") {
-            instances[0].properties["caseInsensitive"] = this.mySlicer.caseInsensitive;
-            instances[0].properties["limit"] = this.maxNumberOfItems;
+            _.merge(props, {
+                caseInsensitive: this.mySlicer.caseInsensitive,
+                limit: this.maxNumberOfItems
+            });
         }
         if (options.objectName === "display") {
-            instances[0].properties["valueColumnWidth"] = this.mySlicer.valueWidthPercentage;
-            instances[0].properties["horizontal"] = this.mySlicer.renderHorizontal;
+            _.merge(props, {
+                valueColumnWidth: this.mySlicer.valueWidthPercentage,
+                horizontal: this.mySlicer.renderHorizontal,
+                labelDisplayUnits: this.labelDisplayUnits,
+                labelPrecision: this.labelPrecision
+            });
         }
         return instances;
     }
@@ -371,11 +433,22 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Creates a value formatter from the current set of options
+     */
+    private createValueFormatter() {
+        return valueFormatterFactory({
+            value: this.labelDisplayUnits,
+            format: "0",
+            precision: this.labelPrecision
+        });
+    }
+
+    /**
      * Loads the data from the dataview
      */
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
         log("Loading data from PBI");
-        this.data = AttributeSlicer.converter(dataView) || [];
+        this.data = AttributeSlicer.converter(dataView, this.createValueFormatter()) || [];
         let filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(0));
 
         // If we are appending data for the attribute slicer
@@ -457,21 +530,22 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Loads our settings from the powerbi objects
      */
     private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
-        const changes = {
-            caseInsensitive: false
-        };
+        const s = this.mySlicer;
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
 
-        const oldVal = this.mySlicer.caseInsensitive;
-        this.mySlicer.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true);
-        changes.caseInsensitive = oldVal !== this.mySlicer.caseInsensitive;
+        const caseInsensitive =
+            s.caseInsensitive !== (s.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true));
+        const displayUnits =
+            this.labelDisplayUnits !== (this.labelDisplayUnits = this.syncSettingWithPBI(objects, "display", "labelDisplayUnits", 0));
+        const precision =
+            this.labelPrecision !== (this.labelPrecision = this.syncSettingWithPBI(objects, "display", "labelPrecision", 0));
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
-        return changes;
+        return { caseInsensitive, displayUnits, precision };
     }
 
     /**
@@ -552,4 +626,4 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
  * Represents a list item
  */
 /* tslint:disable */
-export interface ListItem extends SlicerItem, SelectableDataPoint {}
+export interface ListItem extends SlicerItem, SelectableDataPoint, TooltipEnabledDataPoint {}

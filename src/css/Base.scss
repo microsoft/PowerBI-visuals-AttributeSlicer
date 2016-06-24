@@ -232,6 +232,7 @@
 
 .item:hover .value-display .value {
     display: inline-block;
+    vertical-align: middle;
 }
 .value-display .value {
     display: none;
@@ -280,9 +281,10 @@ body {
 }
 
 .item {
-    @extend .boxsized;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    // @extend .boxsized;
+    // padding-top: 2px;
+    // padding-bottom: 2px;
+    cursor: pointer;
 }
 
 .token:before {

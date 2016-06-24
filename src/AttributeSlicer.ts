@@ -111,39 +111,36 @@ export class AttributeSlicer {
      * The template used to render list items
      */
     private listItemFactory = (item: SlicerItem) => {
-        const { match, matchPrefix, matchSuffix, sections, value, renderedValue } = item;
+        const { match, matchPrefix, matchSuffix, sections, renderedValue } = item;
         const pretty = AttributeSlicer.prettyPrintValue;
         const sizes = this.calcColumnSizes();
         const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
         return $(`
-            <div style="white-space:nowrap" class="item">
-                <label style="cursor:pointer">
-                    <!--<input style="vertical-align:middle;cursor:pointer" type="checkbox">-->
-                    <span style="margin-left: 5px;vertical-align:middle" class="display-container">
-                        <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
-                            <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                            <span class="match">${pretty(match)}</span>
-                            <span class="matchSuffix">${pretty(matchSuffix)}</span>
-                        </span>
-                        <span style="display:inline-block;max-width:${sizes.value}%" class="value-container">
-                            <span style="display:inline-block;width:${renderedValue}%">
-                            ${
-                                (sections || []).map(s => {
-                                    let color = s.color;
-                                    if (color) {
-                                        color = `background-color:${color};`;
-                                    }
-                                    return `
-                                        <span style="display:inline-block;width:${s.width}%;${color}" title="${s.value || "0"}" class="value-display">
-                                            &nbsp;<span class="value">${s.value || "0"}</span>
-                                        </span>
-                                    `.trim().replace(/\n/g, "");
-                                }).join("")
-                            }
-                            </span>
+            <div style="white-space:nowrap" class="item" style="cursor:pointer">
+                <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
+                    <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
+                        <span class="matchPrefix">${pretty(matchPrefix)}</span>
+                        <span class="match">${pretty(match)}</span>
+                        <span class="matchSuffix">${pretty(matchSuffix)}</span>
+                    </span>
+                    <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
+                        <span style="display:inline-block;width:${renderedValue}%;height:100%">
+                        ${
+                            (sections || []).map(s => {
+                                let color = s.color;
+                                if (color) {
+                                    color = `background-color:${color};`;
+                                }
+                                return `
+                                    <span style="display:inline-block;width:${s.width}%;${color};height:100%" title="${s.displayValue || s.value || "0"}" class="value-display">
+                                        &nbsp;<span class="value">${s.displayValue || s.value || "0"}</span>
+                                    </span>
+                                `.trim().replace(/\n/g, "");
+                            }).join("")
+                        }
                         </span>
                     </span>
-                </label>
+                </div>
             </div>
         `.trim().replace(/\n/g, ""));
     };
@@ -156,12 +153,15 @@ export class AttributeSlicer {
         this.slicerEle = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
         this.listEle = this.slicerEle.find(".list");
         this.virtualList = vlist || new VirtualList({
-            itemHeight: 22,
+            itemHeight: 24,
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
                 const ele = this.listItemFactory(item);
-                ele.css({ height: "22px" });
+                ele.css({ height: "20px", marginBottom: "2px", marginTop: "2px" });
                 ele.data("item", item);
+                if (item.onCreate) {
+                    item.onCreate(ele);
+                }
                 return ele[0];
             },
         });
@@ -455,6 +455,15 @@ export class AttributeSlicer {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
 
+    /**
+     * Refreshes the display when data changes
+     */
+    public refresh() {
+        if (this.virtualList) {
+            this.virtualList.rerender();
+        }
+    }
+
     /**j
      * Sorts the slicer
      */
@@ -730,6 +739,11 @@ export interface SlicerItem {
     equals: (b: SlicerItem) => boolean;
 
     /**
+     * Called when an item is created
+     */
+    onCreate?: (ele: JQuery) => void;
+
+    /**
      * The sections that make up this items value, the total of the widths must === 100
      */
     sections?: ISlicerValueSection[];
@@ -746,6 +760,11 @@ export interface ISlicerValueSection {
      * The raw value of the section
      */
     value: any;
+
+    /**
+     * The display value of the section
+     */
+    displayValue: any;
 
     /**
      * The percentage width of this section
