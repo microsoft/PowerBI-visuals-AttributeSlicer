@@ -27,6 +27,7 @@ describe("AttributeSlicerVisual", () => {
     it("should scroll properly in horizontal view mode");
     it("should load additional data properly in horizontal view mode");
     it("should go to vertical view mode, when selected in PBI");
+    it("should not lose selection when toggling caseInsensitivity");
 
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager 

@@ -335,6 +335,14 @@ export class AttributeSlicer {
         this.syncItemVisiblity();
         this.updateSelectAllButtonState();
 
+        // If this is just setting data, we are not currently in a load cycle
+        // Justification: When you change case insensitive in PBI, it reloads the data, filtering it and passing it to us
+        // But, that sometimes is not enough data ie start with 100 items, after a filter you have 2, 
+        // well we need more data to fill the screen, this accounts for that
+        if (!this.loadingMoreData) {
+            setTimeout(() => this.checkLoadMoreData(), 10);
+        }
+
         // if some one sets the data, then clearly we are no longer loading data
         this.loadingMoreData = false;
     }

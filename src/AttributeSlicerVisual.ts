@@ -283,8 +283,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             this.loadingData = true;
             const dv = this.dataView = options.dataViews && options.dataViews[0];
             if (dv) {
+                let forceDataLoad = false;
                 if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
-                    this.loadSettingsFromPowerBI(dv);
+                    // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
+                    forceDataLoad = this.loadSettingsFromPowerBI(dv).caseInsensitive;
                 }
 
                 // We should show values if there are actually values
@@ -292,7 +294,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 const categorical = dv && dv.categorical;
                 this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
 
-                if ((updateType & UpdateType.Data) === UpdateType.Data) {
+                if (forceDataLoad || (updateType & UpdateType.Data) === UpdateType.Data) {
                     this.loadDataFromPowerBI(dv);
                 }
                 this.loadSortFromPowerBI(dv);
@@ -402,18 +404,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Returns true if item1 is basically equal to item2
-     */
-    private areBasicallyEqual(item1: ListItem|SlicerItem, item2: ListItem|SlicerItem) {
-        let clone1: ListItem = $.extend(true, {}, item1);
-        let clone2: ListItem = $.extend(true, {}, item2);
-        return item1 && item2 &&
-               clone1.identity.equals(clone2.identity) &&
-               clone2.value === clone2.value &&
-               clone1.renderedValue === clone2.renderedValue;
-    }
-
-    /**
      * Loads the selection from PowerBI
      */
     private loadSelectionFromPowerBI(dataView: powerbi.DataView) {
@@ -467,14 +457,21 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Loads our settings from the powerbi objects
      */
     private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
+        const changes = {
+            caseInsensitive: false
+        };
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
+
+        const oldVal = this.mySlicer.caseInsensitive;
         this.mySlicer.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true);
+        changes.caseInsensitive = oldVal !== this.mySlicer.caseInsensitive;
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
+        return changes;
     }
 
     /**
