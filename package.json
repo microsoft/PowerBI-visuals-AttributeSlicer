@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "typings": "typings install",
-    "tsc": "! tsc | grep -v \"^node_modules.*\"",
+    "tsc": "(tsc > build.out) || (! cat build.out | grep -v \"^node_modules.*\" | grep -v \"^\\s.*\") || ! printf \"\\n\\033[0;31mCheck build.out for full error text\\n\"",
     "pbibundle": "gulp",
     "lint": "tslint 'src/**/*[!.d].{ts,tsx}'",
     "karma:tdd": "karma start --tdd",
@@ -33,7 +33,7 @@
     "jquery": "^2.2.0",
     "lodash": "4.0.0",
     "moment": "^2.12.0",
-    "powerbi-visuals": "^0.3.8"
+    "powerbi-visuals": "^0.5.0"
   },
   "devDependencies": {
     "babel-cli": "6.x",
