@@ -173,8 +173,18 @@ export class AttributeSlicer {
         this.listEle.append(this.virtualListEle);
 
         this.selectionsEle = element.find(".selections");
+
+        const searchBox = element.find(".searchbox");
+        searchBox[0].addEventListener("mousedown", (e) => {
+            // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
+            e.stopPropagation();
+        }, true);
+
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
-        this.clearAllEle = element.find(".clear-all").on("click", () => this.clearSelection());
+        this.clearAllEle = element.find(".clear-all").on("click", () => {
+            this.searchString = "";
+            this.clearSelection();
+        });
         this.attachEvents();
 
         // these two are here because the devtools call init more than once
