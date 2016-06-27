@@ -177,10 +177,9 @@ export class AttributeSlicer {
         this.selectionsEle = element.find(".selections");
 
         const searchBox = element.find(".searchbox");
-        searchBox[0].addEventListener("mousedown", (e) => {
-            // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
-            e.stopPropagation();
-        }, true);
+
+        // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
+        searchBox.on("mousedown mouseup click focus blur input pointerdown pointerup", e => e.stopPropagation());
 
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
         this.clearAllEle = element.find(".clear-all").on("click", () => {
