@@ -128,11 +128,11 @@ export class AttributeSlicer {
                         ${
                             (sections || []).map(s => {
                                 let color = s.color;
-                                const displayValue = s.displayValue || s.value || "0";
-                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
                                 if (color) {
                                     color = `background-color:${color};`;
                                 }
+                                const displayValue = s.displayValue || s.value || "0";
+                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
                                 return `
                                     <span style="${style}" title="${displayValue}" class="value-display">
                                         &nbsp;<span class="value">${displayValue}</span>

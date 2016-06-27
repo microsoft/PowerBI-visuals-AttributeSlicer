@@ -17,6 +17,7 @@ describe("AttributeSlicerVisual", () => {
     it("should restore selection after a page change");
     it("should clear selection when the category field is changed in PBI");
     it("should show values if there is a values field passed into PBI");
+    it("should show different colors per column when multiple values fields are added to the values section");
     it("should not clear selection when the value field is changed in PBI");
     it("should not clear selection if search is changed");
     it("should not clear selection when just settings are changed.");

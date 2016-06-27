@@ -17,6 +17,7 @@ describe("AttributeSlicer", () => {
         parentEle = undefined;
     });
 
+    const noop = function() /* tslint:disable */ {}; /* tslint:enable */;
     const createInstance = () => {
         let ele = $("<div>");
         let fakeVL: any = function() {
@@ -24,7 +25,8 @@ describe("AttributeSlicer", () => {
             this.setItems = function(items: any) {
                 this.items = items;
             };
-            this.rerender = function() /* tslint:disable */ {}; /* tslint:enable */
+            this.setItemHeight = noop;
+            this.rerender = noop;
         };
         let vList = new fakeVL();
         parentEle.append(ele);
@@ -220,4 +222,7 @@ describe("AttributeSlicer", () => {
     it("should default valueWidthPercentage to a reasonable value");
     it("should default valueWidthPercentage to a reasonable value when the value passed to valueWidthPercentage is invalid");
     it("should adjust the category column to be full width when showValues is false");
+    it("should visually update the text size, when the text size property is changed");
+    it("should scroll correctly when the text size is very large");
+    it("should scroll correctly when the text size is very small");
 });

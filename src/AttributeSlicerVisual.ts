@@ -84,7 +84,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     },
                     textSize: {
                         displayName: data.createDisplayNameGetter("Visual_TextSize"),
-                        type: { numeric: true }
+                        type: { numeric: true },
                     },
                 },
             },
@@ -597,7 +597,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         if (sortedColumns.length) {
             let lastColumn = sortedColumns[sortedColumns.length - 1];
             this.mySlicer.sort(
-               sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", 
+               sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value",
                /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
         }
     }
@@ -614,49 +614,36 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
 
         let objects: powerbi.VisualObjectInstancesToPersist = { };
+        let operation = "merge";
+        let selection: any = undefined;
         if (filter) {
-            $.extend(objects, {
-                merge: [
-                    <powerbi.VisualObjectInstance>{
-                        objectName: "general",
-                        selector: undefined,
-                        properties: {
-                            "filter": filter
-                        },
-                    },
-                    <powerbi.VisualObjectInstance>{
-                        objectName: "general",
-                        selector: undefined,
-                        properties: {
-                            "selection": JSON.stringify(items.map(n => ({
-                                match: n.match,
-                                value: n.value,
-                                renderedValue: n.renderedValue,
-                            }))),
-                        },
-                    },
-                ],
-            });
+            selection = JSON.stringify(items.map(n => ({
+                match: n.match,
+                value: n.value,
+                renderedValue: n.renderedValue,
+            })));
         } else {
-            $.extend(objects, {
-                remove: [
-                    <powerbi.VisualObjectInstance>{
-                        objectName: "general",
-                        selector: undefined,
-                        properties: {
-                            "filter": filter
-                        },
-                    },
-                    <powerbi.VisualObjectInstance>{
-                        objectName: "general",
-                        selector: undefined,
-                        properties: {
-                            "selection": undefined
-                        },
-                    },
-                ],
-            });
+            operation = "remove";
         }
+
+        $.extend(objects, {
+            [operation]: [
+                <powerbi.VisualObjectInstance>{
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        "filter": filter
+                    },
+                },
+                <powerbi.VisualObjectInstance>{
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        "selection": selection
+                    },
+                },
+            ],
+        });
 
         this.host.persistProperties(objects);
         // Stolen from PBI's timeline
