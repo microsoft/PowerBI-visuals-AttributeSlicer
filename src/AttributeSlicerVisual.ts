@@ -23,6 +23,7 @@ import IValueFormatter = powerbi.visuals.IValueFormatter;
 import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
 import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
 import TooltipManager = powerbi.visuals.TooltipManager;
+import PixelConverter = jsCommon.PixelConverter;
 
 @Visual(require("./build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
@@ -80,6 +81,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     // formatString: StandardObjectProperties.formatString,
                     selection: {
                         type: { text: {} }
+                    },
+                    textSize: {
+                        displayName: data.createDisplayNameGetter("Visual_TextSize"),
+                        type: { numeric: true }
                     },
                 },
             },
@@ -372,13 +377,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }, ];
         const instance = instances[0];
         const props = instance.properties;
-        if (options.objectName === "search") {
+        if (options.objectName === "general") {
+            _.merge(props, {
+                textSize: PixelConverter.toPoint(this.mySlicer.fontSize)
+            });
+        } else if (options.objectName === "search") {
             _.merge(props, {
                 caseInsensitive: this.mySlicer.caseInsensitive,
                 limit: this.maxNumberOfItems
             });
-        }
-        if (options.objectName === "display") {
+        } else if (options.objectName === "display") {
             _.merge(props, {
                 valueColumnWidth: this.mySlicer.valueWidthPercentage,
                 horizontal: this.mySlicer.renderHorizontal,
@@ -545,6 +553,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
+
+        let pxSize = this.syncSettingWithPBI(objects, "general", "textSize", undefined);
+        if (pxSize) {
+            pxSize = PixelConverter.fromPointToPixel(pxSize);
+        }
+        this.mySlicer.fontSize = pxSize;
         return { caseInsensitive, displayUnits, precision };
     }
 

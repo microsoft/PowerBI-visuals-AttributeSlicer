@@ -153,11 +153,11 @@ export class AttributeSlicer {
         this.slicerEle = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
         this.listEle = this.slicerEle.find(".list");
         this.virtualList = vlist || new VirtualList({
-            itemHeight: 24,
+            itemHeight: this.fontSize * 2,
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
                 const ele = this.listItemFactory(item);
-                ele.css({ height: "20px", marginBottom: "2px", marginTop: "2px" });
+                ele.css({ height: `${this.virtualList.itemHeight - 4}px`, marginBottom: "2px", marginTop: "2px" });
                 ele.data("item", item);
                 if (item.onCreate) {
                     item.onCreate(ele);
@@ -165,6 +165,7 @@ export class AttributeSlicer {
                 return ele[0];
             },
         });
+        this.fontSize = this.fontSize;
 
         this.virtualListEle = this.virtualList.container;
         this.virtualListEle.scroll(() => this.checkLoadMoreData());
@@ -345,6 +346,27 @@ export class AttributeSlicer {
 
         // if some one sets the data, then clearly we are no longer loading data
         this.loadingMoreData = false;
+    }
+
+    /**
+     * Controls the size of the font
+     */
+    private _fontSize: number = 12; // 12 px
+    public get fontSize() {
+        return this._fontSize;
+    }
+
+    /**
+     * Setter for fontSize
+     */
+    public set fontSize(value: number) {
+        this._fontSize = value || 12;
+        this.slicerEle.css({
+            fontSize: this._fontSize + "px"
+        });
+        if (this.virtualList) {
+            this.virtualList.setItemHeight(this._fontSize * 2);
+        }
     }
 
     /**

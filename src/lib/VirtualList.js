@@ -34,7 +34,7 @@ var $ = require("jquery");
 function VirtualList(config) {
   var width = (config && config.w + 'px') || '100%';
   var height = (config && config.h + 'px') || '100%';
-  var itemHeight = this.itemHeight = config.itemHeight;
+  this.itemHeight = config.itemHeight;
 
   this.generatorFn = config.generatorFn;
 
@@ -65,7 +65,7 @@ function VirtualList(config) {
   var onScroll = function(e) {
     var scrollPos = e.target[this.scrollProp]; // Triggers reflow
     if (!this.lastRepaintPos || Math.abs(scrollPos - this.lastRepaintPos) > this.maxBuffer) {
-      var first = parseInt(scrollPos / itemHeight) - this.screenItemsLen;
+      var first = parseInt(scrollPos / this.itemHeight) - this.screenItemsLen;
       self._renderChunk(self.listContainer, first < 0 ? 0 : first);
       this.lastRepaintPos = scrollPos;
     }
@@ -131,6 +131,23 @@ VirtualList.prototype.setHeight = function (height) {
     // Cache 4 times the number of items that fit in the container viewport
     this.cachedItemsLen = screenItemsLen * 3;
     this.maxBuffer = screenItemsLen * this.itemHeight;
+    
+    this.lastRepaintPos = undefined;
+    if (this.items) {
+        var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
+        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+    }
+};
+
+VirtualList.prototype.setItemHeight = function (itemHeight) {
+    this.itemHeight = itemHeight;
+    var screenItemsLen = this.screenItemsLen = Math.ceil((this.horiz ? this.container.width() : this.container.height()) / this.itemHeight);
+    // Cache 4 times the number of items that fit in the container viewport
+    this.cachedItemsLen = screenItemsLen * 3;
+    this.maxBuffer = screenItemsLen * this.itemHeight;
+    var sizeObj = {  };
+    sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
+    this.scroller.css(sizeObj);
     
     this.lastRepaintPos = undefined;
     if (this.items) {
