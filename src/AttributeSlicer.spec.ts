@@ -1,7 +1,7 @@
 import "../base/testSetup";
 
 import { expect } from "chai";
-import { AttributeSlicer } from "./AttributeSlicer";
+import { AttributeSlicer, SlicerItem } from "./AttributeSlicer";
 import * as $ from "jquery";
 
 describe("AttributeSlicer", () => {
@@ -58,6 +58,13 @@ describe("AttributeSlicer", () => {
             expect(vlist.items.length).to.eq(SIMPLE_DATA.length);
             expect(vlist.items).to.be.deep.equal(SIMPLE_DATA);
         });
+        it ("should clear selection when the data is changed", () => {
+            let { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+            instance.selectedItems = SIMPLE_DATA.slice(1, 3);
+            instance.data = createData("B", "C");
+            expect(instance.selectedItems).to.deep.equal([]);
+        });
     });
 
 
@@ -86,6 +93,28 @@ describe("AttributeSlicer", () => {
         it ("should display '1/2/2012 6:12AM' for same date", () => {
             expect(AttributeSlicer.prettyPrintValue(new Date(2012, 0, 2, 6, 12))).to.eq("1/2/2012 6:12AM");
         });
+    });
+
+    describe("isMatch", () => {
+        const matchTest = (text2: string, text1: string, expected: boolean, caseInsensitive = true) => {
+            expect(AttributeSlicer.isMatch(<SlicerItem><any>{
+                match: text1
+            }, text2, caseInsensitive)).to.be.equal(expected);
+        };
+        it("return true with search 'Hello', and item 'Hello' and caseInsensitive = true", () => matchTest("Hello", "Hello", true));
+        it("return true with search 'hello', and item 'Hello' and caseInsensitive = true", () => matchTest("hello", "Hello", true));
+        it("return true with search 'hel', and item 'Hello' and caseInsensitive = true", () => matchTest("hel", "Hello", true));
+        it("return true with search 'Hello', and item 'Hello' and caseInsensitive = false", () => matchTest("Hello", "Hello", true, false));
+        it("return true with search '', and  item'Hello' and caseInsensitive = true", () => matchTest("", "Hello", true, true));
+        it("return true with search undefined, and 'Hello' and caseInsensitive = true", () => matchTest(undefined, "Hello", true, true));
+        it("return false with search 'Hello2', and item 'Hello' and caseInsensitive = true", () =>
+            matchTest("Hello2", "Hello", false, true));
+        it("return false with search 'hello', and item 'Hello' and caseInsensitive = false", () =>
+            matchTest("hello", "Hello", false, false));
+        it("return true with search undefined, and item undefined and caseInsensitive = true", () =>
+            matchTest(undefined, undefined, true, true)
+        );
+        it("return true with search undefined, and item '' and caseInsensitive = true", () => matchTest(undefined, "", true, true));
     });
 
     describe("case insensitivity", () => {
@@ -121,6 +150,69 @@ describe("AttributeSlicer", () => {
             let { instance } = createInstance();
             instance.serverSideSearch = true;
             expect(instance.serverSideSearch).to.eq(true);
+        });
+    });
+
+    describe("singleSelect", () => {
+        it("should allow for selection initially", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+            instance.singleSelect = true;
+            instance.selectedItems = SIMPLE_DATA.slice(1, 2);
+            expect(instance.selectedItems).to.deep.equal([SIMPLE_DATA[1]]);
+        });
+
+        it("should not remove a singlely selected item, after set to true", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+            instance.selectedItems = SIMPLE_DATA.slice(1, 2);
+            instance.singleSelect = true;
+            expect(instance.selectedItems).to.deep.equal([SIMPLE_DATA[1]]);
+        });
+
+        it("should remove all selectedItems except the most recent when switching from multi to single selection", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+
+            // We have 3 selected
+            instance.selectedItems = SIMPLE_DATA.slice(1, 4);
+
+            // Switch to single selection mode
+            instance.singleSelect = true;
+
+            // Should be only 1 selected item, the last one
+            expect(instance.selectedItems).to.deep.equal([SIMPLE_DATA[3]]);
+        });
+
+        it("should work with no selection", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+
+            // Switch to single selection mode
+            instance.singleSelect = true;
+
+            // Should be only 1 selected item, the last one
+            expect(instance.selectedItems).to.deep.equal([]);
+        });
+
+        it("should allow for multiple selection if changed from true to false", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA;
+
+            // Switch to single selection mode
+            instance.singleSelect = true;
+
+            // We have 1 selected
+            instance.selectedItems = SIMPLE_DATA.slice(1, 2);
+
+            // Switch to mutli selection mode
+            instance.singleSelect = false;
+
+            // We have 2 selected
+            instance.selectedItems = SIMPLE_DATA.slice(1, 3);
+
+            // Should both be selected
+            expect(instance.selectedItems).to.deep.equal(SIMPLE_DATA.slice(1, 3));
         });
     });
 

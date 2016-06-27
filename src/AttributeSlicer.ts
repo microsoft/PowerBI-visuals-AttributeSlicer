@@ -128,12 +128,14 @@ export class AttributeSlicer {
                         ${
                             (sections || []).map(s => {
                                 let color = s.color;
+                                const displayValue = s.displayValue || s.value || "0";
+                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
                                 if (color) {
                                     color = `background-color:${color};`;
                                 }
                                 return `
-                                    <span style="display:inline-block;width:${s.width}%;${color};height:100%" title="${s.displayValue || s.value || "0"}" class="value-display">
-                                        &nbsp;<span class="value">${s.displayValue || s.value || "0"}</span>
+                                    <span style="${style}" title="${displayValue}" class="value-display">
+                                        &nbsp;<span class="value">${displayValue}</span>
                                     </span>
                                 `.trim().replace(/\n/g, "");
                             }).join("")
@@ -204,6 +206,24 @@ export class AttributeSlicer {
      */
     public get serverSideSearch() {
         return this._serverSideSearch;
+    }
+
+    /**
+     * Setter for if the attribute slicer should be single select
+     */
+    private _singleSelect = true;
+    public set singleSelect(value: boolean) {
+        this._singleSelect = value;
+
+        // Cheat, reset it
+        this.selectedItems = this.selectedItems.slice(0);
+    }
+
+    /**
+     * Getter for single select
+     */
+    public get singleSelect() {
+        return this._singleSelect;
     }
 
     /**
@@ -392,6 +412,10 @@ export class AttributeSlicer {
      */
     public set selectedItems (value: SlicerItem[]) {
         let oldSelection = this.selectedItems.slice(0);
+        if (this.singleSelect && value && value.length > 1) {
+            // Create an array with only the last item added
+            value = [value[value.length - 1]];
+        }
         this._selectedItems = value;
 
         // HACK: They are all selected if it is the same length as our dataset
@@ -598,7 +622,7 @@ export class AttributeSlicer {
         let remaining = 100 - this.valueWidthPercentage;
         return {
             value: this.showValues ? this.valueWidthPercentage : 0,
-            category: this.showValues ? remaining : 100
+            category: this.showValues ? remaining : 100,
         };
     }
 
@@ -703,6 +727,9 @@ export class AttributeSlicer {
             let ele = $((<HTMLElement>evt.target)).parents(".item");
             if (ele.length > 0) {
                 let item: any = ele.data("item");
+                if (this.singleSelect) {
+                    this.selectedItems.length = 0;
+                }
                 this.selectedItems.push(item);
                 this.selectedItems = this.selectedItems.slice(0);
                 this.updateSelectAllButtonState();

@@ -22,8 +22,8 @@ import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
 import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
-import TooltipManager = powerbi.visuals.TooltipManager;
 import PixelConverter = jsCommon.PixelConverter;
+// import TooltipManager = powerbi.visuals.TooltipManager;
 
 @Visual(require("./build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
@@ -41,12 +41,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             {
                 name: "Category",
                 kind: VisualDataRoleKind.Grouping,
-                displayName: "Category"
+                displayName: "Category",
             }, {
                 name: "Values",
                 kind: VisualDataRoleKind.Measure,
-                displayName: "Value"
-            }
+                displayName: "Value",
+            },
         ],
         dataViewMappings: [{
             conditions: [{ "Category": { max: 1, min: 0 }, "Values": { min: 0 }}],
@@ -57,9 +57,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 },
                 values: {
                     select: [{ for: { in: "Values" }}],
-                    dataReductionAlgorithm: { top: {} }
-                }
-            }
+                    dataReductionAlgorithm: { top: {} },
+                },
+            },
         }, ],
         // sort this crap by default
         sorting: {
@@ -117,7 +117,17 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         type: { bool: true },
                     },
                     labelDisplayUnits: StandardObjectProperties.labelDisplayUnits,
-                    labelPrecision: StandardObjectProperties.labelPrecision
+                    labelPrecision: StandardObjectProperties.labelPrecision,
+                },
+            },
+            selection: {
+                displayName: "Selection",
+                properties: {
+                    singleSelect: {
+                        displayName: "Single Select",
+                        description: "Only allow for a single selected",
+                        type: { bool: true },
+                    },
                 },
             },
             /*,
@@ -234,7 +244,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                             color: colors[j] || "#ccc",
                             value: value,
                             displayValue: formatter.format(value),
-                            width: 0
+                            width: 0,
                         };
                     });
                     sections.forEach((s: any) => {
@@ -346,6 +356,17 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         });
                         this.mySlicer.refresh();
                     }
+
+                    // If we went from multiple to single, then update the selection filter accordingly
+                    if (this.mySlicer.singleSelect && changes.singleSelect) {
+                        // Let it know that selection has changed, eventually
+                        // Normally would do a return; after this, but there are circumstances in which this may cause other issues
+                        // ie. If data hasn't been loaded in the first place, then on the next update there will be no data changes
+                        // according to our change detector
+                        // OR if the selection hasn't actually changed, and we short circuit it, the data won't have a chance to load.
+                        // I guess it's safer/easier to do this than to think of all the possible issues doing it the other way.
+                        this.onSelectionChanged(this.mySlicer.selectedItems as ListItem[]);
+                    }
                 }
 
                 // We should show values if there are actually values
@@ -384,14 +405,18 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         } else if (options.objectName === "search") {
             _.merge(props, {
                 caseInsensitive: this.mySlicer.caseInsensitive,
-                limit: this.maxNumberOfItems
+                limit: this.maxNumberOfItems,
             });
         } else if (options.objectName === "display") {
             _.merge(props, {
                 valueColumnWidth: this.mySlicer.valueWidthPercentage,
                 horizontal: this.mySlicer.renderHorizontal,
                 labelDisplayUnits: this.labelDisplayUnits,
-                labelPrecision: this.labelPrecision
+                labelPrecision: this.labelPrecision,
+            });
+        } else if (options.objectName === "selection") {
+            _.merge(props, {
+                singleSelect: this.mySlicer.singleSelect
             });
         }
         return instances;
@@ -447,7 +472,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         return valueFormatterFactory({
             value: this.labelDisplayUnits,
             format: "0",
-            precision: this.labelPrecision
+            precision: this.labelPrecision,
         });
     }
 
@@ -547,19 +572,20 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             this.labelDisplayUnits !== (this.labelDisplayUnits = this.syncSettingWithPBI(objects, "display", "labelDisplayUnits", 0));
         const precision =
             this.labelPrecision !== (this.labelPrecision = this.syncSettingWithPBI(objects, "display", "labelPrecision", 0));
+        const singleSelect =
+            s.singleSelect !== (s.singleSelect = this.syncSettingWithPBI(objects, "selection", "singleSelect", false));
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
         this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
-
         let pxSize = this.syncSettingWithPBI(objects, "general", "textSize", undefined);
         if (pxSize) {
             pxSize = PixelConverter.fromPointToPixel(pxSize);
         }
         this.mySlicer.fontSize = pxSize;
-        return { caseInsensitive, displayUnits, precision };
+        return { caseInsensitive, displayUnits, precision, singleSelect };
     }
 
     /**
@@ -570,7 +596,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         let sortedColumns = metadata.columns.filter((c) => !!c.sort);
         if (sortedColumns.length) {
             let lastColumn = sortedColumns[sortedColumns.length - 1];
-            this.mySlicer.sort(sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
+            this.mySlicer.sort(
+               sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value", 
+               /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
         }
     }
 
