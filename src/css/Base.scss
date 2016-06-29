@@ -12,6 +12,10 @@
     background-color: yellow;
 }
 
+.searchbox {
+  vertical-align: middle;
+}
+
 .clear-all {
     cursor: pointer;
     font-size: .8em;
@@ -224,6 +228,18 @@
 
 .item {
     width: 100%;
+   &.selected-slicer-item {
+     background-color: #eef;
+    .display-container:before {
+        content: "";
+        width: 2px;
+        height: 100%;
+        background-color: $dataColor9;
+        vertical-align: middle;
+        position: absolute;
+        top: 0;
+     }
+   }
 }
 
 .value-display {
@@ -291,4 +307,21 @@ body {
   content: "\2716";
   font-weight: 100;
   margin-right: 5px;
+}
+
+// .brush-mode {
+//   // By default, our cursor should be the resize, to indicate selection
+//   // .list, .list .item {
+//   //   cursor: nw-resize;
+//   // }
+  
+//   // &.render-horizontal {
+//   //   .list, .list .item {
+//   //     cursor: ew-resize;
+//   //   }
+//   // }
+// }
+
+.category-container {
+  margin-left: 3px; // Needed for .brushed
 }

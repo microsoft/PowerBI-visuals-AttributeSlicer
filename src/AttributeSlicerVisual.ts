@@ -45,7 +45,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             }, {
                 name: "Values",
                 kind: VisualDataRoleKind.Measure,
-                displayName: "Value",
+                displayName: "Values",
             },
         ],
         dataViewMappings: [{
@@ -123,9 +123,19 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             selection: {
                 displayName: "Selection",
                 properties: {
+                    brushMode: {
+                        displayName: "Brush Mode",
+                        description: "Allow for the drag selecting of attributes",
+                        type: { bool: true },
+                    },
                     singleSelect: {
                         displayName: "Single Select",
                         description: "Only allow for a single selected",
+                        type: { bool: true },
+                    },
+                    showSelections: {
+                        displayName: "Use Tokens",
+                        description: "Will show the selected attributes as tokens",
                         type: { bool: true },
                     },
                 },
@@ -304,7 +314,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.host = options.host;
         this.mySlicer = new AttributeSlicerImpl(this.element);
         this.mySlicer.serverSideSearch = true;
-        this.mySlicer.showSelections = true;
         this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
@@ -416,7 +425,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             });
         } else if (options.objectName === "selection") {
             _.merge(props, {
-                singleSelect: this.mySlicer.singleSelect
+                singleSelect: this.mySlicer.singleSelect,
+                brushMode: this.mySlicer.brushSelectionMode,
+                showSelections: this.mySlicer.showSelections
             });
         }
         return instances;
@@ -574,6 +585,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             this.labelPrecision !== (this.labelPrecision = this.syncSettingWithPBI(objects, "display", "labelPrecision", 0));
         const singleSelect =
             s.singleSelect !== (s.singleSelect = this.syncSettingWithPBI(objects, "selection", "singleSelect", false));
+        const brushMode =
+            s.brushSelectionMode !== (s.brushSelectionMode = this.syncSettingWithPBI(objects, "selection", "brushMode", false));
+        const showSelections =
+            s.showSelections !== (s.showSelections = this.syncSettingWithPBI(objects, "selection", "showSelections", true));
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
@@ -585,7 +600,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             pxSize = PixelConverter.fromPointToPixel(pxSize);
         }
         this.mySlicer.fontSize = pxSize;
-        return { caseInsensitive, displayUnits, precision, singleSelect };
+        return { caseInsensitive, displayUnits, precision, singleSelect, brushMode};
     }
 
     /**
