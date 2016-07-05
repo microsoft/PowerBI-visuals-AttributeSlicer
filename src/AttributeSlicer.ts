@@ -1,6 +1,7 @@
 import EventEmitter from "../base/EventEmitter";
 import * as $ from "jquery";
 import * as _ from "lodash";
+import JQuerySelectionManager from "./selection/JQuerySelectionManager";
 
 /* tslint:disable */
 const naturalSort = require("javascript-natural-sort");
@@ -47,6 +48,11 @@ export class AttributeSlicer {
             </div>
         </div>
     `.trim().replace(/\n/g, "");
+
+    /**
+     * The selection manager to use
+     */
+    private selectionManager: JQuerySelectionManager<SlicerItem>;
 
     /**
      * The slicer element
@@ -109,11 +115,6 @@ export class AttributeSlicer {
     private virtualListEle: any;
 
     /**
-     * The items that are in the processes of being selected by the user
-     */
-    private selectionModeItems: SlicerItem[] = [];
-
-    /**
      * The template used to render list items
      */
     private listItemFactory = (item: SlicerItem) => {
@@ -158,8 +159,8 @@ export class AttributeSlicer {
      */
     private updateListHeight = _.debounce(() => {
         if (this.dimensions) {
-            let slicerHeight = Math.floor(this.element.find(".slicer-options").height() - 10);
-            let height = Math.floor(this.dimensions.height - slicerHeight) - 20;
+            let slicerHeight = this.showOptions ? Math.floor(this.element.find(".slicer-options").height() - 10) : 0;
+            let height = Math.floor(this.dimensions.height - slicerHeight) - (this.showOptions ? 20 : 0);
             let width: number|string = "100%";
             this.listEle.css({ width: width, height: height });
                 // .attr("dir", dir);
@@ -178,42 +179,31 @@ export class AttributeSlicer {
         this.listEle = this.slicerEle.find(".list");
         this.virtualList = vlist || new VirtualList({
             itemHeight: this.fontSize * 2,
+            afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
                 const ele = this.listItemFactory(item);
-                ele.css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" });
-                ele.on("mousedown", (e) => {
-                    e.stopPropagation();
-                    this.selectionMode = true;
-                    this.selectionModeSelectItem(item);
-                });
-                ele.on("mouseover mouseenter", () => {
-                    if (this.brushSelectionMode) {
-                        this.selectionModeSelectItem(item);
-                    }
-                });
-                ele.on("mouseup", () => {
-                    this.selectionMode = false;
-                });
-                ele.data("item", item);
+                ele
+                    .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
+                    .data("item", item);
                 if (item.onCreate) {
                     item.onCreate(ele);
                 }
-                // If we are selected
-                ele.toggleClass("selected-slicer-item",
-                    this.selectedItems.filter(n => n.equals(item)).length > 0 ||
-                    this.selectionModeItems.filter(n => n.equals(item)).length > 0);
                 item.$element = ele;
                 return ele[0];
             },
         });
+        this.selectionManager = new JQuerySelectionManager<SlicerItem>((items) => {
+            this.raiseSelectionChanged(items);
+        });
+
+        // We should just pass this info into the constructor
+        this.selectionManager.bindTo(this.listEle, ".item", (ele) => ele.data("item"), (i) => i.$element);
+
         this.fontSize = this.fontSize;
 
         this.virtualListEle = this.virtualList.container;
         this.virtualListEle.scroll(() => this.checkLoadMoreData());
-        this.virtualListEle.on("mouseleave", () => {
-            this.selectionMode = false;
-        });
 
         this.listEle.append(this.virtualListEle);
 
@@ -238,48 +228,20 @@ export class AttributeSlicer {
     }
 
     /**
-     * Selection mode is the mode in which the user can pre-select 1 or more items without affecting the userlying 
-     * selectedItems array, until they leave selection mode
+     * Setter for whether or not the slicer options should be shown
      */
-    private _selectionMode = false;
-    public get selectionMode() { return this._selectionMode; }
+    private _showOptions = true;
+    public set showOptions(value: boolean) {
+        this._showOptions = value;
+        this.element.find(".slicer-options").toggle(value);
+        this.updateListHeight();
+    }
 
     /**
-     * Setter for is in selection mode
+     * Getter for showOptions
      */
-    public set selectionMode(value: boolean) {
-        const wasBrushing = this._selectionMode;
-        this._selectionMode = value;
-
-        // If we were brushing, but we are not now
-        if (wasBrushing && !this._selectionMode && this.selectionModeItems.length) {
-            let final: SlicerItem[] = this.selectionModeItems.slice(0);
-            if (!this.brushSelectionMode) {
-                final = this.selectionModeItems.slice(0);
-                let filtered = this.selectedItems.filter(n => {
-                    // If we reselected a brushed item
-                    const idx = _.findIndex(final, m => m.equals(n));
-                    if (idx >= 0) {
-                        final.splice(idx, 1);
-                        return false;
-                    }
-                    return true;
-                });
-                final = filtered.concat(final);
-            // User only selected a single item this item
-            } else if (final.length === 1 && this.selectedItems.length === 1) {
-                const idx = _.findIndex(this.selectedItems, m => m.equals(final[0]));
-                // If the user has only selected a single item, and it is a selected item, then nuke it
-                if (idx >= 0) {
-                    final = this.selectedItems;
-                    final.splice(idx, 1);
-                }
-            }
-            this.selectedItems = final;
-            this.selectionModeItems = [];
-        } else if (value) {
-            this.element.find(".item").removeClass("selected-slicer-item");
-        }
+    public get showOptions() {
+        return this._showOptions;
     }
 
     /**
@@ -300,27 +262,22 @@ export class AttributeSlicer {
     /**
      * Setter for if the attribute slicer should be single select
      */
-    private _singleSelect = true;
     public set singleSelect(value: boolean) {
-        this._singleSelect = value;
-
-        // Cheat, reset it
-        this.selectedItems = this.selectedItems.slice(0);
+        this.selectionManager.singleSelect = value;
     }
 
     /**
      * Getter for single select
      */
     public get singleSelect() {
-        return this._singleSelect;
+        return this.selectionManager.singleSelect;
     }
 
     /**
      * Setter for if the attribute slicer should use brush selection mode
      */
-    private _brushSelectionMode = true;
     public set brushSelectionMode(value: boolean) {
-        this._brushSelectionMode = value;
+        this.selectionManager.brushMode = value;
         this.element.toggleClass("brush-mode", value);
     }
 
@@ -328,7 +285,7 @@ export class AttributeSlicer {
      * Getter for should use brush selection mode
      */
     public get brushSelectionMode() {
-        return this._brushSelectionMode;
+        return this.selectionManager.brushMode;
     }
 
     /**
@@ -476,6 +433,7 @@ export class AttributeSlicer {
         }
 
         this._data = newData;
+        this.selectionManager.items = newData;
 
         this.virtualList.setItems(newData);
 
@@ -518,30 +476,21 @@ export class AttributeSlicer {
     /**
      * The list of selected items
      */
-    private _selectedItems: SlicerItem[] = [];
     public get selectedItems(): SlicerItem[] {
-        return this._selectedItems;
+        return this.selectionManager.selection;
     }
 
     /**
      * Sets the set of selected items
      */
     public set selectedItems (value: SlicerItem[]) {
-        let oldSelection = this.selectedItems.slice(0);
-        if (this.singleSelect && value && value.length > 1) {
-            // Create an array with only the last item added
-            value = [value[value.length - 1]];
-        }
-        this._selectedItems = value;
-        this.data.forEach(n => {
-            this.getElementForItem(n)
-                .toggleClass("selected-slicer-item", value.filter(m => m.equals(n)).length > 0);
-        });
+        this.selectionManager.selection = value;
 
         // Important that these are always in sync, in case showSelections gets set to true
-        if (value) {
+        const selection = this.selectionManager.selection;
+        if (selection) {
             this.selectionsEle.find(".token").remove();
-            value.map((v) => this.createSelectionToken(v)).forEach(n => n.appendTo(this.element.find(".selections")));
+            selection.map((v) => this.createSelectionToken(v)).forEach(n => n.appendTo(this.element.find(".selections")));
         }
 
         // We don't need to do any of this if show selections is off
@@ -550,13 +499,6 @@ export class AttributeSlicer {
 
             this.updateListHeight();
         }
-        this.raiseSelectionChanged(this.selectedItems, oldSelection);
-
-        // // HACK: They are all selected if it is the same length as our dataset
-        // let allChecked = value && value.length === this.data.length;
-        // let someChecked = value && value.length > 0 && !allChecked;
-        // this.checkAllEle.prop("checked", someChecked);
-        // this.checkAllEle.prop("indeterminate", someChecked);
     }
 
     /**
@@ -635,6 +577,15 @@ export class AttributeSlicer {
     }
 
     /**
+     * Destroys this attribute slicer
+     */
+    public destroy() {
+        if (this.selectionManager) {
+            this.selectionManager.destroy();
+        }
+    }
+
+    /**
      * Refreshes the display when data changes
      */
     public refresh() {
@@ -651,18 +602,6 @@ export class AttributeSlicer {
             const sortVal = naturalSort((<any>a)[toSort], (<any>b)[toSort]);
             return desc ? -1 * sortVal : sortVal;
         });
-    }
-
-    /**
-     * Selects an item in selection mode
-     */
-    public selectionModeSelectItem(item: SlicerItem) {
-        // If we haven't already brushed this item
-        if (this.selectionMode && this.selectionModeItems.filter(n => n.equals(item)).length === 0) {
-            this.selectionModeItems.push(item);
-            const ele = this.getElementForItem(item);
-            ele.toggleClass("selected-slicer-item");
-        }
     }
 
     /**
@@ -734,15 +673,8 @@ export class AttributeSlicer {
     /**
      * Raises the selectionChanged event
      */
-    protected raiseSelectionChanged(newItems: SlicerItem[], oldItems: SlicerItem[]) {
-        this.events.raiseEvent("selectionChanged", newItems, oldItems);
-    }
-
-    /**
-     * Returns the correct element for the given item
-     */
-    private getElementForItem(item: SlicerItem) {
-        return $(item.$element);//this.element.find(".item").filter((n, ele) => $(ele).data("item").equals(item));
+    protected raiseSelectionChanged(newItems: SlicerItem[]) {
+        this.events.raiseEvent("selectionChanged", newItems);
     }
 
     /**

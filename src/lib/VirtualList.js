@@ -25,6 +25,7 @@
 'use strict';
 
 var $ = require("jquery");
+var _ = require("lodash");
 
 /**
  * Creates a virtually-rendered scrollable list.
@@ -37,6 +38,7 @@ function VirtualList(config) {
   this.itemHeight = config.itemHeight;
 
   this.generatorFn = config.generatorFn;
+  this.afterRender = config.afterRender;
 
   var scroller = VirtualList.createScroller(0);
   var listContainer = this.listContainer = $("<div class='list-display'>");
@@ -189,11 +191,11 @@ VirtualList.prototype.createRow = function(i) {
   return item;
 };
 
-VirtualList.prototype.rerender = function() {
+VirtualList.prototype.rerender = _.debounce(function() {
     var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
     this._renderChunk(this.listContainer, first < 0 ? 0 : first);
     this.lastScrolled = 0;
-};
+}, 100);
 
 /**
  * Renders a particular, consecutive chunk of the total rows in the list. To
@@ -224,6 +226,9 @@ VirtualList.prototype._renderChunk = function(node, from) {
     node[0].childNodes[j].setAttribute('data-rm', '1');
   }
   node.append(fragment);
+  if (this.afterRender) {
+    this.afterRender();
+  }
 };
 
 VirtualList.createContainer = function(w, h) {

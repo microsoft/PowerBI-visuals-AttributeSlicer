@@ -86,6 +86,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         displayName: data.createDisplayNameGetter("Visual_TextSize"),
                         type: { numeric: true },
                     },
+                    showOptions: {
+                        displayName: "Show Options",
+                        description: "Should the search box and other options be shown",
+                        type: { bool: true },
+                    },
                 },
             },
             search: {
@@ -318,7 +323,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
             return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
         });
-        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[], oldItems: ListItem[]) => {
+        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[]) => {
             if (!this.loadingData) {
                 this.onSelectionChanged(newItems);
             }
@@ -341,59 +346,59 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         if ((updateType & UpdateType.Resize) === UpdateType.Resize) {
             this.mySlicer.dimensions = options.viewport;
-        } else {
-            this.loadingData = true;
-            const dv = this.dataView = options.dataViews && options.dataViews[0];
-            if (dv) {
-                let forceDataLoad = false;
-                if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
-                    // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
-                    const changes = this.loadSettingsFromPowerBI(dv);
-                    forceDataLoad = changes.caseInsensitive;
-
-                    // If the displayUnits or precision changed, and we don't have a data update,
-                    // then we need to manually refresh the renderedValue of the items
-                    if ((changes.displayUnits || changes.precision) &&
-                        (updateType & UpdateType.Data) !== UpdateType.Data &&
-                        this.mySlicer.data &&
-                        this.mySlicer.data.length) {
-                        const formatter = this.createValueFormatter();
-                        this.mySlicer.data.forEach(n => {
-                            (n.sections || []).forEach(s => {
-                                s.displayValue = formatter.format(s.value);
-                            });
-                        });
-                        this.mySlicer.refresh();
-                    }
-
-                    // If we went from multiple to single, then update the selection filter accordingly
-                    if (this.mySlicer.singleSelect && changes.singleSelect) {
-                        // Let it know that selection has changed, eventually
-                        // Normally would do a return; after this, but there are circumstances in which this may cause other issues
-                        // ie. If data hasn't been loaded in the first place, then on the next update there will be no data changes
-                        // according to our change detector
-                        // OR if the selection hasn't actually changed, and we short circuit it, the data won't have a chance to load.
-                        // I guess it's safer/easier to do this than to think of all the possible issues doing it the other way.
-                        this.onSelectionChanged(this.mySlicer.selectedItems as ListItem[]);
-                    }
-                }
-
-                // We should show values if there are actually values
-                // IMPORTANT: This stays before loadDataFromPowerBI, otherwise the values don't display
-                const categorical = dv && dv.categorical;
-                this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
-
-                if (forceDataLoad || (updateType & UpdateType.Data) === UpdateType.Data) {
-                    this.loadDataFromPowerBI(dv);
-                }
-                this.loadSortFromPowerBI(dv);
-                this.loadSelectionFromPowerBI(dv);
-            } else {
-                this.mySlicer.data = [];
-                this.mySlicer.selectedItems = [];
-            }
-            this.loadingData = false;
         }
+
+        this.loadingData = true;
+        const dv = this.dataView = options.dataViews && options.dataViews[0];
+        if (dv) {
+            let forceDataLoad = false;
+            if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
+                // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
+                const changes = this.loadSettingsFromPowerBI(dv);
+                forceDataLoad = changes.caseInsensitive;
+
+                // If the displayUnits or precision changed, and we don't have a data update,
+                // then we need to manually refresh the renderedValue of the items
+                if ((changes.displayUnits || changes.precision) &&
+                    (updateType & UpdateType.Data) !== UpdateType.Data &&
+                    this.mySlicer.data &&
+                    this.mySlicer.data.length) {
+                    const formatter = this.createValueFormatter();
+                    this.mySlicer.data.forEach(n => {
+                        (n.sections || []).forEach(s => {
+                            s.displayValue = formatter.format(s.value);
+                        });
+                    });
+                    this.mySlicer.refresh();
+                }
+
+                // If we went from multiple to single, then update the selection filter accordingly
+                if (this.mySlicer.singleSelect && changes.singleSelect) {
+                    // Let it know that selection has changed, eventually
+                    // Normally would do a return; after this, but there are circumstances in which this may cause other issues
+                    // ie. If data hasn't been loaded in the first place, then on the next update there will be no data changes
+                    // according to our change detector
+                    // OR if the selection hasn't actually changed, and we short circuit it, the data won't have a chance to load.
+                    // I guess it's safer/easier to do this than to think of all the possible issues doing it the other way.
+                    this.onSelectionChanged(this.mySlicer.selectedItems as ListItem[]);
+                }
+            }
+
+            // We should show values if there are actually values
+            // IMPORTANT: This stays before loadDataFromPowerBI, otherwise the values don't display
+            const categorical = dv && dv.categorical;
+            this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+
+            if (forceDataLoad || (updateType & UpdateType.Data) === UpdateType.Data) {
+                this.loadDataFromPowerBI(dv);
+            }
+            this.loadSortFromPowerBI(dv);
+            this.loadSelectionFromPowerBI(dv);
+        } else {
+            this.mySlicer.data = [];
+            this.mySlicer.selectedItems = [];
+        }
+        this.loadingData = false;
     }
 
     /**
@@ -409,7 +414,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         const props = instance.properties;
         if (options.objectName === "general") {
             _.merge(props, {
-                textSize: PixelConverter.toPoint(this.mySlicer.fontSize)
+                textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
+                showOptions: this.mySlicer.showOptions,
             });
         } else if (options.objectName === "search") {
             _.merge(props, {
@@ -427,10 +433,19 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             _.merge(props, {
                 singleSelect: this.mySlicer.singleSelect,
                 brushMode: this.mySlicer.brushSelectionMode,
-                showSelections: this.mySlicer.showSelections
+                showSelections: this.mySlicer.showSelections,
             });
         }
         return instances;
+    }
+
+    /**
+     * Gets called when PBI destroys this visual
+     */
+    public destroy() {
+        if (this.mySlicer) {
+            this.mySlicer.destroy();
+        }
     }
 
     /**
@@ -577,6 +592,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         const s = this.mySlicer;
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
 
+        log("Load Settings (Objects): ", JSON.stringify(objects));
+
         const caseInsensitive =
             s.caseInsensitive !== (s.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true));
         const displayUnits =
@@ -589,6 +606,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             s.brushSelectionMode !== (s.brushSelectionMode = this.syncSettingWithPBI(objects, "selection", "brushMode", false));
         const showSelections =
             s.showSelections !== (s.showSelections = this.syncSettingWithPBI(objects, "selection", "showSelections", true));
+        const showOptions =
+            s.showOptions !== (s.showOptions = this.syncSettingWithPBI(objects, "general", "showOptions", true));
 
         const size = AttributeSlicer.DATA_WINDOW_SIZE;
         this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
@@ -600,7 +619,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             pxSize = PixelConverter.fromPointToPixel(pxSize);
         }
         this.mySlicer.fontSize = pxSize;
-        return { caseInsensitive, displayUnits, precision, singleSelect, brushMode};
+        return { caseInsensitive, displayUnits, precision, singleSelect, brushMode, showSelections, showOptions };
     }
 
     /**
