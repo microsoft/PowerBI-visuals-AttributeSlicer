@@ -129,7 +129,25 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
      */
     public itemHovered(item: T) {
         if (this._dragging && this._brushMode && this.findIndex(item, this._brushingSelection) < 0) {
-            this._brushingSelection.push(item);
+            if (this._brushingSelection.length >= 1 && this.items && this.items.length) {
+                let lowIndex: number;
+                let highIndex: number;
+                const newSel = this._brushingSelection.slice(0);
+                newSel.push(item);
+                newSel.forEach(n => {
+                    const currIndex = this._items.indexOf(n);
+                    if (typeof lowIndex === "undefined" || currIndex < lowIndex) {
+                        lowIndex = currIndex;
+                    }
+                    if (typeof highIndex === "undefined" || currIndex > highIndex) {
+                        highIndex = currIndex;
+                    }
+                });
+
+                this._brushingSelection = this.items.slice(lowIndex, highIndex + 1);
+            } else {
+                this._brushingSelection.push(item);
+            }
         }
     }
 

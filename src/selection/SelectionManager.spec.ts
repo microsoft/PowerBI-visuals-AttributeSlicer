@@ -12,6 +12,9 @@ describe("SelectionManager", () => {
             equals: (b: any) => name === b.name,
         };
     }
+    function createItems(...names: string[]) {
+        return names.map(n => createItem(n));
+    }
 
     function pressCTRL(instance: SelectionManager<any>) {
         instance.keyPressed({ ctrl: true });
@@ -298,6 +301,32 @@ describe("SelectionManager", () => {
                 brush(instance, item, item2, item3);
 
                 expect(instance.selection).to.be.deep.equal([item3]);
+            });
+
+            it("should select missing items if the user brushes too fast (small amount)", () => {
+                const { instance } = createBrushingInstance();
+                const item = createItem("A");
+                const item2 = createItem("B");
+                const item3 = createItem("C");
+
+                instance.items = [item, item2, item3];
+
+                // Brushes first and last item, so, item2 was missing
+                brush(instance, item3, item);
+
+                expect(instance.selection).to.be.deep.equal([item, item2, item3]);
+            });
+
+            it("should select missing items if the user brushes too fast (large amount)", () => {
+                const { instance } = createBrushingInstance();
+                const items = createItems("A", "B", "C", "D", "E", "F", "G", "H");
+
+                instance.items = items;
+
+                // Brush between a non contiguous section
+                brush(instance, items[4], items[1]);
+
+                expect(instance.selection).to.be.deep.equal(items.slice(1, 5)); // 5 because it doesn't include 4 into the index
             });
         });
     });

@@ -8,6 +8,13 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
     private itemEleGetter: (item: T) => JQuery;
 
     /**
+     * Control brushing
+     */
+    private lastMouseDownX: number;
+    private lastMouseDownY: number;
+    private mouseDownEle: JQuery;
+
+    /**
      * Constructor
      */
     constructor(onSelectionChanged?: (items: T[]) => any) {
@@ -37,10 +44,6 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         this.itemEleGetter = itemEleGetter;
 
         listEle.on(`mouseleave${EVENTS_NS}`, () => this.endDrag());
-
-        let lastMouseDownX: number;
-        let lastMouseDownY: number;
-        let mouseDownEle: JQuery;
         listEle.on(`mousedown${EVENTS_NS}`, (e) => {
             e.stopPropagation();
             let $target = $(e.target);
@@ -48,15 +51,15 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
                 $target = $target.parents(".item");
             }
             if ($target.is(itemEleSelector)) {
-                mouseDownEle = $target;
-                lastMouseDownX = e.clientX;
-                lastMouseDownY = e.clientY;
+                this.mouseDownEle = $target;
+                this.lastMouseDownX = e.clientX;
+                this.lastMouseDownY = e.clientY;
             }
         });
         listEle.on(`mouseup${EVENTS_NS}`, (e) => {
             e.stopPropagation();
-            lastMouseDownX = undefined;
-            lastMouseDownY = undefined;
+            this.lastMouseDownX = undefined;
+            this.lastMouseDownY = undefined;
             if (this._dragging) {
                 this.endDrag();
             }
@@ -64,14 +67,14 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         listEle.on(`mousemove${EVENTS_NS}`, (e) => {
             e.stopPropagation();
             // If the user moved more than 10 px in any direction with the mouse down
-            if (typeof lastMouseDownX !== "undefined" &&
-                (Math.abs(e.clientX - lastMouseDownX) >= 10 ||
-                 Math.abs(e.clientY - lastMouseDownY)) &&
+            if (typeof this.lastMouseDownX !== "undefined" &&
+                (Math.abs(e.clientX - this.lastMouseDownX) >= 10 ||
+                 Math.abs(e.clientY - this.lastMouseDownY)) &&
                  !this._dragging) {
                 this.startDrag();
 
                 // Add the item that we mouse downed on
-                const item = this.eleItemGetter(mouseDownEle);
+                const item = this.eleItemGetter(this.mouseDownEle);
                 if (item) {
                     this.itemHovered(item);
                 }
@@ -82,11 +85,15 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
 
         // Return a function to unbind
         return () => {
+            let u: any;
             listEle.off(EVENTS_NS);
             listEle.find(itemEleSelector).off(EVENTS_NS);
-            delete this.listEle;
-            delete this.itemSelector;
-            delete this.eleItemGetter;
+            this.listEle = u;
+            this.itemSelector = u;
+            this.eleItemGetter = u;
+            this.lastMouseDownX = u;
+            this.lastMouseDownY = u;
+            this.mouseDownEle = u;
         };
     }
 
@@ -115,6 +122,17 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         if (this.brushMode) {
             this.listEle.find(this.itemSelector).removeClass("selected-slicer-item");
         }
+    }
+
+    /**
+     * Indicates that we are ending a drag
+     */
+    public endDrag() {
+        let u: any;
+        this.lastMouseDownX = u;
+        this.lastMouseDownY = u;
+        this.mouseDownEle = u;
+        super.endDrag();
     }
 
     /**
