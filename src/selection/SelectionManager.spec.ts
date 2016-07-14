@@ -322,6 +322,19 @@ describe("SelectionManager", () => {
 
             expect(instance.dragging).to.be.false;
         });
+        it("should not change the selection if dragging in non brush mode", () => {
+            const { instance } = createInstance();
+
+            const item = createItem("A");
+            const item2 = createItem("B");
+            const item3 = createItem("C");
+
+            instance.itemClicked(item);
+
+            brush(instance, item2, item3);
+
+            expect(instance.selection).to.be.deep.equal([item]);
+        });
     });
 
     describe("itemHovered", () => {

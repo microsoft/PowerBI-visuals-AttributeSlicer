@@ -204,7 +204,9 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
     public endDrag() {
         if (this._dragging) {
             this._dragging = false;
-            this.selection = this._brushingSelection.slice(0);
+            if (this.brushMode) {
+                this.selection = this._brushingSelection.slice(0);
+            }
             this._brushingSelection = [];
         }
     }

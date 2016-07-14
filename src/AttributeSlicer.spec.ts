@@ -131,7 +131,7 @@ describe("AttributeSlicer", () => {
             let { instance, vlist } = createInstance();
             instance.serverSideSearch = false;
             instance.data = SIMPLE_DATA;
-            instance.searchString = "M";
+            instance.search("M");
 
             expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(["M", "m"]);
         });
@@ -141,7 +141,7 @@ describe("AttributeSlicer", () => {
             instance.serverSideSearch = false;
             instance.data = SIMPLE_DATA;
             instance.caseInsensitive = false;
-            instance.searchString = "M";
+            instance.search("M");
 
             expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(["M"]);
         });
@@ -225,4 +225,11 @@ describe("AttributeSlicer", () => {
     it("should visually update the text size, when the text size property is changed");
     it("should scroll correctly when the text size is very large");
     it("should scroll correctly when the text size is very small");
+
+    it("should reload the entire set of data if the clear button is clicked");
+    it("should set the search string to nothing if the clear button is clicked"); // TextBox and the SearchString prop
+
+    // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts 
+    // the debounce function, but then corrects back to the original string "ABC", so the search string has not actually changed
+    it("should not rerequest (call the external search provider) with the same search text back to back");
 });

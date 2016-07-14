@@ -159,8 +159,7 @@ export class AttributeSlicer {
      */
     private updateListHeight = _.debounce(() => {
         if (this.dimensions) {
-            let slicerHeight = this.showOptions ? Math.floor(this.element.find(".slicer-options").height() - 10) : 0;
-            let height = Math.floor(this.dimensions.height - slicerHeight) - (this.showOptions ? 20 : 0);
+            let height = (this.dimensions.height - (this.listEle.offset().top - this.element.offset().top)) - 2;
             let width: number|string = "100%";
             this.listEle.css({ width: width, height: height });
                 // .attr("dir", dir);
@@ -216,7 +215,7 @@ export class AttributeSlicer {
 
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
         this.clearAllEle = element.find(".clear-all").on("click", () => {
-            this.searchString = "";
+            this.search("");
             this.clearSelection();
         });
         this.attachEvents();
@@ -233,8 +232,7 @@ export class AttributeSlicer {
     private _showOptions = true;
     public set showOptions(value: boolean) {
         this._showOptions = value;
-        this.element.find(".slicer-options").toggle(value);
-        this.updateListHeight();
+        this.syncUIVisibility();
     }
 
     /**
@@ -242,6 +240,22 @@ export class AttributeSlicer {
      */
     public get showOptions() {
         return this._showOptions;
+    }
+
+    /**
+     * Setter for whether or not the slicer search box should be shown
+     */
+    private _showSearchBox = true;
+    public set showSearchBox(value: boolean) {
+        this._showSearchBox = value;
+        this.syncUIVisibility();
+    }
+
+    /**
+     * Getter for showSearchBox
+     */
+    public get showSearchBox() {
+        return this._showSearchBox;
     }
 
     /**
@@ -427,9 +441,7 @@ export class AttributeSlicer {
         }
 
         if (newData && newData.length) {
-            this.loadingSearch = true;
-            this.element.find(".searchbox").val(this.searchString);
-            this.loadingSearch = false;
+            this.search(this.searchString); // This forces a visibility change for the items (if necessary) 
         }
 
         this._data = newData;
@@ -496,24 +508,29 @@ export class AttributeSlicer {
         // We don't need to do any of this if show selections is off
         if (this.showSelections) {
             this.syncItemVisiblity();
-
-            this.updateListHeight();
         }
+
+        this.syncUIVisibility();
     }
 
     /**
      * Gets the current serch value
      */
+    private _searchString: string = "";
     public get searchString() {
-        return this.element.find(".searchbox").val();
+        return this._searchString;
     }
 
     /**
      * Gets the current serch value
      */
     public set searchString(value: string) {
+        this._searchString = value || "";
+
+        this.loadingSearch = true;
         this.element.find(".searchbox").val(value);
-        this.handleSearchChanged();
+        this.loadingSearch = false;
+        this.syncUIVisibility(false);
     }
 
     /**
@@ -583,6 +600,22 @@ export class AttributeSlicer {
         if (this.selectionManager) {
             this.selectionManager.destroy();
         }
+    }
+
+    /**
+     * Performs a search
+     */
+    public search(searchStr: string) {
+        // If the search string has not changed we don't need to query for more data
+        if (this.searchString !== searchStr) {
+            this.searchString = searchStr;
+            if (this.serverSideSearch) {
+                setTimeout(() => this.checkLoadMoreDataBasedOnSearch(), 10);
+            }
+        }
+        // this is required because when the list is done searching it adds back in cached elements with selected flags
+        this.syncItemVisiblity();
+        this.element.toggleClass("has-search", !!this.searchString);
     }
 
     /**
@@ -726,6 +759,22 @@ export class AttributeSlicer {
     }
 
     /**
+     * Syncs the UIs Visibility
+     */
+    private syncUIVisibility(calcList = true) {
+        const hasSelection = !!(this.selectedItems && this.selectedItems.length);
+
+        this.element.find(".slicer-options").toggle(this.showOptions);
+        this.element.find(".searchbox").toggle(this.showSearchBox);
+        this.element.find(".slicer-options").toggle(this.showOptions && (this.showSearchBox || hasSelection));
+        this.clearAllEle.toggle(hasSelection || !!this.searchString);
+
+        if (calcList) {
+            this.updateListHeight();
+        }
+    }
+
+    /**
      * Toggle the select all state
      */
     private toggleSelectAll() {
@@ -777,11 +826,14 @@ export class AttributeSlicer {
      * Attaches all the necessary events
      */
     private attachEvents() {
-        this.element.find(".searchbox").on("input", _.debounce(() => {
+        const searchDebounced =
+            _.debounce(() => this.search(this.getSearchStringFromElement()), AttributeSlicer.SEARCH_DEBOUNCE);
+
+        this.element.find(".searchbox").on("input", () => {
             if (!this.loadingSearch) {
-                this.handleSearchChanged();
+                searchDebounced();
             }
-        }, AttributeSlicer.SEARCH_DEBOUNCE));
+        });
 
         this.listEle.on("click", (evt) => {
             evt.stopImmediatePropagation();
@@ -790,15 +842,10 @@ export class AttributeSlicer {
     }
 
     /**
-     * Handles when the search is changed
+     * Gets the search string from the search box
      */
-    private handleSearchChanged() {
-        if (this.serverSideSearch) {
-            setTimeout(() => this.checkLoadMoreDataBasedOnSearch(), 10);
-        }
-        // this is required because when the list is done searching it adds back in cached elements with selected flags
-        this.syncItemVisiblity();
-        this.element.toggleClass("has-search", !!this.searchString);
+    private getSearchStringFromElement() {
+        return this.element.find(".searchbox").val() || "";
     }
 
     /**

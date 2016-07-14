@@ -91,20 +91,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         description: "Should the search box and other options be shown",
                         type: { bool: true },
                     },
-                },
-            },
-            search: {
-                displayName: "Search",
-                properties: {
-                    caseInsensitive: {
-                        displayName: "Case Insensitive",
-                        type: { bool: true },
+                    selfFilter: {
+                        type: { filter: { selfFilter: true } }
                     },
-                    limit: {
-                        displayName: "Search Limit",
-                        description:
-                            `The maximum number of items to search in PowerBI. (increments of ${AttributeSlicer.DATA_WINDOW_SIZE})`,
-                        type: { numeric: true },
+                    selfFilterEnabled: {
+                        type: { operations: { searchEnabled: true } }
                     },
                 },
             },
@@ -161,11 +152,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     });
 
     /**
-     * The max number of items to load from PBI
-     */
-    private static DEFAULT_MAX_NUMBER_OF_ITEMS: number = 10000;
-
-    /**
      * The current dataView
      */
     private dataView: DataView;
@@ -196,11 +182,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * The current set of cacheddata
      */
     private data: SlicerItem[];
-
-    /**
-     * The number of items to load from PBI
-     */
-    private maxNumberOfItems: number = AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS;
 
     /**
      * Updates the data filter based on the selection
@@ -321,13 +302,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.serverSideSearch = true;
         this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
-            return item.result = isSearch || (this.maxNumberOfItems > this.data.length && !!this.dataView.metadata.segment);
+            return item.result = !!this.dataView && (isSearch || !!this.dataView.metadata.segment);
         });
         this.mySlicer.events.on("selectionChanged", (newItems: ListItem[]) => {
             if (!this.loadingData) {
                 this.onSelectionChanged(newItems);
             }
         });
+
+        // Hide the searchbox by default
+        this.mySlicer.showSearchBox = false;
 
         log("Loading Custom Sandbox: ", this.sandboxed);
     }
@@ -351,11 +335,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.loadingData = true;
         const dv = this.dataView = options.dataViews && options.dataViews[0];
         if (dv) {
-            let forceDataLoad = false;
             if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
                 // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
                 const changes = this.loadSettingsFromPowerBI(dv);
-                forceDataLoad = changes.caseInsensitive;
 
                 // If the displayUnits or precision changed, and we don't have a data update,
                 // then we need to manually refresh the renderedValue of the items
@@ -387,9 +369,24 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             // We should show values if there are actually values
             // IMPORTANT: This stays before loadDataFromPowerBI, otherwise the values don't display
             const categorical = dv && dv.categorical;
+            const metadata = dv && dv.metadata;
             this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+            let isSupportedSearchType = false;
+            if (categorical && categorical.categories && categorical.categories.length) {
+                const source = categorical.categories[0].source;
+                isSupportedSearchType = source && (source.type.numeric || source.type.text || source.type.bool);
+            }
+            const showSearch =
+                isSupportedSearchType &&
+                !this.syncSettingWithPBI(metadata && metadata.objects, "general", "selfFilterEnabled", false);
+            this.mySlicer.showSearchBox = showSearch;
+            if (!showSearch) {
+                this.mySlicer.searchString = "";
+            }
 
-            if (forceDataLoad || (updateType & UpdateType.Data) === UpdateType.Data) {
+            if ((updateType & UpdateType.Data) === UpdateType.Data ||
+                // Data may not have changed, ie search for Microsof then Microsoft
+                this.loadDeferred) {
                 this.loadDataFromPowerBI(dv);
             }
             this.loadSortFromPowerBI(dv);
@@ -416,11 +413,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             _.merge(props, {
                 textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
                 showOptions: this.mySlicer.showOptions,
-            });
-        } else if (options.objectName === "search") {
-            _.merge(props, {
-                caseInsensitive: this.mySlicer.caseInsensitive,
-                limit: this.maxNumberOfItems,
             });
         } else if (options.objectName === "display") {
             _.merge(props, {
@@ -449,19 +441,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Returns an array containing a filtered set of data based on the search string
-     */
-    public getFilteredDataBasedOnSearch(data: ListItem[]|SlicerItem[]): ListItem[] {
-        data = data || [];
-        if (this.mySlicer.searchString) {
-            const search = this.mySlicer.searchString;
-            const ci = this.mySlicer.caseInsensitive;
-            data = data.filter(n => AttributeSlicerImpl.isMatch(n, search, ci));
-        }
-        return <ListItem[]>data;
-    }
-
-    /**
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
@@ -472,11 +451,66 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Listener for when loading more data
      */
     private onLoadMoreData(item: any, isSearch: boolean) {
-        if (isSearch && this.data && this.data.length) {
-            let defer = $.Deferred();
-            defer.resolve(this.getFilteredDataBasedOnSearch(this.data));
-            item.result = defer.promise();
-        } else if (this.maxNumberOfItems > this.data.length && this.dataView.metadata.segment) {
+        if (isSearch) {
+            let st = this.mySlicer.searchString;
+            let filterExpr: data.SQExpr;
+            const source = this.dataView.categorical.categories[0].source;
+            const sourceType = source.type;
+            // Only support "contains" with text columns
+            // if (sourceType.extendedType === powerbi.ValueType.fromDescriptor({ text: true }).extendedType) {
+            if (st) {
+                if (sourceType.text) {
+                    let containsTextExpr = data.SQExprBuilder.text(st);
+                    filterExpr = data.SQExprBuilder.contains(<any>source.expr, containsTextExpr);
+                } /*else if (sourceType.dateTime) {
+                    const parsedDate = moment(st, AttributeSlicer.MOMENT_FORMATS);
+                    const dateValue = parsedDate.toDate();
+                    filterExpr = data.SQExprBuilder.equal(<any>source.expr, data.SQExprBuilder.dateTime(dateValue)); */
+                /* tslint:disable */
+                else {
+                /* tslint:enable */
+                    let rightExpr: data.SQExpr;
+                    if (sourceType.numeric) {
+                        rightExpr = data.SQExprBuilder.typedConstant(parseFloat(st), sourceType);
+                    } else if (sourceType.bool) {
+                        rightExpr = data.SQExprBuilder.boolean(st === "1" || st === "true");
+                    }
+                    if (rightExpr) {
+                        filterExpr = data.SQExprBuilder.equal(<any>source.expr, rightExpr);
+                    }
+                }
+                // if (sourceType.extendedType === powerbi.ValueType.fromDescriptor({ integer: true }).extendedType ||
+                //     sourceType.extendedType === powerbi.ValueType.fromDescriptor({ numeric: true }).extendedType ||
+                //     sourceType.extendedType === powerbi.ValueType.fromDescriptor({ dateTime: true }).extendedType) {
+                //     builderType = "integer";
+                // } 
+            }
+            let propToPersist: any;
+            let operation = "merge";
+            if (filterExpr && st) {
+                propToPersist = data.SemanticFilter.fromSQExpr(filterExpr);
+            } else {
+                operation = "remove";
+            }
+
+            this.host.persistProperties({
+                [operation]: [
+                    <powerbi.VisualObjectInstance>{
+                        objectName: "general",
+                        selector: undefined,
+                        properties: {
+                            "selfFilter": propToPersist
+                        },
+                    },
+                ],
+            });
+
+            this.loadDeferred = $.Deferred();
+
+            // Let the loader know that it is a search
+            this.loadDeferred["search"] = true;
+            item.result = this.loadDeferred.promise();
+        } else if (this.dataView.metadata.segment) {
             let alreadyLoading = !!this.loadDeferred;
             if (this.loadDeferred) {
                 this.loadDeferred.reject();
@@ -507,28 +541,32 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
         log("Loading data from PBI");
+
         this.data = AttributeSlicer.converter(dataView, this.createValueFormatter()) || [];
-        let filteredData = this.getFilteredDataBasedOnSearch(this.data.slice(0));
+        let filteredData = this.data.slice(0);
 
         // If we are appending data for the attribute slicer
-        if (this.loadDeferred && this.mySlicer.data) {
+        if (this.loadDeferred && this.mySlicer.data && !this.loadDeferred["search"]) {
             // we only need to give it the new items
             this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
             delete this.loadDeferred;
         } else {
             this.mySlicer.data = filteredData;
+            delete this.loadDeferred;
         }
 
         // Default the number if necessary 
         const categorical = dataView.categorical;
         const categories = categorical && categorical.categories;
         const hasCategories = !!(categories && categories.length > 0);
-        const catName = hasCategories && categorical.categories[0].source.queryName;
+        const source = hasCategories && categorical.categories[0].source;
+        const catName = source.queryName;
 
         // if the user has changed the categories, then selection is done for
         if (!hasCategories || (this.currentCategory && this.currentCategory !== categorical.categories[0].source.queryName)) {
             log("Clearing Selection, Categories Changed");
             this.mySlicer.selectedItems = [];
+            this.mySlicer.searchString = "";
             this.updateSelectionFilter([]);
         }
 
@@ -563,6 +601,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     return AttributeSlicer.createItem(slimItem.match, slimItem.value, n, slimItem.renderedValue);
                 });
             }
+        } else if (dataView) { // If we have a dataview, but we don't have any selection, then clear it
+            this.mySlicer.selectedItems = [];
         }
     }
 
@@ -594,8 +634,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         log("Load Settings (Objects): ", JSON.stringify(objects));
 
-        const caseInsensitive =
-            s.caseInsensitive !== (s.caseInsensitive = this.syncSettingWithPBI(objects, "search", "caseInsensitive", true));
         const displayUnits =
             this.labelDisplayUnits !== (this.labelDisplayUnits = this.syncSettingWithPBI(objects, "display", "labelDisplayUnits", 0));
         const precision =
@@ -609,9 +647,14 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         const showOptions =
             s.showOptions !== (s.showOptions = this.syncSettingWithPBI(objects, "general", "showOptions", true));
 
-        const size = AttributeSlicer.DATA_WINDOW_SIZE;
-        this.maxNumberOfItems = this.syncSettingWithPBI(objects, "search", "limit", AttributeSlicer.DEFAULT_MAX_NUMBER_OF_ITEMS);
-        this.maxNumberOfItems = Math.ceil(Math.max(this.maxNumberOfItems, size) / size) * size;
+        const newSearch: data.SemanticFilter = this.syncSettingWithPBI(objects, "general", "selfFilter", undefined);
+        const whereItems = newSearch && newSearch.where();
+        const contains = whereItems && whereItems.length > 0 && whereItems[0].condition as data.SQContainsExpr;
+        const right = contains && contains.right as data.SQConstantExpr;
+        if (right && right.value && right.value !== this.mySlicer.searchString) {
+            this.mySlicer.searchString = right.value;
+        }
+
         this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
         this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
         let pxSize = this.syncSettingWithPBI(objects, "general", "textSize", undefined);
@@ -619,7 +662,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             pxSize = PixelConverter.fromPointToPixel(pxSize);
         }
         this.mySlicer.fontSize = pxSize;
-        return { caseInsensitive, displayUnits, precision, singleSelect, brushMode, showSelections, showOptions };
+        return { displayUnits, precision, singleSelect, brushMode, showSelections, showOptions };
     }
 
     /**
