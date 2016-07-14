@@ -290,6 +290,19 @@ describe("SelectionManager", () => {
                 expect(instance.selection).to.be.deep.equal([item2, item3]);
             });
 
+            it("should deselect a single item, if that item is already selected and clicked on", () => {
+                const { instance } = createBrushingInstance();
+                const item = createItem("A");
+
+                instance.singleSelect = true;
+
+                brush(instance, item);
+
+                click(instance, item);
+
+                expect(instance.selection).to.be.deep.equal([]);
+            });
+
             it("should select the last item that was dragged on, when singleSelect = true", () => {
                 const { instance } = createBrushingInstance();
                 const item = createItem("A");

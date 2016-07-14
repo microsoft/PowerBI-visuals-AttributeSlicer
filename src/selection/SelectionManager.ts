@@ -182,8 +182,9 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
                         idx < lastIdx ? idx : lastIdx,
                         (idx < lastIdx ? lastIdx : idx) + 1);
             } else if (this._brushMode) {
-                // The user just clicked on a single item in brush mode
-                this.selection = [item];
+                // If the user is in "brush" mode, but just single clicks an item, then just deselect it, otherwise 
+                // set the item
+                this.selection = this.selection.length === 1 && this.selection[0].equals(item) ? [] : [item];
             } else {
                 toggleItem();
             }
