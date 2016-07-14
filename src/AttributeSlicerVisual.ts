@@ -389,7 +389,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 this.loadDeferred) {
                 this.loadDataFromPowerBI(dv);
             }
-            this.loadSortFromPowerBI(dv);
+            // this.loadSortFromPowerBI(dv);
             this.loadSelectionFromPowerBI(dv);
         } else {
             this.mySlicer.data = [];
@@ -663,20 +663,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
         this.mySlicer.fontSize = pxSize;
         return { displayUnits, precision, singleSelect, brushMode, showSelections, showOptions };
-    }
-
-    /**
-     * Loads the sort from powerbi 
-     */
-    private loadSortFromPowerBI(dataView: powerbi.DataView) {
-        const metadata = dataView && dataView.metadata;
-        let sortedColumns = metadata.columns.filter((c) => !!c.sort);
-        if (sortedColumns.length) {
-            let lastColumn = sortedColumns[sortedColumns.length - 1];
-            this.mySlicer.sort(
-               sortedColumns[sortedColumns.length - 1].roles["Category"] ? "match" : "value",
-               /* tslint:disable */lastColumn.sort != 1/* tslint:enable */);
-        }
     }
 
     /**
