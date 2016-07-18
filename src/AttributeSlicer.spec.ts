@@ -320,9 +320,11 @@ describe("AttributeSlicer", () => {
 
             let callCount = 0;
             instance.events.on("canLoadMoreData", (e: any, isSearch: boolean) => {
-                e.result = true;
-                // This is true because it is a search change that caused this
-                expect(isSearch).to.be.true;
+                if (callCount === 0) {
+                    e.result = true;
+                    // This is true because it is a search change that caused this
+                    expect(isSearch).to.be.true;
+                }
             });
             instance.events.on("loadMoreData", (e: any) => {
                 callCount++;
