@@ -1,4 +1,4 @@
-import "../base/testSetup";
+import "essex.powerbi.base/spec/visualHelpers";
 import * as $ from "jquery";
 
 describe("AttributeSlicerVisual", () => {
@@ -13,7 +13,9 @@ describe("AttributeSlicerVisual", () => {
         }
         parentEle = undefined;
     });
+
     it("should restore selection after a refresh");
+
     it("should restore selection after a page change");
     it("should clear selection when the category field is changed in PBI");
     it("should show values if there is a values field passed into PBI");

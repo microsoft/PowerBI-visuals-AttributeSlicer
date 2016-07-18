@@ -115,46 +115,6 @@ export class AttributeSlicer {
     private virtualListEle: any;
 
     /**
-     * The template used to render list items
-     */
-    private listItemFactory = (item: SlicerItem) => {
-        const { match, matchPrefix, matchSuffix, sections, renderedValue } = item;
-        const pretty = AttributeSlicer.prettyPrintValue;
-        const sizes = this.calcColumnSizes();
-        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
-        return $(`
-            <div style="white-space:nowrap" class="item" style="cursor:pointer">
-                <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
-                    <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
-                        <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                        <span class="match">${pretty(match)}</span>
-                        <span class="matchSuffix">${pretty(matchSuffix)}</span>
-                    </span>
-                    <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
-                        <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                        ${
-                            (sections || []).map(s => {
-                                let color = s.color;
-                                if (color) {
-                                    color = `background-color:${color};`;
-                                }
-                                const displayValue = s.displayValue || s.value || "0";
-                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
-                                return `
-                                    <span style="${style}" title="${displayValue}" class="value-display">
-                                        &nbsp;<span class="value">${displayValue}</span>
-                                    </span>
-                                `.trim().replace(/\n/g, "");
-                            }).join("")
-                        }
-                        </span>
-                    </span>
-                </div>
-            </div>
-        `.trim().replace(/\n/g, ""));
-    };
-
-    /**
      * Updates the list height
      */
     private updateListHeight = _.debounce(() => {
@@ -600,6 +560,46 @@ export class AttributeSlicer {
         if (this.selectionManager) {
             this.selectionManager.destroy();
         }
+    }
+
+    /**
+     * Returns an element for the given item
+     */
+    public listItemFactory(item: SlicerItem) {
+        const { match, matchPrefix, matchSuffix, sections, renderedValue } = item;
+        const pretty = AttributeSlicer.prettyPrintValue;
+        const sizes = this.calcColumnSizes();
+        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
+        return $(`
+            <div style="white-space:nowrap" class="item" style="cursor:pointer">
+                <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
+                    <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
+                        <span class="matchPrefix">${pretty(matchPrefix)}</span>
+                        <span class="match">${pretty(match)}</span>
+                        <span class="matchSuffix">${pretty(matchSuffix)}</span>
+                    </span>
+                    <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
+                        <span style="display:inline-block;width:${renderedValue}%;height:100%">
+                        ${
+                            (sections || []).map(s => {
+                                let color = s.color;
+                                if (color) {
+                                    color = `background-color:${color};`;
+                                }
+                                const displayValue = s.displayValue || s.value || "0";
+                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
+                                return `
+                                    <span style="${style}" title="${displayValue}" class="value-display">
+                                        &nbsp;<span class="value">${displayValue}</span>
+                                    </span>
+                                `.trim().replace(/\n/g, "");
+                            }).join("")
+                        }
+                        </span>
+                    </span>
+                </div>
+            </div>
+        `.trim().replace(/\n/g, ""));
     }
 
     /**

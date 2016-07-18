@@ -17,6 +17,10 @@ describe("AttributeSlicer", () => {
         parentEle = undefined;
     });
 
+    const expectSearchBox = () => {
+        return expect(parentEle.find(".searchbox").val());
+    };
+
     const noop = function() /* tslint:disable */ {}; /* tslint:enable */;
     const createInstance = () => {
         let ele = $("<div>");
@@ -48,6 +52,14 @@ describe("AttributeSlicer", () => {
     };
 
     const SIMPLE_DATA = createData("M", "m", "N", "n");
+    const SIMPLE_DATA_SET_TWO = createData("O", "o", "P", "p");
+    const SIMPLE_DATA_WITH_VALUES = createData("M", "m", "N", "n").map(n => {
+        return $.extend(true, {
+            equals: n.equals,
+            value: n.match.charCodeAt(0),
+            renderedValue: n.match.charCodeAt(0),
+        }, n);
+    });
 
     it("should load", () => {
         createInstance();
@@ -155,6 +167,14 @@ describe("AttributeSlicer", () => {
         });
     });
 
+    describe("search", () => {
+        it("should set the search text box", () => {
+            let { instance } = createInstance();
+            instance.search("SOME SEARCH");
+            expectSearchBox().to.eq("SOME SEARCH");
+        });
+    });
+
     describe("singleSelect", () => {
         it("should allow for selection initially", () => {
             const { instance } = createInstance();
@@ -218,18 +238,143 @@ describe("AttributeSlicer", () => {
         });
     });
 
-    it("should adjust element width when valueWidthPercentage changes");
-    it("should default valueWidthPercentage to a reasonable value");
-    it("should default valueWidthPercentage to a reasonable value when the value passed to valueWidthPercentage is invalid");
-    it("should adjust the category column to be full width when showValues is false");
-    it("should visually update the text size, when the text size property is changed");
-    it("should scroll correctly when the text size is very large");
-    it("should scroll correctly when the text size is very small");
+    describe("listItemFactory", () => {
+        it("should not show values if showValues is false", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
 
-    it("should reload the entire set of data if the clear button is clicked");
-    it("should set the search string to nothing if the clear button is clicked"); // TextBox and the SearchString prop
+            // Change it into an unusual number
+            instance.valueWidthPercentage = 12.34;
 
-    // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts 
-    // the debounce function, but then corrects back to the original string "ABC", so the search string has not actually changed
-    it("should not rerequest (call the external search provider) with the same search text back to back");
+            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
+
+            const actual = itemEle.find(".value-container").css("max-width");
+            expect(actual).to.equal("0%");
+        });
+
+        it("should adjust element width when valueWidthPercentage changes, and showValues=true", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            // Change it into an unusual number
+            instance.valueWidthPercentage = 12.34;
+            instance.showValues = true;
+
+            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
+
+            const actual = itemEle.find(".value-container").css("max-width");
+            expect(actual).to.equal("12.34%");
+        });
+
+        it("should adjust the category column to be full width when showValues is false", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            // Change it into an unusual number, shouldn't affect the outcome
+            instance.valueWidthPercentage = 12.34;
+
+            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
+
+            const actual = itemEle.find(".category-container").css("max-width");
+            expect(actual).to.equal("100%");
+        });
+    });
+
+    describe("fontSize", () => {
+
+        it("should visually update the text size, when the text size property is changed", () => {
+            const { instance, element } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+            instance.fontSize = 123.4;
+
+            const actual = element.find(".advanced-slicer").css("font-size");
+            expect(actual).to.equal("123.4px");
+        });
+    });
+
+    describe("valueWidthPercentage", () => {
+        it("should default valueWidthPercentage to a reasonable value", () => {
+            const { instance } = createInstance();
+            expect(instance.valueWidthPercentage).to.be.gte(0).and.lte(100);
+        });
+
+        it("should default valueWidthPercentage to a reasonable value, if an invalid value is passed to it", () => {
+            const { instance } = createInstance();
+            instance.valueWidthPercentage = -1;
+            expect(instance.valueWidthPercentage).to.be.gte(0).and.lte(100);
+
+            instance.valueWidthPercentage = 1000000;
+            expect(instance.valueWidthPercentage).to.be.gte(0).and.lte(100);
+        });
+    });
+
+    describe("integration", () => {
+        it("should scroll correctly when the text size is very large");
+        it("should scroll correctly when the text size is very small");
+
+        it("should reload the entire set of data if the clear button is clicked", (done) => {
+            const { instance, element } = createInstance();
+            instance.data = SIMPLE_DATA;
+            instance.searchString = "WHATEVER";
+            instance.serverSideSearch = true;
+
+            let callCount = 0;
+            instance.events.on("canLoadMoreData", (e: any, isSearch: boolean) => {
+                e.result = true;
+                // This is true because it is a search change that caused this
+                expect(isSearch).to.be.true;
+            });
+            instance.events.on("loadMoreData", (e: any) => {
+                callCount++;
+                if (callCount === 1) {
+                    // HACK: After some delay 
+                    setTimeout(() => {
+                        expect(callCount).to.eq(1);
+                        expect(instance.data).to.be.deep.equal(SIMPLE_DATA_SET_TWO);
+                        done();
+                    }, 50);
+                    const def = $.Deferred();
+                    e.result = def.promise();
+                    def.resolve(SIMPLE_DATA_SET_TWO);
+                }
+            });
+
+            element.find(".clear-all").click();
+        });
+        it("should set the search string to nothing if the clear button is clicked", () => {
+            const { instance, element } = createInstance();
+            instance.searchString = "Some Rando Search String";
+
+            element.find(".clear-all").click();
+
+            // The search string prop
+            expect(instance.searchString).to.be.empty;
+
+            // The actual search box
+            expectSearchBox().to.be.empty;
+        });
+
+        // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts 
+        // the debounce function, but then corrects back to the original string "ABC", so the search string has not actually changed
+        it("should not rerequest (call the external search provider) with the same search text back to back", (done) => {
+            const { instance } = createInstance();
+            instance.serverSideSearch = true;
+            let callCount = 0;
+            instance.events.on("canLoadMoreData", (e: any) => {
+                e.result = true;
+            });
+            instance.events.on("loadMoreData", () => {
+                callCount++;
+                if (callCount === 1) {
+                    // HACK: After some delay 
+                    setTimeout(() => {
+                        expect(callCount).to.eq(1);
+                        done();
+                    }, 50);
+                }
+            });
+            instance.search("TEST");
+            instance.search("TEST");
+        });
+    });
 });
