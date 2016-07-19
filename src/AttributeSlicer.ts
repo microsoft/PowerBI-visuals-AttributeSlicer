@@ -170,9 +170,6 @@ export class AttributeSlicer {
 
         const searchBox = element.find(".searchbox");
 
-        // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
-        searchBox.on("mousedown mouseup click focus blur input pointerdown pointerup", e => e.stopPropagation());
-
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
         this.clearAllEle = element.find(".clear-all").on("click", () => {
             this.search("");
@@ -401,7 +398,7 @@ export class AttributeSlicer {
         }
 
         if (newData && newData.length) {
-            this.search(this.searchString); // This forces a visibility change for the items (if necessary) 
+            this.search(this.searchString); // This forces a visibility change for the items (if necessary)
         }
 
         this._data = newData;

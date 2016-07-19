@@ -47,6 +47,7 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         listEle.on(`selectstart${EVENTS_NS}`, (e) => false);
         listEle.on(`mouseenter${EVENTS_NS}`, (e) => {
             e.stopPropagation();
+            this.endDrag();
         });
         listEle.on(`mouseleave${EVENTS_NS}`, () => this.endDrag());
         listEle.on(`mousedown${EVENTS_NS}`, (e) => {

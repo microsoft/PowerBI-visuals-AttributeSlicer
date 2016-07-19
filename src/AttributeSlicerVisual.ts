@@ -5,6 +5,9 @@ const colors = require("essex.powerbi.base/src/colors").full;
 const log = logger("essex:widget:AttributeSlicerVisual");
 /* tslint:enable */
 
+// PBI Swallows these
+const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
+
 import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
 import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
@@ -302,6 +305,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     public init(options: powerbi.VisualInitOptions): void {
         super.init(options, `<div></div>`.trim());
+
+        // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
+        this.element.on(EVENTS_TO_IGNORE, (e) => e.stopPropagation());
+
         this.host = options.host;
         this.propertyPersister = createPropertyPersister(this.host, 100);
         this.mySlicer = new AttributeSlicerImpl(this.element);
