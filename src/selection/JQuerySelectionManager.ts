@@ -43,6 +43,11 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         this.eleItemGetter = eleItemGetter;
         this.itemEleGetter = itemEleGetter;
 
+        listEle.on(`contextmenu${EVENTS_NS}`, (e) => this.endDrag());
+        listEle.on(`selectstart${EVENTS_NS}`, (e) => false);
+        listEle.on(`mouseenter${EVENTS_NS}`, (e) => {
+            e.stopPropagation();
+        });
         listEle.on(`mouseleave${EVENTS_NS}`, () => this.endDrag());
         listEle.on(`mousedown${EVENTS_NS}`, (e) => {
             e.stopPropagation();
@@ -110,8 +115,8 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         }
     }
 
-    /** 
-     * OVERRIDES 
+    /**
+     * OVERRIDES
      */
 
     /**
