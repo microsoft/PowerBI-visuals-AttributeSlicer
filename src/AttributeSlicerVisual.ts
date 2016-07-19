@@ -1,5 +1,5 @@
 /* tslint:disable */
-import { logger, updateTypeGetter, UpdateType } from "essex.powerbi.base";
+import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister } from "essex.powerbi.base";
 const colors = require("essex.powerbi.base/src/colors").full;
 
 const log = logger("essex:widget:AttributeSlicerVisual");
@@ -209,6 +209,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private labelPrecision: number;
 
     /**
+     * A property persister
+     */
+    private propertyPersister: PropertyPersister;
+
+    /**
      * Constructor
      */
     constructor() {
@@ -298,6 +303,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     public init(options: powerbi.VisualInitOptions): void {
         super.init(options, `<div></div>`.trim());
         this.host = options.host;
+        this.propertyPersister = createPropertyPersister(this.host, 100);
         this.mySlicer = new AttributeSlicerImpl(this.element);
         this.mySlicer.serverSideSearch = true;
         this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
@@ -483,7 +489,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 //     sourceType.extendedType === powerbi.ValueType.fromDescriptor({ numeric: true }).extendedType ||
                 //     sourceType.extendedType === powerbi.ValueType.fromDescriptor({ dateTime: true }).extendedType) {
                 //     builderType = "integer";
-                // } 
+                // }
             }
             let propToPersist: any;
             let operation = "merge";
@@ -493,7 +499,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 operation = "remove";
             }
 
-            this.host.persistProperties({
+            this.propertyPersister.persist(false, {
                 [operation]: [
                     <powerbi.VisualObjectInstance>{
                         objectName: "general",
@@ -555,7 +561,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             delete this.loadDeferred;
         }
 
-        // Default the number if necessary 
+        // Default the number if necessary
         const categorical = dataView.categorical;
         const categories = categorical && categorical.categories;
         const hasCategories = !!(categories && categories.length > 0);
@@ -708,9 +714,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             ],
         });
 
-        this.host.persistProperties(objects);
-        // Stolen from PBI's timeline
-        this.host.onSelect({ data: [] });
+        this.propertyPersister.persist(true, objects);
     }
 }
 
