@@ -52,14 +52,17 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         listEle.on(`mouseleave${EVENTS_NS}`, () => this.endDrag());
         listEle.on(`mousedown${EVENTS_NS}`, (e) => {
             e.stopPropagation();
-            let $target = $(e.target);
-            if (!$target.is(itemEleSelector)) {
-                $target = $target.parents(".item");
-            }
-            if ($target.is(itemEleSelector)) {
-                this.mouseDownEle = $target;
-                this.lastMouseDownX = e.clientX;
-                this.lastMouseDownY = e.clientY;
+            const button = e.which || e["buttons"];
+            if (button === 1) { // Only let the left mouse button start it
+                let $target = $(e.target);
+                if (!$target.is(itemEleSelector)) {
+                    $target = $target.parents(".item");
+                }
+                if ($target.is(itemEleSelector)) {
+                    this.mouseDownEle = $target;
+                    this.lastMouseDownX = e.clientX;
+                    this.lastMouseDownY = e.clientY;
+                }
             }
         });
         listEle.on(`mouseup${EVENTS_NS}`, (e) => {
@@ -72,8 +75,11 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         });
         listEle.on(`mousemove${EVENTS_NS}`, (e) => {
             e.stopPropagation();
+            const button = e.which || e["buttons"];
             // If the user moved more than 10 px in any direction with the mouse down
-            if (typeof this.lastMouseDownX !== "undefined" &&
+            if (button !== 1) { // No longer dragging
+                this.endDrag();
+            } else if (typeof this.lastMouseDownX !== "undefined" &&
                 (Math.abs(e.clientX - this.lastMouseDownX) >= 10 ||
                  Math.abs(e.clientY - this.lastMouseDownY)) &&
                  !this._dragging) {
@@ -150,6 +156,7 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
             const that = this;
             this.listEle.find(this.itemSelector)
                 .off(EVENTS_NS) // Remove all the other ones
+                .on(`selectstart${EVENTS_NS}`, (e) => false)
                 .on(`mouseenter${EVENTS_NS}`, function(e) {
                     e.stopPropagation();
                     that.itemHovered(that.eleItemGetter($(this)));
