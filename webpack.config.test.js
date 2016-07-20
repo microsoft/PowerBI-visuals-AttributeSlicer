@@ -16,6 +16,10 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: 'raw-loader'
+            },
+            {
+                test: /\.html$/,
+                loader: 'raw-loader'
             }
         ],
     },

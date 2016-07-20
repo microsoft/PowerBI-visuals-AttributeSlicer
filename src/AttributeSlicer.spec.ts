@@ -1,7 +1,10 @@
 import "../base/testSetup";
 
 import { expect } from "chai";
-import { AttributeSlicer, SlicerItem } from "./AttributeSlicer";
+import { AttributeSlicer } from "./AttributeSlicer";
+import { SlicerItem } from "./interfaces";
+import { prettyPrintValue } from "./Utils";
+import itemTemplate from "./SlicerItem.tmpl";
 import * as $ from "jquery";
 
 describe("AttributeSlicer", () => {
@@ -84,28 +87,28 @@ describe("AttributeSlicer", () => {
 
     describe("prettyPrintValue", () => {
         it ("should display '0' for 0", () => {
-            expect(AttributeSlicer.prettyPrintValue(0)).to.eq("0");
+            expect(prettyPrintValue(0)).to.eq("0");
         });
         it ("should display '0' for '0'", () => {
-            expect(AttributeSlicer.prettyPrintValue("0")).to.eq("0");
+            expect(prettyPrintValue("0")).to.eq("0");
         });
         it ("should display 'false' for false", () => {
-            expect(AttributeSlicer.prettyPrintValue(false)).to.eq("false");
+            expect(prettyPrintValue(false)).to.eq("false");
         });
         it ("should display 'false' for 'false'", () => {
-            expect(AttributeSlicer.prettyPrintValue("false")).to.eq("false");
+            expect(prettyPrintValue("false")).to.eq("false");
         });
         it ("should display '' for null", () => {
-            expect(AttributeSlicer.prettyPrintValue(/* tslint:disable */null/* tslint:enable */)).to.eq("");
+            expect(prettyPrintValue(/* tslint:disable */null/* tslint:enable */)).to.eq("");
         });
         it ("should display '' for undefined", () => {
-            expect(AttributeSlicer.prettyPrintValue(undefined)).to.eq("");
+            expect(prettyPrintValue(undefined)).to.eq("");
         });
         it ("should display '11/12/2013 12:12PM' for same date", () => {
-            expect(AttributeSlicer.prettyPrintValue(new Date(2013, 10, 12, 12, 12))).to.eq("11/12/2013 12:12PM");
+            expect(prettyPrintValue(new Date(2013, 10, 12, 12, 12))).to.eq("11/12/2013 12:12PM");
         });
         it ("should display '1/2/2012 6:12AM' for same date", () => {
-            expect(AttributeSlicer.prettyPrintValue(new Date(2012, 0, 2, 6, 12))).to.eq("1/2/2012 6:12AM");
+            expect(prettyPrintValue(new Date(2012, 0, 2, 6, 12))).to.eq("1/2/2012 6:12AM");
         });
     });
 
@@ -238,7 +241,51 @@ describe("AttributeSlicer", () => {
         });
     });
 
+    // const sizes = calcColumnSizes();
+
     describe("listItemFactory", () => {
+        it("should not show values if values is 0", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 0, category: 100 });
+
+            const actual = itemEle.find(".value-container").css("max-width");
+            expect(actual).to.equal("0%");
+        });
+
+        it("should show an unusual value size", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 12.34, category: 87.66 });
+
+            const actual = itemEle.find(".value-container").css("max-width");
+            expect(actual).to.equal("12.34%");
+        });
+
+        it("should not show categories if values is 0", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 100, category: 0 });
+
+            const actual = itemEle.find(".category-container").css("max-width");
+            expect(actual).to.equal("0%");
+        });
+
+        it("should show an categories value size", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 87.66, category: 12.34 });
+
+            const actual = itemEle.find(".category-container").css("max-width");
+            expect(actual).to.equal("12.34%");
+        });
+    });
+
+    describe("calcColumnSizes", () => {
         it("should not show values if showValues is false", () => {
             const { instance } = createInstance();
             instance.data = SIMPLE_DATA_WITH_VALUES;
@@ -246,10 +293,8 @@ describe("AttributeSlicer", () => {
             // Change it into an unusual number
             instance.valueWidthPercentage = 12.34;
 
-            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
-
-            const actual = itemEle.find(".value-container").css("max-width");
-            expect(actual).to.equal("0%");
+            const actual = instance.calcColumnSizes();
+            expect(actual.value).to.equal(0);
         });
 
         it("should adjust element width when valueWidthPercentage changes, and showValues=true", () => {
@@ -260,10 +305,8 @@ describe("AttributeSlicer", () => {
             instance.valueWidthPercentage = 12.34;
             instance.showValues = true;
 
-            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
-
-            const actual = itemEle.find(".value-container").css("max-width");
-            expect(actual).to.equal("12.34%");
+            const actual = instance.calcColumnSizes();
+            expect(actual.value).to.equal(12.34);
         });
 
         it("should adjust the category column to be full width when showValues is false", () => {
@@ -273,10 +316,20 @@ describe("AttributeSlicer", () => {
             // Change it into an unusual number, shouldn't affect the outcome
             instance.valueWidthPercentage = 12.34;
 
-            const itemEle = instance.listItemFactory(SIMPLE_DATA[0]);
+            const actual = instance.calcColumnSizes();
+            expect(actual.category).to.equal(100);
+        });
 
-            const actual = itemEle.find(".category-container").css("max-width");
-            expect(actual).to.equal("100%");
+        it("should adjust the category column to be the remaining width from the value size", () => {
+            const { instance } = createInstance();
+            instance.data = SIMPLE_DATA_WITH_VALUES;
+
+            // Change it into an unusual number, shouldn't affect the outcome
+            instance.valueWidthPercentage = 12.34;
+            instance.showValues = true;
+
+            const actual = instance.calcColumnSizes();
+            expect(actual.category).to.equal(87.66);
         });
     });
 

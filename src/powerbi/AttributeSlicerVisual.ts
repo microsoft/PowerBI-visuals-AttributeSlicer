@@ -9,7 +9,8 @@ const log = logger("essex:widget:AttributeSlicerVisual");
 // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
 
-import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "../AttributeSlicer";
+import { SlicerItem } from "../interfaces";
+import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
 import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
 import IVisual = powerbi.IVisual;

@@ -117,4 +117,4 @@ export default $.extend(true, {}, VisualBase.capabilities, {
                 }
             }*/
         },
-    })
+    });

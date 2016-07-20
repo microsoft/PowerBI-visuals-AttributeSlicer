@@ -2,6 +2,9 @@ import EventEmitter from "../base/EventEmitter";
 import * as $ from "jquery";
 import * as _ from "lodash";
 import JQuerySelectionManager from "./selection/JQuerySelectionManager";
+import { SlicerItem } from "./interfaces";
+import { prettyPrintValue as pretty } from "./Utils";
+import itemTemplate from "./SlicerItem.tmpl";
 
 /* tslint:disable */
 const naturalSort = require("javascript-natural-sort");
@@ -26,28 +29,7 @@ export class AttributeSlicer {
     /**
      * The template for this visual
      */
-    private static template = `
-        <div class="advanced-slicer">
-            <div class="slicer-options">
-                <input class="searchbox" placeholder="Search" />
-                <span class="clear-all">Clear All</span>
-                <div style="margin:0;padding:0;margin-top:5px;">
-                <div class="selection-container">
-                    <div class="selections">
-                    </div>
-                </div>
-                <!-- Disabled -->
-                <label style="display:none;vertical-align:middle">
-                    <input class="check-all" type="checkbox" style="margin-right:5px;vertical-align:middle"/>&nbsp;Select All
-                </label>
-                </div>
-                <hr/>
-            </div>
-            <div class="list">
-                <div class='load-spinner'><div>
-            </div>
-        </div>
-    `.trim().replace(/\n/g, "");
+    private static template = require("./AttributeSlicer.tmpl.html");
 
     /**
      * The selection manager to use
@@ -141,7 +123,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = this.listItemFactory(item);
+                const ele = itemTemplate(item, this.calcColumnSizes());
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -167,9 +149,6 @@ export class AttributeSlicer {
         this.listEle.append(this.virtualListEle);
 
         this.selectionsEle = element.find(".selections");
-
-        const searchBox = element.find(".searchbox");
-
         this.checkAllEle = element.find(".check-all").on("click", () => this.toggleSelectAll());
         this.clearAllEle = element.find(".clear-all").on("click", () => {
             this.search("");
@@ -513,25 +492,9 @@ export class AttributeSlicer {
     }
 
     /**
-     * Pretty prints a value
-     */
-    public static prettyPrintValue (val: any) {
-        // Date check
-        if (val && val.toISOString) {
-            let dateVal = <Date>val;
-            return (dateVal.getMonth() + 1) + "/" +
-                    dateVal.getDate() + "/" +
-                    dateVal.getFullYear() + " " +
-                    dateVal.getHours() + ":" + dateVal.getMinutes() + (dateVal.getHours() >= 12 ? "PM" : "AM");
-        }
-        return /* tslint:disable */ val === null /* tslint:enable */|| val === undefined ? "" : val + "";
-    }
-
-    /**
      * Determines if the given slice item matches the given string value
      */
     public static isMatch(item: SlicerItem, matchValue: string, caseInsensitive: boolean) {
-        const pretty = AttributeSlicer.prettyPrintValue;
         const searchStr = pretty(matchValue);
         const flags = caseInsensitive ? "i" : "";
         let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
@@ -551,52 +514,23 @@ export class AttributeSlicer {
     }
 
     /**
+     * Calculates the column sizes for both the value and category columns
+     */
+    public calcColumnSizes() {
+        let remaining = 100 - this.valueWidthPercentage;
+        return {
+            value: this.showValues ? this.valueWidthPercentage : 0,
+            category: this.showValues ? remaining : 100,
+        };
+    }
+
+    /**
      * Destroys this attribute slicer
      */
     public destroy() {
         if (this.selectionManager) {
             this.selectionManager.destroy();
         }
-    }
-
-    /**
-     * Returns an element for the given item
-     */
-    public listItemFactory(item: SlicerItem) {
-        const { match, matchPrefix, matchSuffix, sections, renderedValue } = item;
-        const pretty = AttributeSlicer.prettyPrintValue;
-        const sizes = this.calcColumnSizes();
-        const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
-        return $(`
-            <div style="white-space:nowrap" class="item" style="cursor:pointer">
-                <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
-                    <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
-                        <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                        <span class="match">${pretty(match)}</span>
-                        <span class="matchSuffix">${pretty(matchSuffix)}</span>
-                    </span>
-                    <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
-                        <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                        ${
-                            (sections || []).map(s => {
-                                let color = s.color;
-                                if (color) {
-                                    color = `background-color:${color};`;
-                                }
-                                const displayValue = s.displayValue || s.value || "0";
-                                const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
-                                return `
-                                    <span style="${style}" title="${displayValue}" class="value-display">
-                                        &nbsp;<span class="value">${displayValue}</span>
-                                    </span>
-                                `.trim().replace(/\n/g, "");
-                            }).join("")
-                        }
-                        </span>
-                    </span>
-                </div>
-            </div>
-        `.trim().replace(/\n/g, ""));
     }
 
     /**
@@ -721,17 +655,6 @@ export class AttributeSlicer {
     }
 
     /**
-     * Calculates the column sizes for both the value and category columns
-     */
-    private calcColumnSizes() {
-        let remaining = 100 - this.valueWidthPercentage;
-        return {
-            value: this.showValues ? this.valueWidthPercentage : 0,
-            category: this.showValues ? remaining : 100,
-        };
-    }
-
-    /**
      * Syncs the item elements state with the current set of selected items and the search
      */
     private syncItemVisiblity() {
@@ -788,7 +711,6 @@ export class AttributeSlicer {
      */
     private createSelectionToken(v: SlicerItem): JQuery {
         const newEle = $("<div/>");
-        const pretty = AttributeSlicer.prettyPrintValue;
         const text = pretty(v.matchPrefix) + pretty(v.match) + pretty(v.matchSuffix);
         newEle
             .addClass("token")
@@ -861,74 +783,4 @@ export class AttributeSlicer {
             this.raiseLoadMoreData(true);
         }
     }
-}
-
-/**
- * Represents an item in the slicer
- */
-export interface SlicerItem {
-    /**
-     * The actual match
-     */
-    match: any;
-
-    matchPrefix?: any;
-    matchSuffix?: any;
-
-    /**
-     * The color of the item
-     */
-    color?: string;
-
-    /**
-     * The raw value of this item
-     */
-    value: any;
-    // selected: boolean;
-
-    /**
-     * Returns true if this == b
-     */
-    equals: (b: SlicerItem) => boolean;
-
-    /**
-     * Called when an item is created
-     */
-    onCreate?: (ele: JQuery) => void;
-
-    /**
-     * The sections that make up this items value, the total of the widths must === 100
-     */
-    sections?: ISlicerValueSection[];
-
-    /**
-     * The percentage value that should be displayed (0 - 100)
-     * TODO: Better name, basically it is the value that should be displayed in the histogram
-     */
-    renderedValue?: number;
-
-    // Special property for Attribute Slicer to optimize lookup
-    $element?: JQuery;
-}
-
-export interface ISlicerValueSection {
-    /**
-     * The raw value of the section
-     */
-    value: any;
-
-    /**
-     * The display value of the section
-     */
-    displayValue: any;
-
-    /**
-     * The percentage width of this section
-     */
-    width: number;
-
-    /**
-     * The color of this section
-     */
-    color: string;
 }
