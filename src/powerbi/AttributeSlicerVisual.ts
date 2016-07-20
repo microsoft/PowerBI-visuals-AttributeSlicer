@@ -1,5 +1,6 @@
 /* tslint:disable */
 import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister } from "essex.powerbi.base";
+import capabilities from "./AttributeSlicerVisual.capabilities";
 const colors = require("essex.powerbi.base/src/colors").full;
 
 const log = logger("essex:widget:AttributeSlicerVisual");
@@ -8,7 +9,7 @@ const log = logger("essex:widget:AttributeSlicerVisual");
 // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
 
-import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "./AttributeSlicer";
+import { AttributeSlicer as AttributeSlicerImpl, SlicerItem } from "../AttributeSlicer";
 import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
 import IVisual = powerbi.IVisual;
@@ -16,143 +17,22 @@ import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
 import DataView = powerbi.DataView;
 import SelectionId = powerbi.visuals.SelectionId;
-import VisualDataRoleKind = powerbi.VisualDataRoleKind;
 import data = powerbi.data;
 import SelectableDataPoint = powerbi.visuals.SelectableDataPoint;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
 import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
 import PixelConverter = jsCommon.PixelConverter;
-// import TooltipManager = powerbi.visuals.TooltipManager;
 
-@Visual(require("./build").output.PowerBI)
+@Visual(require("../build").output.PowerBI)
 export default class AttributeSlicer extends VisualBase implements IVisual {
-
-    /**
-     * The number of items to load from PBI at any one time
-     */
-    public static DATA_WINDOW_SIZE = 500;
 
     /**
      * The set of capabilities for the visual
      */
-    public static capabilities: VisualCapabilities = $.extend(true, {}, VisualBase.capabilities, {
-        dataRoles: [
-            {
-                name: "Category",
-                kind: VisualDataRoleKind.Grouping,
-                displayName: "Category",
-            }, {
-                name: "Values",
-                kind: VisualDataRoleKind.Measure,
-                displayName: "Values",
-            },
-        ],
-        dataViewMappings: [{
-            conditions: [{ "Category": { max: 1, min: 0 }, "Values": { min: 0 }}],
-            categorical: {
-                categories: {
-                    for: { in: "Category" },
-                    dataReductionAlgorithm: { window: { count: AttributeSlicer.DATA_WINDOW_SIZE } },
-                },
-                values: {
-                    select: [{ for: { in: "Values" }}],
-                    dataReductionAlgorithm: { top: {} },
-                },
-            },
-        }, ],
-        // sort this crap by default
-        sorting: {
-            default: {}
-        },
-        objects: {
-            general: {
-                displayName: data.createDisplayNameGetter("Visual_General"),
-                properties: {
-                    filter: {
-                        type: { filter: {} },
-                        rule: {
-                            output: {
-                                property: "selected",
-                                selector: ["Values"],
-                            },
-                        },
-                    },
-                    // formatString: StandardObjectProperties.formatString,
-                    selection: {
-                        type: { text: {} }
-                    },
-                    textSize: {
-                        displayName: data.createDisplayNameGetter("Visual_TextSize"),
-                        type: { numeric: true },
-                    },
-                    showOptions: {
-                        displayName: "Show Options",
-                        description: "Should the search box and other options be shown",
-                        type: { bool: true },
-                    },
-                    selfFilter: {
-                        type: { filter: { selfFilter: true } }
-                    },
-                    selfFilterEnabled: {
-                        type: { operations: { searchEnabled: true } }
-                    },
-                },
-            },
-            display: {
-                displayName: "Display",
-                properties: {
-                    valueColumnWidth: {
-                        displayName: "Value Width %",
-                        description: "The percentage of the width that the value column should take up.",
-                        type: { numeric: true },
-                    },
-                    horizontal: {
-                        displayName: "Horizontal",
-                        description: "Display the attributes horizontally, rather than vertically",
-                        type: { bool: true },
-                    },
-                    labelDisplayUnits: StandardObjectProperties.labelDisplayUnits,
-                    labelPrecision: StandardObjectProperties.labelPrecision,
-                },
-            },
-            selection: {
-                displayName: "Selection",
-                properties: {
-                    brushMode: {
-                        displayName: "Brush Mode",
-                        description: "Allow for the drag selecting of attributes",
-                        type: { bool: true },
-                    },
-                    singleSelect: {
-                        displayName: "Single Select",
-                        description: "Only allow for a single selected",
-                        type: { bool: true },
-                    },
-                    showSelections: {
-                        displayName: "Use Tokens",
-                        description: "Will show the selected attributes as tokens",
-                        type: { bool: true },
-                    },
-                },
-            },
-            /*,
-            sorting: {
-                displayName: "Sorting",
-                properties: {
-                    byHistogram: {
-                        type: { bool: true }
-                    },
-                    byName: {
-                        type: { bool: true }
-                    }
-                }
-            }*/
-        },
-    });
+    public static capabilities: VisualCapabilities = capabilities;
 
     /**
      * The current dataView
@@ -457,7 +337,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
-        return super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
+        return super.getCss().concat([require("!css!sass!../css/AttributeSlicerVisual.scss")]);
     }
 
     /**

@@ -309,9 +309,6 @@ describe("AttributeSlicer", () => {
     });
 
     describe("integration", () => {
-        it("should scroll correctly when the text size is very large");
-        it("should scroll correctly when the text size is very small");
-
         it("should reload the entire set of data if the clear button is clicked", (done) => {
             const { instance, element } = createInstance();
             instance.data = SIMPLE_DATA;
@@ -379,4 +376,11 @@ describe("AttributeSlicer", () => {
             instance.search("TEST");
         });
     });
+
+    /**
+     * Ones not easily testable
+     */
+    it("should scroll correctly when the text size is very large");
+    it("should scroll correctly when the text size is very small");
+
 });

@@ -25,7 +25,7 @@ describe("AttributeSlicerVisual", () => {
     it("should not clear selection when just settings are changed.");
     it("should adjust the width of the value column, when the PBI config changes");
     it("should not clear the selection if two searches are performed in quick succession, while the first is running");
-    it("should not crash when you search for something, then change the maxNumberOfItems setting");
+    // it("should not crash when you search for something, then change the maxNumberOfItems setting");
     it("should go to horizontal view mode, when selected in PBI");
     it("should retain horizontal view mode, after switching pages (in DESKTOP)");
     it("should scroll properly in horizontal view mode");
