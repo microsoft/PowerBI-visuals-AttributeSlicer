@@ -110,7 +110,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     /**
      * Converts the given dataview into a list of listitems
      */
-    public static converter(dataView: DataView, formatter: IValueFormatter): ListItem[] {
+    public static converter(
+        dataView: DataView,
+        valueFormatter: IValueFormatter,
+        categoryFormatter?: IValueFormatter): ListItem[] {
         let converted: ListItem[];
         const categorical = dataView && dataView.categorical;
         const categories = categorical && categorical.categories;
@@ -128,7 +131,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         return {
                             color: colors[j] || "#ccc",
                             value: value,
-                            displayValue: formatter.format(value),
+                            displayValue: valueFormatter.format(value),
                             width: 0,
                         };
                     });
@@ -138,7 +141,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 }
                 let item =
                     AttributeSlicer.createItem(
-                        category,
+                        categoryFormatter ? categoryFormatter.format(category) : category,
                         total,
                         id,
                         undefined,
@@ -300,7 +303,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             /*tslint:disable */selector: null/* tslint:enable */,
             objectName: options.objectName,
             properties: {},
-        }, ];
+        },];
         const instance = instances[0];
         const props = instance.properties;
         if (options.objectName === "general") {
@@ -362,7 +365,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     filterExpr = data.SQExprBuilder.equal(<any>source.expr, data.SQExprBuilder.dateTime(dateValue)); */
                 /* tslint:disable */
                 else {
-                /* tslint:enable */
+                    /* tslint:enable */
                     let rightExpr: data.SQExpr;
                     if (sourceType.numeric) {
                         rightExpr = data.SQExprBuilder.typedConstant(parseFloat(st), sourceType);
@@ -436,7 +439,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private loadDataFromPowerBI(dataView: powerbi.DataView) {
         log("Loading data from PBI");
 
-        this.data = AttributeSlicer.converter(dataView, this.createValueFormatter()) || [];
+        this.data = AttributeSlicer.converter(
+            dataView,
+            this.createValueFormatter(),
+            this.createCategoryFormatter(dataView)) || [];
         let filteredData = this.data.slice(0);
 
         // If we are appending data for the attribute slicer
@@ -465,6 +471,34 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         }
 
         this.currentCategory = catName;
+    }
+
+    /**
+     * Creates a formatter capable of formatting the categories (or undefined) if not necessary
+     */
+    private createCategoryFormatter(dataView: powerbi.DataView) {
+        let formatter: IValueFormatter;
+        let cats = dataView && dataView.categorical && dataView.categorical.categories;
+        if (cats && cats.length && cats[0].source.type.dateTime) {
+            let min: Date;
+            let max: Date;
+            cats[0].values.forEach(n => {
+                if (typeof min === "undefined" || min > n) {
+                    min = n;
+                }
+                if (typeof max === "undefined" || max < n) {
+                    max = n;
+                }
+            });
+            if (min && max) {
+                formatter = valueFormatterFactory({
+                    value: min,
+                    value2: max,
+                    format: cats[0].source.format || "0"
+                });
+            }
+        }
+        return formatter;
     }
 
     /**
@@ -570,7 +604,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             filter = data.Selector.filterFromSelector(selectors);
         }
 
-        let objects: powerbi.VisualObjectInstancesToPersist = { };
+        let objects: powerbi.VisualObjectInstancesToPersist = {};
         let operation = "merge";
         let selection: any = undefined;
         if (filter) {
@@ -610,4 +644,4 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
  * Represents a list item
  */
 /* tslint:disable */
-export interface ListItem extends SlicerItem, SelectableDataPoint, TooltipEnabledDataPoint {}
+export interface ListItem extends SlicerItem, SelectableDataPoint, TooltipEnabledDataPoint { }
