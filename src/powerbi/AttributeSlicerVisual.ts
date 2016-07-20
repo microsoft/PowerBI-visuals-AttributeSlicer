@@ -338,7 +338,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
-        return super.getCss().concat([require("!css!sass!../css/AttributeSlicerVisual.scss")]);
+        return super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
     }
 
     /**

@@ -81,7 +81,7 @@ module.exports = function (gulp: any) {
                         pkg.resources.push({
                             resourceId: "rId3",
                             sourceType: 3,
-                            file: "resources/" + output.icon
+                            file: "resources/" + path.basename(output.icon)
                         });
                     }
 
@@ -93,7 +93,7 @@ module.exports = function (gulp: any) {
                         pkg.resources.push({
                             resourceId: "rId4",
                             sourceType: 6,
-                            file: "resources/" + output.thumbnail
+                            file: "resources/" + path.basename(output.thumbnail)
                         });
                     }
 
@@ -105,7 +105,7 @@ module.exports = function (gulp: any) {
                         pkg.resources.push({
                             resourceId: "rId5",
                             sourceType: 2,
-                            file: "resources/" + output.screenshot
+                            file: "resources/" + path.basename(output.screenshot)
                         });
                     }
                     return JSON.stringify(pkg, null, 4);
