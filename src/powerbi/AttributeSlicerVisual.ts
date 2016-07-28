@@ -98,10 +98,17 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private propertyPersister: PropertyPersister;
 
     /**
+     * Whether or not to include css
+     */
+    private noCss: boolean;
+
+    /**
      * Constructor
      */
-    constructor() {
+    constructor(noCss = false) {
         super();
+
+        this.noCss = noCss;
 
         // Tell base we should not load sandboxed
         VisualBase.DEFAULT_SANDBOX_ENABLED = false;
@@ -195,20 +202,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         this.host = options.host;
         this.propertyPersister = createPropertyPersister(this.host, 100);
-        this.mySlicer = new AttributeSlicerImpl(this.element);
-        this.mySlicer.serverSideSearch = true;
-        this.mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
-        this.mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
-            return item.result = !!this.dataView && (isSearch || !!this.dataView.metadata.segment);
-        });
-        this.mySlicer.events.on("selectionChanged", (newItems: ListItem[]) => {
-            if (!this.loadingData) {
-                this.onSelectionChanged(newItems);
-            }
-        });
 
-        // Hide the searchbox by default
-        this.mySlicer.showSearchBox = false;
+        this.mySlicer = this.createAttributeSlicer(options.element);
 
         log("Loading Custom Sandbox: ", this.sandboxed);
     }
@@ -341,7 +336,28 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
-        return super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
+        return this.noCss ? [] : super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
+    }
+
+    /**
+     * Creates an attribute slicer with the given element
+     */
+    protected createAttributeSlicer(element: JQuery) {
+        const mySlicer = new AttributeSlicerImpl(this.element);
+        mySlicer.serverSideSearch = true;
+        mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
+        mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {
+            return item.result = !!this.dataView && (isSearch || !!this.dataView.metadata.segment);
+        });
+        mySlicer.events.on("selectionChanged", (newItems: ListItem[]) => {
+            if (!this.loadingData) {
+                this.onSelectionChanged(newItems);
+            }
+        });
+
+        // Hide the searchbox by default
+        mySlicer.showSearchBox = false;
+        return mySlicer;
     }
 
     /**

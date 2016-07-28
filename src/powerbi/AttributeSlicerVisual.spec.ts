@@ -1,5 +1,26 @@
-import "essex.powerbi.base/spec/visualHelpers";
+import { Utils } from "essex.powerbi.base/spec/visualHelpers";
 import * as $ from "jquery";
+import { expect } from "chai";
+/* tslint:disable */
+$.extend(true, global["powerbi"], {
+    visuals: {
+        StandardObjectProperties: {},
+        valueFormatter: { 
+            create: () => {
+                return {
+                    format: () => {}
+                };
+            }
+        },
+        SelectionId: {
+            createWithId: () => {}
+        },
+    },
+});
+global["jsCommon"] = {};
+/* tslint:enable */
+import AttributeSlicerVisual from "./AttributeSlicerVisual";
+import { AttributeSlicer } from "../AttributeSlicer";
 
 describe("AttributeSlicerVisual", () => {
     let parentEle: JQuery;
@@ -13,6 +34,98 @@ describe("AttributeSlicerVisual", () => {
         }
         parentEle = undefined;
     });
+
+    /**
+     * Creates an instance of AttributeSlicerVisual
+     */
+    function createInstance() {
+        const initOptions = Utils.createFakeInitOptions();
+        const instance = new AttributeSlicerVisual(true);
+        const attributeSlicer = {
+
+        } as AttributeSlicer;
+        instance["createAttributeSlicer"] = (element: JQuery) => attributeSlicer;
+        instance.init(initOptions);
+        return {
+            element: initOptions.element,
+            instance,
+            attributeSlicer,
+        };
+    }
+
+    /** 
+     * Creates update options with the given categories 
+     */
+    function createUpdateOptionsWithCategoryValues(categories: any[], categoryName: string) {
+        return <powerbi.VisualUpdateOptions><any>{
+            viewport: {
+                width: 100,
+                height: 100,
+            },
+            dataViews: [{
+                table: {
+                    identity: []
+                },
+                categorical: {
+                    categories: [{
+                        source: {
+                            queryName: categoryName,
+                            type: {},
+                        },
+                        values: categories.slice(0),
+                    }, ],
+                },
+            }, ],
+        };
+    }
+
+    it ("should init", () => {
+        createInstance();
+    });
+
+    it("should load only categories if that is all that is passed in via PBI", () => {
+        const { instance, attributeSlicer } = createInstance();
+        const fakeCats = ["CAT_1", "CAT_2"];
+        const update = createUpdateOptionsWithCategoryValues(fakeCats, "SOME_CATEGORY_NAME");
+        instance.update(update);
+
+        // Make sure the data was passed correctly to attribute slicer
+        expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
+    });
+
+    it("should clear the selection when the categories are changed", () => {
+        const { instance, attributeSlicer } = createInstance();
+        const categories = ["CAT_1", "CAT_2"];
+        const update = createUpdateOptionsWithCategoryValues(categories, "SOME_CATEGORY_NAME");
+        instance.update(update);
+
+        // Set our fake selected items
+        attributeSlicer.selectedItems = <any>[{ match: "WHATEVER" }];
+
+        const anotherUpdate = createUpdateOptionsWithCategoryValues(categories, "SOME_OTHER_CATEGORY");
+        instance.update(anotherUpdate);
+
+        // Make sure there is no more selected items
+        expect(attributeSlicer.selectedItems).to.be.empty;
+    });
+
+    it("should clear the search when the categories are changed", () => {
+        const { instance, attributeSlicer } = createInstance();
+        const categories = ["CAT_1", "CAT_2"];
+        const update = createUpdateOptionsWithCategoryValues(categories, "SOME_CATEGORY_NAME");
+        instance.update(update);
+
+        // Set our fake selected items
+        attributeSlicer.searchString = "SOME SEARCH STRING";
+
+        const anotherUpdate = createUpdateOptionsWithCategoryValues(categories, "SOME_OTHER_CATEGORY");
+        instance.update(anotherUpdate);
+
+        // Make sure there is no more search string
+        expect(attributeSlicer.searchString).to.be.empty;
+    });
+
+
 
     it("should restore selection after a refresh");
 
