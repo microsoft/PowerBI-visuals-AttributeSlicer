@@ -303,7 +303,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             /*tslint:disable */selector: null/* tslint:enable */,
             objectName: options.objectName,
             properties: {},
-        },];
+        }, ];
         const instance = instances[0];
         const props = instance.properties;
         if (options.objectName === "general") {
@@ -494,7 +494,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 formatter = valueFormatterFactory({
                     value: min,
                     value2: max,
-                    format: cats[0].source.format || "0"
+                    format: cats[0].source.format || "0",
                 });
             }
         }

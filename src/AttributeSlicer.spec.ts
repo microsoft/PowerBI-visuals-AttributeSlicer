@@ -6,6 +6,7 @@ import { SlicerItem } from "./interfaces";
 import { prettyPrintValue } from "./Utils";
 import itemTemplate from "./SlicerItem.tmpl";
 import * as $ from "jquery";
+import { Promise } from "es6-promise";
 
 describe("AttributeSlicer", () => {
     let parentEle: JQuery;
@@ -33,6 +34,8 @@ describe("AttributeSlicer", () => {
                 this.items = items;
             };
             this.setItemHeight = noop;
+            this.setDir = (horizontal: boolean) => this.hoizontal = horizontal;
+            this.setHeight = (height: number) => this.height = height;
             this.rerender = noop;
         };
         let vList = new fakeVL();
@@ -42,6 +45,7 @@ describe("AttributeSlicer", () => {
             element: ele,
             vlist: vList,
         };
+        result.instance.dimensions = { width: 200, height: 400 };
         return result;
     };
 
@@ -239,6 +243,17 @@ describe("AttributeSlicer", () => {
             // Should both be selected
             expect(instance.selectedItems).to.deep.equal(SIMPLE_DATA.slice(1, 3));
         });
+
+        // Because we can infinitely load, some items may not currently be visible (ie in the currently loaded dataset)
+        it("should allow for selection of items which aren't in the current dataset", () => {
+            const { instance } = createInstance();
+
+            // We have 2 selected
+            instance.selectedItems = SIMPLE_DATA.slice(1, 3);
+
+            // Should both be selected
+            expect(instance.selectedItems).to.deep.equal(SIMPLE_DATA.slice(1, 3));
+        });
     });
 
     // const sizes = calcColumnSizes();
@@ -428,6 +443,117 @@ describe("AttributeSlicer", () => {
             instance.search("TEST");
             instance.search("TEST");
         });
+
+        it("should attempt to load more data if scrolled to the bottom", (done) => {
+            const { instance, vlist } = createInstance();
+            instance.data = SIMPLE_DATA;
+
+            instance.events.on("canLoadMoreData", (e: any) => {
+                e.result = false;
+                done(); // At least it asked
+            });
+
+            // Pretend we just infinitely scrolled
+            const pretendItems = $("<div>").css({ height: 20000 });
+            vlist.container.append(pretendItems);
+            vlist.container[0].scrollTop = 20000;
+            vlist.container.scroll();
+        });
+
+        it("should render horizontally when the horizontally flag is set", () => {
+            const { element, instance, vlist } = createInstance();
+            return new Promise(resolve => {
+                vlist.setDir = (horiz: boolean) => {
+                    // Make sure horizontally gets set on the list
+                    expect(horiz).to.be.true;
+                    resolve();
+                };
+                instance.renderHorizontal = true;
+
+                // Make sure it sets itself.
+                expect(instance.renderHorizontal).to.be.true;
+                expect(element.is(".render-horizontal")).to.be.true;
+            });
+        });
+        it("should NOT render horizontally when the horizontally flag is set to false", () => {
+            const { element, instance, vlist } = createInstance();
+            return new Promise(resolve => {
+                vlist.setDir = (horiz: boolean) => {
+                    // Make sure horizontally gets set on the list
+                    expect(horiz).to.be.false;
+                    resolve();
+                };
+                instance.renderHorizontal = false;
+
+                // Make sure it sets itself.
+                expect(instance.renderHorizontal).to.be.false;
+                expect(element.is(".render-horizontal")).to.be.false;
+            });
+        });
+        it("should adjust the item height when the font size changes", () => {
+            const { instance, vlist } = createInstance();
+            return new Promise(resolve => {
+                const newFontSize = 24;
+                vlist.setItemHeight = (height: number) => {
+                    // * 2 because attributeslicer doubles the itemheight
+                    expect(height).to.be.equal(newFontSize * 2);
+                    resolve();
+                };
+                instance.fontSize = newFontSize;
+                expect(instance.fontSize).to.be.equal(newFontSize);
+            });
+        });
+        it("should adjust the font size of items when the font size changes", () => {
+            const { instance, element } = createInstance();
+            const newFontSize = 24;
+            instance.fontSize = newFontSize;
+            expect(element.find(".advanced-slicer").css("font-size")).to.be.equal(newFontSize + "px");
+        });
+
+        it("should show the selections if set to showSelections is true", () => {
+            const { instance, element } = createInstance();
+            const selItems = SIMPLE_DATA.slice(1, 2);
+            instance.data = SIMPLE_DATA;
+
+            // Make sure there are tokens for each selection
+            instance.selectedItems = selItems.slice(0);
+            expect(element.find(".token").map((i, ele) => $(ele).text()).toArray()).to.deep.equal(selItems.map(n => n.match));
+
+            // Should have this class if true
+            expect(element.is(".show-selections")).to.be.true;
+
+            // Make sure when we clear the selection, there are no tokens left
+            instance.selectedItems = [];
+            expect(element.find(".token").map((i, ele) => $(ele).text()).toArray()).to.deep.equal([]);
+        });
+
+        it("should not show selection elements if showSelections is false", () => {
+            const { instance, element } = createInstance();
+            const selItems = SIMPLE_DATA.slice(1, 2);
+            instance.data = SIMPLE_DATA;
+
+            instance.showSelections = false;
+
+            // Make sure there are tokens for each selection
+            instance.selectedItems = selItems.slice(0);
+
+            // Click on the token
+            expect(element.is(".show-selections")).to.be.false;
+        });
+
+        it("should remove a selection if a selection element is clicked on", () => {
+            const { instance, element } = createInstance();
+            const selItems = SIMPLE_DATA.slice(1, 2);
+            instance.data = SIMPLE_DATA;
+
+            // Make sure there are tokens for each selection
+            instance.selectedItems = selItems.slice(0);
+
+            // Click on the token
+            element.find(".token").click();
+
+            expect(instance.selectedItems).to.be.deep.equal([]);
+        });
     });
 
     /**
@@ -435,5 +561,4 @@ describe("AttributeSlicer", () => {
      */
     it("should scroll correctly when the text size is very large");
     it("should scroll correctly when the text size is very small");
-
 });
