@@ -125,7 +125,17 @@ describe("AttributeSlicerVisual", () => {
         expect(attributeSlicer.searchString).to.be.empty;
     });
 
-
+    it.skip("should restore selection from PBI", () => {
+        const { instance, attributeSlicer } = createInstance();
+        const metadata = require("./test_data/selectionMetadata.json");
+        const categories = ["CAT_1", "CAT_2"];
+        const update = createUpdateOptionsWithCategoryValues(categories, "SOME_CATEGORY_NAME");
+        update.dataViews[0].metadata = <any>{
+            objects: metadata
+        };
+        instance.update(update);
+        expect(attributeSlicer.selectedItems).to.not.be.empty;
+    });
 
     it("should restore selection after a refresh");
 

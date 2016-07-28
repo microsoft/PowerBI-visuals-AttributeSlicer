@@ -1,0 +1,45 @@
+{
+    "general": {
+        "filter": {
+            "fromValue": {
+                "items": {
+                    "f": {
+                        "entity": "facetlist"
+                    }
+                }
+            },
+            "whereItems": [
+                {
+                    "condition": {
+                        "_kind": 9,
+                        "args": [
+                            {
+                                "_kind": 1,
+                                "source": {
+                                    "_kind": 0,
+                                    "entity": "facetlist",
+                                    "variable": "f"
+                                },
+                                "ref": "facet"
+                            }
+                        ],
+                        "values": [
+                            [
+                                {
+                                    "_kind": 16,
+                                    "type": {
+                                        "underlyingType": 1,
+                                        "category": null
+                                    },
+                                    "value": "#&",
+                                    "valueEncoded": "'#&'"
+                                }
+                            ]
+                        ]
+                    }
+                }
+            ]
+        },
+        "selection": "[{\"match\":\"#&\",\"value\":0}]"
+    }
+}
