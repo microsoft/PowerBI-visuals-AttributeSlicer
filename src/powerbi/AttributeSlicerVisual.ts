@@ -432,7 +432,9 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
         if (categorical && categorical.categories && categorical.categories.length) {
             const source = categorical.categories[0].source;
-            return source && (source.type.numeric || source.type.text || source.type.bool);
+            const metadataSource = dv.metadata.columns.filter(n => n.roles["Category"])[0];
+            // return source && (source.type.numeric || source.type.text || source.type.bool);
+            return source && metadataSource && metadataSource.type.text && source.type.text;
         }
         return false;
     }

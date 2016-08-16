@@ -154,13 +154,13 @@ describe("AttributeSlicerVisual", () => {
     it("should scroll properly in horizontal view mode");
     it("should load additional data properly in horizontal view mode");
     it("should go to vertical view mode, when selected in PBI");
-    it("should not lose selection when toggling caseInsensitivity");
+    // it("should not lose selection when toggling caseInsensitivity");
 
     // ie. Search for Microsof then Microsoft, the service will return the same data
     it("should not get into an infinite loop if the data doesn't change");
 
     it ("should support searching numerical columns (when a numerical column is the category)");
-    it ("should support searching date columns (when a date column is the category)");
+    it ("should NOT support searching date columns (when a date column is the category)");
     it ("should clear the search when switching column types");
 
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
