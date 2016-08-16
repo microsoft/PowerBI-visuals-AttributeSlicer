@@ -96,17 +96,18 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private propertyPersister: PropertyPersister;
 
     /**
-     * Whether or not to include css
+     * My css module
      */
-    private noCss: boolean;
+    private myCssModule: any;
 
     /**
      * Constructor
      */
     constructor(noCss = false) {
-        super();
-
-        this.noCss = noCss;
+        super(noCss);
+        if (!noCss) {
+             this.myCssModule = require("!css!sass!./css/AttributeSlicerVisual.scss");
+        }
 
         // Tell base we should not load sandboxed
         VisualBase.DEFAULT_SANDBOX_ENABLED = false;
@@ -194,6 +195,11 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      */
     public init(options: powerbi.VisualInitOptions): void {
         super.init(options, `<div></div>`.trim());
+
+        const className = this.myCssModule && this.myCssModule.locals && this.myCssModule.locals.className;
+        if (className) {
+            this.element.addClass(className);
+        }
 
         // HAX: I am a strong, independent element and I don't need no framework tellin me how much focus I can have
         this.element.on(EVENTS_TO_IGNORE, (e) => e.stopPropagation());
@@ -395,14 +401,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
-        return this.noCss ? [] : super.getCss().concat([require("!css!sass!./css/AttributeSlicerVisual.scss")]);
+        return this.myCssModule ? super.getCss().concat([this.myCssModule + ""]) : [];
     }
 
     /**
      * Creates an attribute slicer with the given element
      */
     protected createAttributeSlicer(element: JQuery) {
-        const mySlicer = new AttributeSlicerImpl(this.element);
+        const slicerEle = $("<div>");
+        this.element.append(slicerEle);
+        const mySlicer = new AttributeSlicerImpl(slicerEle);
         mySlicer.serverSideSearch = true;
         mySlicer.events.on("loadMoreData", (item: any, isSearch: boolean) => this.onLoadMoreData(item, isSearch));
         mySlicer.events.on("canLoadMoreData", (item: any, isSearch: boolean) => {

@@ -1,14 +1,16 @@
 @import "../../base/css/main";
 @import "./Base";
 
-.value-display {
-   background-color: blue;
-}
+:local(.className) {
+    .value-display {
+    background-color: blue;
+    }
 
-.item:hover {
-    background-color:#ccc;
-}
+    .item:hover {
+        background-color:#ccc;
+    }
 
-.token {
-    background-color: #e6e6e6;
+    .token {
+        background-color: #e6e6e6;
+    }
 }
