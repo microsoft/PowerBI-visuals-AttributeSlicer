@@ -20,7 +20,6 @@ module.exports = function (gulp: any) {
     const paths = projectConfig.paths;
     const projectVersion = projectConfig.version;
     const baseDir = __dirname + "/../../";
-    const baseBuildName = "build";
     const buildName = "build:powerbi";
 
     /**
@@ -29,7 +28,7 @@ module.exports = function (gulp: any) {
     gulp.task(`${buildName}:package_css`, function() {
         var output = config.output.PowerBI;
         if (output && output.icon) {
-            var base64Contents = new Buffer(fs.readFileSync(path.join(paths.projectDir, output.icon), 'binary')).toString('base64');
+            var base64Contents = fs.readFileSync(path.join(paths.projectDir, output.icon)).toString('base64');
             var mimeType = "image/png";
             if (output.icon.indexOf(".svg") >= 0) {
                 mimeType = "image/svg+xml";

@@ -108,7 +108,9 @@ VirtualList.prototype.setDir = function (horiz) {
     });
     this.listContainer.css({
         transform: "",
-        transformOrigin: ""
+        transformOrigin: "",
+        width: width + "px",
+        height: height + "px"
     });
     this.container.css({
       overflowX: "hidden",

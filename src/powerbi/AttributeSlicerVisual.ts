@@ -9,7 +9,7 @@ const log = logger("essex:widget:AttributeSlicerVisual");
 // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
 
-import { SlicerItem } from "../interfaces";
+import { ListItem, ISlicerVisualData, ISettings, SlicerItem } from "./interfaces";
 import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
 import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
@@ -19,12 +19,10 @@ import VisualCapabilities = powerbi.VisualCapabilities;
 import DataView = powerbi.DataView;
 import SelectionId = powerbi.visuals.SelectionId;
 import data = powerbi.data;
-import SelectableDataPoint = powerbi.visuals.SelectableDataPoint;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
-import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
 import PixelConverter = jsCommon.PixelConverter;
 
 @Visual(require("../build").output.PowerBI)
@@ -202,7 +200,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         this.host = options.host;
         this.propertyPersister = createPropertyPersister(this.host, 100);
-
         this.mySlicer = this.createAttributeSlicer(options.element);
 
         log("Loading Custom Sandbox: ", this.sandboxed);
@@ -226,62 +223,36 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
 
         this.loadingData = true;
         const dv = this.dataView = options.dataViews && options.dataViews[0];
+        const metadata = dv && dv.metadata;
         if (dv) {
+
+            // Is this necessary here? Shouldn't this be moved outside of the dataview check?
             if ((updateType & UpdateType.Settings) === UpdateType.Settings) {
                 // We need to reload the data if the case insensitivity changes (this filters the data and sends it to the slicer)
-                const changes = this.loadSettingsFromPowerBI(dv);
-
-                // If the displayUnits or precision changed, and we don't have a data update,
-                // then we need to manually refresh the renderedValue of the items
-                if ((changes.displayUnits || changes.precision) &&
-                    (updateType & UpdateType.Data) !== UpdateType.Data &&
-                    this.mySlicer.data &&
-                    this.mySlicer.data.length) {
-                    const formatter = this.createValueFormatter();
-                    this.mySlicer.data.forEach(n => {
-                        (n.sections || []).forEach(s => {
-                            s.displayValue = formatter.format(s.value);
-                        });
-                    });
-                    this.mySlicer.refresh();
-                }
-
-                // If we went from multiple to single, then update the selection filter accordingly
-                if (this.mySlicer.singleSelect && changes.singleSelect) {
-                    // Let it know that selection has changed, eventually
-                    // Normally would do a return; after this, but there are circumstances in which this may cause other issues
-                    // ie. If data hasn't been loaded in the first place, then on the next update there will be no data changes
-                    // according to our change detector
-                    // OR if the selection hasn't actually changed, and we short circuit it, the data won't have a chance to load.
-                    // I guess it's safer/easier to do this than to think of all the possible issues doing it the other way.
-                    this.onSelectionChanged(this.mySlicer.selectedItems as ListItem[]);
-                }
+                const hasDataChanges = (updateType & UpdateType.Data) === UpdateType.Data;
+                const newSettings = this.parseSettingsFromPowerBI(dv);
+                this.loadSettings(newSettings, hasDataChanges);
             }
 
             // We should show values if there are actually values
             // IMPORTANT: This stays before loadDataFromPowerBI, otherwise the values don't display
-            const categorical = dv && dv.categorical;
-            const metadata = dv && dv.metadata;
-            this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
-            let isSupportedSearchType = false;
-            if (categorical && categorical.categories && categorical.categories.length) {
-                const source = categorical.categories[0].source;
-                isSupportedSearchType = source && (source.type.numeric || source.type.text || source.type.bool);
-            }
-            const showSearch =
-                isSupportedSearchType &&
-                !this.syncSettingWithPBI(metadata && metadata.objects, "general", "selfFilterEnabled", false);
+            const doesDataSupportSearch = this.doesDataSupportSearch(dv);
+            const isSearchEnabled = !this.syncSettingWithPBI(metadata && metadata.objects, "general", "selfFilterEnabled", false);
+            const showSearch = doesDataSupportSearch && isSearchEnabled;
             this.mySlicer.showSearchBox = showSearch;
             if (!showSearch) {
                 this.mySlicer.searchString = "";
             }
 
-            if ((updateType & UpdateType.Data) === UpdateType.Data ||
-                // Data may not have changed, ie search for Microsof then Microsoft
-                this.loadDeferred) {
-                this.loadDataFromPowerBI(dv);
+            // Load data if the data has definitely changed, sometimes however it hasn't actually changed
+            // ie search for Microsof then Microsoft
+            if ((updateType & UpdateType.Data) === UpdateType.Data || this.loadDeferred) {
+                const newData = AttributeSlicer.converter(dv, this.createValueFormatter(), this.createCategoryFormatter(dv));
+                this.loadData({
+                    data: newData,
+                    metadata: this.getCategoryInfoFromPowerBI(dv),
+                });
             }
-            // this.loadSortFromPowerBI(dv);
             this.loadSelectionFromPowerBI(dv);
         } else {
             this.mySlicer.data = [];
@@ -324,6 +295,94 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Loads our settings from the powerbi objects
+     */
+    public loadSettings(newSettings: ISettings, dataUpdate: boolean) {
+        log("Load Settings: ", JSON.stringify(newSettings));
+        const s = this.mySlicer;
+        const displayUnits = this.labelDisplayUnits !== (this.labelDisplayUnits = newSettings.labelDisplayUnits);
+        const precision = this.labelPrecision !== (this.labelPrecision = newSettings.labelPrecision);
+        const singleSelect = s.singleSelect !== (s.singleSelect = newSettings.singleSelect);
+        s.brushSelectionMode = newSettings.brushSelectionMode;
+        s.showSelections = newSettings.showSelections;
+        s.showOptions = newSettings.showOptions;
+        const searchString = newSettings.searchString;
+        if (searchString && searchString !== this.mySlicer.searchString) {
+            this.mySlicer.searchString = searchString;
+        }
+
+        this.mySlicer.valueWidthPercentage = newSettings.valueWidthPercentage;
+        this.mySlicer.renderHorizontal = newSettings.renderHorizontal;
+        let pxSize = newSettings.textSize;
+        if (pxSize) {
+            pxSize = PixelConverter.fromPointToPixel(pxSize);
+        }
+        this.mySlicer.fontSize = pxSize;
+
+        // If our value displays change
+        if ((displayUnits || precision) &&
+            !dataUpdate && // We don't need to do anything if we will be changing the underlying data anyhow
+            // No point in doing anything if there is not data
+            this.mySlicer.data &&
+            this.mySlicer.data.length) {
+            const formatter = this.createValueFormatter();
+
+            // Update the display values in the datas
+            this.mySlicer.data.forEach(n => {
+                (n.sections || []).forEach(section => {
+                    section.displayValue = formatter.format(section.value);
+                });
+            });
+
+            // Tell the slicer to repaint
+            this.mySlicer.refresh();
+        }
+
+        // If we went from multiple to single, then update the selection filter accordingly
+        if (this.mySlicer.singleSelect && singleSelect) {
+            // Let it know that selection has changed, eventually
+            // Normally would do a return; after this, but there are circumstances in which this may cause other issues
+            // ie. If data hasn't been loaded in the first place, then on the next update there will be no data changes
+            // according to our change detector
+            // OR if the selection hasn't actually changed, and we short circuit it, the data won't have a chance to load.
+            // I guess it's safer/easier to do this than to think of all the possible issues doing it the other way.
+            this.onSelectionChanged(this.mySlicer.selectedItems as ListItem[]);
+        }
+    }
+
+    /**
+     * Loads the data from the dataview
+     */
+    public loadData(dataObj: ISlicerVisualData) {
+        log("Loading data from PBI");
+        const { metadata, data } = dataObj;
+
+        this.data = data || [];
+        let filteredData = this.data.slice(0);
+
+        // If we are appending data for the attribute slicer
+        if (this.loadDeferred && this.mySlicer.data && !this.loadDeferred["search"]) {
+            // we only need to give it the new items
+            this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
+            delete this.loadDeferred;
+        } else {
+            this.mySlicer.data = filteredData;
+            delete this.loadDeferred;
+        }
+
+        // if the user has changed the categories, then selection is done for
+        if (!metadata.hasCategories ||
+            (this.currentCategory && this.currentCategory !== metadata.categoryColumnName)) {
+            log("Clearing Selection, Categories Changed");
+            this.mySlicer.selectedItems = [];
+            this.mySlicer.searchString = "";
+            this.updateSelectionFilter([]);
+        }
+
+        this.currentCategory = metadata.categoryColumnName;
+    }
+
+    /**
      * Gets called when PBI destroys this visual
      */
     public destroy() {
@@ -358,6 +417,29 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         // Hide the searchbox by default
         mySlicer.showSearchBox = false;
         return mySlicer;
+    }
+
+    private doesDataSupportSearch(dv: powerbi.DataView) {
+        const categorical = dv && dv.categorical;
+        this.mySlicer.showValues = !!categorical && !!categorical.values && categorical.values.length > 0;
+        if (categorical && categorical.categories && categorical.categories.length) {
+            const source = categorical.categories[0].source;
+            return source && (source.type.numeric || source.type.text || source.type.bool);
+        }
+        return false;
+    }
+    /**
+     * Gets the categorical information from powerbi
+     */
+    private getCategoryInfoFromPowerBI(dv: powerbi.DataView) {
+        const categorical = dv.categorical;
+        const categories = categorical && categorical.categories;
+        const hasCategories = !!(categories && categories.length > 0);
+        const source = hasCategories && categorical.categories[0].source;
+        return {
+            categoryColumnName: source.queryName,
+            hasCategories,
+        };
     }
 
     /**
@@ -450,46 +532,6 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Loads the data from the dataview
-     */
-    private loadDataFromPowerBI(dataView: powerbi.DataView) {
-        log("Loading data from PBI");
-
-        this.data = AttributeSlicer.converter(
-            dataView,
-            this.createValueFormatter(),
-            this.createCategoryFormatter(dataView)) || [];
-        let filteredData = this.data.slice(0);
-
-        // If we are appending data for the attribute slicer
-        if (this.loadDeferred && this.mySlicer.data && !this.loadDeferred["search"]) {
-            // we only need to give it the new items
-            this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
-            delete this.loadDeferred;
-        } else {
-            this.mySlicer.data = filteredData;
-            delete this.loadDeferred;
-        }
-
-        // Default the number if necessary
-        const categorical = dataView.categorical;
-        const categories = categorical && categorical.categories;
-        const hasCategories = !!(categories && categories.length > 0);
-        const source = hasCategories && categorical.categories[0].source;
-        const catName = source.queryName;
-
-        // if the user has changed the categories, then selection is done for
-        if (!hasCategories || (this.currentCategory && this.currentCategory !== categorical.categories[0].source.queryName)) {
-            log("Clearing Selection, Categories Changed");
-            this.mySlicer.selectedItems = [];
-            this.mySlicer.searchString = "";
-            this.updateSelectionFilter([]);
-        }
-
-        this.currentCategory = catName;
-    }
-
-    /**
      * Creates a formatter capable of formatting the categories (or undefined) if not necessary
      */
     private createCategoryFormatter(dataView: powerbi.DataView) {
@@ -529,6 +571,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
             let condition = whereItems && whereItems[0] && whereItems[0].condition;
             let values = condition && condition.values;
             let args = condition && condition.args;
+            let selectedItems: any[] = [];
             if (values && args && values.length && args.length) {
                 const selectionItems: ListItem[] = JSON.parse(objects["general"]["selection"]);
                 let sourceExpr = filter.whereItems[0].condition.args[0];
@@ -540,11 +583,12 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                         )
                     ));
                 });
-                this.mySlicer.selectedItems = <any>selectionIds.map((n: any, i: number) => {
+                selectedItems = <any>selectionIds.map((n: any, i: number) => {
                     const slimItem = selectionItems[i];
                     return AttributeSlicer.createItem(slimItem.match, slimItem.value, n, slimItem.renderedValue);
                 });
             }
+            this.mySlicer.selectedItems = selectedItems;
         } else if (dataView) { // If we have a dataview, but we don't have any selection, then clear it
             this.mySlicer.selectedItems = [];
         }
@@ -570,43 +614,27 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
-     * Loads our settings from the powerbi objects
+     * Parses the settings that are stored in powerbi
      */
-    private loadSettingsFromPowerBI(dataView: powerbi.DataView) {
-        const s = this.mySlicer;
+    private parseSettingsFromPowerBI(dataView: powerbi.DataView): ISettings {
         const objects = dataView && dataView.metadata && dataView.metadata.objects;
-
-        log("Load Settings (Objects): ", JSON.stringify(objects));
-
-        const displayUnits =
-            this.labelDisplayUnits !== (this.labelDisplayUnits = this.syncSettingWithPBI(objects, "display", "labelDisplayUnits", 0));
-        const precision =
-            this.labelPrecision !== (this.labelPrecision = this.syncSettingWithPBI(objects, "display", "labelPrecision", 0));
-        const singleSelect =
-            s.singleSelect !== (s.singleSelect = this.syncSettingWithPBI(objects, "selection", "singleSelect", false));
-        const brushMode =
-            s.brushSelectionMode !== (s.brushSelectionMode = this.syncSettingWithPBI(objects, "selection", "brushMode", false));
-        const showSelections =
-            s.showSelections !== (s.showSelections = this.syncSettingWithPBI(objects, "selection", "showSelections", true));
-        const showOptions =
-            s.showOptions !== (s.showOptions = this.syncSettingWithPBI(objects, "general", "showOptions", true));
-
-        const newSearch: data.SemanticFilter = this.syncSettingWithPBI(objects, "general", "selfFilter", undefined);
+        const selfFilter = this.syncSettingWithPBI(objects, "general", "selfFilter", undefined);
+        const newSearch: data.SemanticFilter = selfFilter;
         const whereItems = newSearch && newSearch.where();
         const contains = whereItems && whereItems.length > 0 && whereItems[0].condition as data.SQContainsExpr;
         const right = contains && contains.right as data.SQConstantExpr;
-        if (right && right.value && right.value !== this.mySlicer.searchString) {
-            this.mySlicer.searchString = right.value;
-        }
-
-        this.mySlicer.valueWidthPercentage = this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined);
-        this.mySlicer.renderHorizontal = this.syncSettingWithPBI(objects, "display", "horizontal", false);
-        let pxSize = this.syncSettingWithPBI(objects, "general", "textSize", undefined);
-        if (pxSize) {
-            pxSize = PixelConverter.fromPointToPixel(pxSize);
-        }
-        this.mySlicer.fontSize = pxSize;
-        return { displayUnits, precision, singleSelect, brushMode, showSelections, showOptions };
+        return {
+            labelDisplayUnits: this.syncSettingWithPBI(objects, "display", "labelDisplayUnits", 0),
+            labelPrecision: this.syncSettingWithPBI(objects, "display", "labelPrecision", 0),
+            singleSelect:  this.syncSettingWithPBI(objects, "selection", "singleSelect", false),
+            brushSelectionMode: this.syncSettingWithPBI(objects, "selection", "brushMode", false),
+            showSelections: this.syncSettingWithPBI(objects, "selection", "showSelections", true),
+            showOptions: this.syncSettingWithPBI(objects, "general", "showOptions", true),
+            valueWidthPercentage: this.syncSettingWithPBI(objects, "display", "valueColumnWidth", undefined),
+            renderHorizontal: this.syncSettingWithPBI(objects, "display", "horizontal", false),
+            textSize: this.syncSettingWithPBI(objects, "general", "textSize", undefined),
+            searchString: right && right.value,
+        };
     }
 
     /**
@@ -655,9 +683,3 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         this.propertyPersister.persist(true, objects);
     }
 }
-
-/**
- * Represents a list item
- */
-/* tslint:disable */
-export interface ListItem extends SlicerItem, SelectableDataPoint, TooltipEnabledDataPoint { }
