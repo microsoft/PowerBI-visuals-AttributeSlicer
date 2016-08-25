@@ -2,7 +2,6 @@ import { VisualBase } from "essex.powerbi.base";
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
-import data = powerbi.data;
 
 export default $.extend(true, {}, VisualBase.capabilities, {
         dataRoles: [
@@ -35,7 +34,7 @@ export default $.extend(true, {}, VisualBase.capabilities, {
         },
         objects: {
             general: {
-                displayName: data.createDisplayNameGetter("Visual_General"),
+                displayName: "General",
                 properties: {
                     filter: {
                         type: { filter: {} },
@@ -51,7 +50,7 @@ export default $.extend(true, {}, VisualBase.capabilities, {
                         type: { text: {} }
                     },
                     textSize: {
-                        displayName: data.createDisplayNameGetter("Visual_TextSize"),
+                        displayName: "Text Size",
                         type: { numeric: true },
                     },
                     showOptions: {
