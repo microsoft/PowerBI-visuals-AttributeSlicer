@@ -127,7 +127,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         let maxValue = 0;
         if (categories && categories.length && categories[0].values) {
             converted = categories[0].values.map((category, catIdx) => {
-                let id = SelectionId.createWithId(dataView.table.identity[catIdx]);
+                let id = SelectionId.createWithId(categories[0].identity[catIdx]);
                 let total = 0;
                 let sections: any;
                 if (values) {
