@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) Microsoft
+ * All rights reserved.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 import "../base/testSetup";
 
 import { expect } from "chai";
@@ -41,7 +65,9 @@ describe("AttributeSlicer", () => {
         let vList = new fakeVL();
         parentEle.append(ele);
         let result = {
-            instance: new AttributeSlicer(ele, vList),
+            instance: new AttributeSlicer(ele, {
+                searchDebounce: 0
+            }, vList),
             element: ele,
             vlist: vList,
         };
@@ -460,6 +486,35 @@ describe("AttributeSlicer", () => {
             vlist.container.scroll();
         });
 
+        it("should append data to the original dataset if scrolled to the bottom", (done) => {
+            const { instance, vlist } = createInstance();
+            instance.data = SIMPLE_DATA.slice(0);
+
+            let once = false;
+            instance.events.on("canLoadMoreData", (e: any) => {
+                e.result = !once;
+                once = true;
+            });
+
+            instance.events.on("loadMoreData", (result: any) => {
+                result.result = new Promise(resolve => {
+                    resolve(SIMPLE_DATA_SET_TWO.slice(0));
+                    // Timeout to allow it to actually resolve
+                    setTimeout(() => {
+                        const expected = [].concat(SIMPLE_DATA).concat(SIMPLE_DATA_SET_TWO);
+                        expect(instance.data).to.deep.equal(expected);
+                        done();
+                    }, 20);
+                });
+            });
+
+            // Pretend we just infinitely scrolled
+            const pretendItems = $("<div>").css({ height: 20000 });
+            vlist.container.append(pretendItems);
+            vlist.container[0].scrollTop = 20000;
+            vlist.container.scroll();
+        });
+
         it("should render horizontally when the horizontally flag is set", () => {
             const { element, instance, vlist } = createInstance();
             return new Promise(resolve => {
@@ -553,6 +608,44 @@ describe("AttributeSlicer", () => {
             element.find(".token").click();
 
             expect(instance.selectedItems).to.be.deep.equal([]);
+        });
+    });
+
+    describe("UI", () => {
+        it("should update the search string if the search box is changed", () => {
+            const { instance, element } = createInstance();
+
+            // Click on the token
+            element.find(".searchbox")
+                .val("TEST_SEARCH")
+                .trigger("input");
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    expect(instance.searchString).to.be.equal("TEST_SEARCH");
+                    resolve();
+                }, 10); // Add a delay so it overcomes the search debounce
+            });
+        });
+        it("should raise the load more data event if search box is changed", () => {
+            const { instance, element } = createInstance();
+            return new Promise(resolve => {
+
+                // Setup stuff to say that we need search updates.
+                instance.serverSideSearch = true;
+                instance.events.on("canLoadMoreData", (result: any) => {
+                    result.result = true;
+                });
+                instance.events.on("loadMoreData", () => {
+                    expect(instance.searchString).to.be.equal("TEST_SEARCH");
+                    resolve();
+                });
+
+                // Click on the token
+                element.find(".searchbox")
+                    .val("TEST_SEARCH")
+                    .trigger("input");
+            });
         });
     });
 

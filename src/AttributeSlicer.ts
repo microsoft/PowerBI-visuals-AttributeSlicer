@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) Microsoft
+ * All rights reserved.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 import EventEmitter from "../base/EventEmitter";
 import * as $ from "jquery";
 import * as _ from "lodash";
@@ -9,6 +33,7 @@ import itemTemplate from "./SlicerItem.tmpl";
 /* tslint:disable */
 const naturalSort = require("javascript-natural-sort");
 const VirtualList = require("./lib/VirtualList");
+const ldget = require("lodash/get");
 /* tslint:enable */
 
 /**
@@ -19,7 +44,7 @@ export class AttributeSlicer {
     /**
      * The number of milliseconds before running the search, after a user stops typing.
      */
-    private static SEARCH_DEBOUNCE = 500;
+    private static DEFAULT_SEARCH_DEBOUNCE = 500;
 
     /**
      * The value column default width
@@ -65,6 +90,11 @@ export class AttributeSlicer {
      * The data contained in this slicer
      */
     private _data: SlicerItem[] = [];
+
+    /**
+     * The number of milliseconds before running the search, after a user stops typing.
+     */
+    private searchDebounce = AttributeSlicer.DEFAULT_SEARCH_DEBOUNCE;
 
     /**
      * Our event emitter
@@ -113,9 +143,10 @@ export class AttributeSlicer {
     /**
      * Constructor for the advanced slicer
      */
-    constructor(element: JQuery, vlist?: any) {
+    constructor(element: JQuery, config?: { searchDebounce?: number }, vlist?: any) {
         this.element = element;
         this.showSelections = true;
+        this.searchDebounce = ldget(config, "searchDebounce", AttributeSlicer.DEFAULT_SEARCH_DEBOUNCE);
         this.slicerEle = element.append($(AttributeSlicer.template)).find(".advanced-slicer");
         this.listEle = this.slicerEle.find(".list");
         this.virtualList = vlist || new VirtualList({
@@ -498,11 +529,6 @@ export class AttributeSlicer {
         const searchStr = pretty(matchValue);
         const flags = caseInsensitive ? "i" : "";
         let regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
-        // if (searchStr.indexOf("#R:") === 0) {
-        //     try {
-        //         regex = new RegExp(searchStr.substring(3), flags);
-        //     } catch (e) { }
-        // }
         return regex.test(pretty(item.match)) || regex.test(pretty(item.matchPrefix)) || regex.test(pretty(item.matchSuffix));
     }
 
@@ -746,7 +772,7 @@ export class AttributeSlicer {
      */
     private attachEvents() {
         const searchDebounced =
-            _.debounce(() => this.search(this.getSearchStringFromElement()), AttributeSlicer.SEARCH_DEBOUNCE);
+            _.debounce(() => this.search(this.getSearchStringFromElement()), this.searchDebounce);
 
         this.element.find(".searchbox").on("input", () => {
             if (!this.loadingSearch) {
