@@ -27,7 +27,7 @@
     "release:major": "npm-run-all --sequential bump:major build:release tag" 
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
