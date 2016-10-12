@@ -23,10 +23,10 @@
  */
 
 /* tslint:disable */
-import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister } from "essex.powerbi.base";
+import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister, colors as colorsArr } from "essex.powerbi.base";
 import capabilities from "./AttributeSlicerVisual.capabilities";
-const colors = require("essex.powerbi.base/src/colors").full;
-
+const colors = colorsArr.full;
+const MY_CSS_MODULE = require("!css!sass!./css/AttributeSlicerVisual.scss");
 const log = logger("essex:widget:AttributeSlicerVisual");
 /* tslint:enable */
 
@@ -37,6 +37,7 @@ import { ListItem, ISlicerVisualData, ISettings, SlicerItem } from "./interfaces
 import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
 import { VisualBase, Visual } from "essex.powerbi.base";
 import * as _ from "lodash";
+import * as $ from "jquery";
 import IVisual = powerbi.IVisual;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualCapabilities = powerbi.VisualCapabilities;
@@ -120,18 +121,10 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     private propertyPersister: PropertyPersister;
 
     /**
-     * My css module
-     */
-    private myCssModule: any;
-
-    /**
      * Constructor
      */
     constructor(noCss = false) {
         super(noCss);
-        if (!noCss) {
-             this.myCssModule = require("!css!sass!./css/AttributeSlicerVisual.scss");
-        }
 
         // Tell base we should not load sandboxed
         VisualBase.DEFAULT_SANDBOX_ENABLED = false;
@@ -148,7 +141,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         const categorical = dataView && dataView.categorical;
         const categories = categorical && categorical.categories;
         const values = categorical && categorical.values;
-        let maxValue = 0;
+        let maxValue: number;
+        let minValue: number;
         if (categories && categories.length && categories[0].values) {
             converted = categories[0].values.map((category, catIdx) => {
                 let id = SelectionId.createWithId(categories[0].identity[catIdx]);
@@ -157,7 +151,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 if (values) {
                     sections = values.map((v, j) => {
                         const value = v.values[catIdx];
-                        total += value;
+                        total += value as any;
                         return {
                             color: colors[j] || "#ccc",
                             value: value,
@@ -171,7 +165,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 }
                 let item =
                     AttributeSlicer.createItem(
-                        categoryFormatter ? categoryFormatter.format(category) : category,
+                        (categoryFormatter ? categoryFormatter.format(category) : category) as string,
                         total,
                         id,
                         undefined,
@@ -186,13 +180,16 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                     };
                 });
                 item.sections = sections;
-                if (item.value > maxValue) {
+                if (typeof maxValue === "undefined" || item.value > maxValue) {
                     maxValue = item.value;
+                }
+                if (typeof minValue === "undefined" || item.value < minValue) {
+                    minValue = item.value;
                 }
                 return item as any;
             });
             converted.forEach((c) => {
-                c.renderedValue = c.value ? (c.value / maxValue) * 100 : undefined;
+                c.renderedValue = c.value ? ((c.value - minValue) / (maxValue - minValue)) * 100 : undefined;
             });
             return converted;
         }
@@ -215,12 +212,19 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
     }
 
     /**
+     * Gets the template for the attribute slicer
+     */
+    public get template() {
+        return  `<div></div>`.trim();
+    }
+
+    /**
      * Called when the visual is being initialized
      */
     public init(options: powerbi.VisualInitOptions): void {
-        super.init(options, `<div></div>`.trim());
+        super.init(options);
 
-        const className = this.myCssModule && this.myCssModule.locals && this.myCssModule.locals.className;
+        const className = MY_CSS_MODULE && MY_CSS_MODULE.locals && MY_CSS_MODULE.locals.className;
         if (className) {
             this.element.addClass(className);
         }
@@ -425,7 +429,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
      * Gets the inline css used for this element
      */
     protected getCss(): string[] {
-        return this.myCssModule ? super.getCss().concat([this.myCssModule + ""]) : [];
+        return MY_CSS_MODULE ? super.getCss().concat([MY_CSS_MODULE + ""]) : [];
     }
 
     /**
@@ -572,8 +576,8 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
         let formatter: IValueFormatter;
         let cats = dataView && dataView.categorical && dataView.categorical.categories;
         if (cats && cats.length && cats[0].source.type.dateTime) {
-            let min: Date;
-            let max: Date;
+            let min: any;
+            let max: any;
             cats[0].values.forEach(n => {
                 if (typeof min === "undefined" || min > n) {
                     min = n;

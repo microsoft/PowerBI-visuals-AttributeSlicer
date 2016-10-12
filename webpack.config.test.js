@@ -48,7 +48,8 @@ module.exports = {
         ],
     },
     externals: {
-        "jsdom": ""
+        "jsdom": "",
+        "powerbi-visuals/lib/powerbi-visuals": "{}"
     },
     plugins: [
         new webpack.optimize.OccurenceOrderPlugin(),
