@@ -24,6 +24,7 @@
 
 import { SlicerItem } from "./interfaces";
 import { prettyPrintValue as pretty } from "./Utils";
+import * as $ from "jquery";
 
 /**
  * Returns an element for the given item

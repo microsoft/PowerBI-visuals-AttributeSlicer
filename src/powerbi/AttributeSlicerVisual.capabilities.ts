@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 
-import { VisualBase } from "essex.powerbi.base";
+import VisualBase from "essex.powerbi.base/dist/lib/VisualBase";
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
-import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
+import { SETTING_DESCRIPTORS } from "./interfaces";
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
+const log = require("debug")("AttributeSlicer::Capabilities"); // tslint:disable-line
+import * as $ from "jquery";
 
-export default $.extend(true, {}, VisualBase.capabilities, {
+const capabilities = $.extend(true, {}, VisualBase.capabilities, {
         dataRoles: [
             {
                 name: "Category",
@@ -51,12 +53,12 @@ export default $.extend(true, {}, VisualBase.capabilities, {
                     dataReductionAlgorithm: { top: {} },
                 },
             },
-        }, ],
+        }],
         // sort this crap by default
         sorting: {
-            default: {}
+            default: {},
         },
-        objects: {
+        objects: $.extend(true, {}, {
             general: {
                 displayName: "General",
                 properties: {
@@ -71,73 +73,37 @@ export default $.extend(true, {}, VisualBase.capabilities, {
                     },
                     // formatString: StandardObjectProperties.formatString,
                     selection: {
-                        type: { text: {} }
-                    },
-                    textSize: {
-                        displayName: "Text Size",
-                        type: { numeric: true },
-                    },
-                    showOptions: {
-                        displayName: "Show Options",
-                        description: "Should the search box and other options be shown",
-                        type: { bool: true },
+                        type: { text: {} },
                     },
                     selfFilter: {
-                        type: { filter: { selfFilter: true } }
+                        type: { filter: { selfFilter: true } },
                     },
                     selfFilterEnabled: {
-                        type: { operations: { searchEnabled: true } }
+                        type: { operations: { searchEnabled: true } },
                     },
                 },
             },
-            display: {
-                displayName: "Display",
-                properties: {
-                    valueColumnWidth: {
-                        displayName: "Value Width %",
-                        description: "The percentage of the width that the value column should take up.",
-                        type: { numeric: true },
-                    },
-                    horizontal: {
-                        displayName: "Horizontal",
-                        description: "Display the attributes horizontally, rather than vertically",
-                        type: { bool: true },
-                    },
-                    labelDisplayUnits: StandardObjectProperties.labelDisplayUnits,
-                    labelPrecision: StandardObjectProperties.labelPrecision,
-                },
-            },
-            selection: {
-                displayName: "Selection",
-                properties: {
-                    brushMode: {
-                        displayName: "Brush Mode",
-                        description: "Allow for the drag selecting of attributes",
-                        type: { bool: true },
-                    },
-                    singleSelect: {
-                        displayName: "Single Select",
-                        description: "Only allow for a single selected",
-                        type: { bool: true },
-                    },
-                    showSelections: {
-                        displayName: "Use Tokens",
-                        description: "Will show the selected attributes as tokens",
-                        type: { bool: true },
-                    },
-                },
-            },
-            /*,
-            sorting: {
-                displayName: "Sorting",
-                properties: {
-                    byHistogram: {
-                        type: { bool: true }
-                    },
-                    byName: {
-                        type: { bool: true }
-                    }
-                }
-            }*/
-        },
+        }, buildObjects()),
     });
+
+export default capabilities;
+log("Attribute Slicer Capabilities: ", capabilities);
+
+function buildObjects() {
+    "use strict";
+    const objects = {};
+    Object.keys(SETTING_DESCRIPTORS).forEach(section => {
+        const objProps = objects[section] = {
+            properties: {},
+        };
+        const props = SETTING_DESCRIPTORS[section];
+        Object.keys(props).forEach(propName => {
+            if (propName === "displayName") {
+                objProps[propName] = props[propName];
+            } else {
+                objProps.properties[propName] = props[propName];
+            }
+        });
+    });
+    return objects;
+}

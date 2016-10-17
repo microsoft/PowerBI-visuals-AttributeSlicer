@@ -22,22 +22,39 @@
  * SOFTWARE.
  */
 
-import { Utils } from "essex.powerbi.base/spec/visualHelpers";
+"use strict";
+require("essex.powerbi.base/dist/spec/visualHelpers"); // tslint:disable-line
+import { UpdateType } from "essex.powerbi.base";
 import * as $ from "jquery";
 import { expect } from "chai";
+import { AttributeSlicer } from "../AttributeSlicer";
+
+import VisualUpdateOptions = powerbi.VisualUpdateOptions;
+
+// global["powerbi"] = {};
+
 /* tslint:disable */
 $.extend(true, global["powerbi"], {
     visuals: {
         StandardObjectProperties: {},
-        valueFormatter: { 
-            create: () => {
+        valueFormatter: {
+            create: function () {
                 return {
-                    format: () => {}
+                    format: function () { }
                 };
             }
         },
         SelectionId: {
-            createWithId: () => {}
+            createWithId: function () {
+                return {
+                    getKey() {
+                        return 1;
+                    },
+                    getSelector() {
+                        return 1;
+                    },
+                };
+            }
         },
     },
     data: {
@@ -46,146 +63,178 @@ $.extend(true, global["powerbi"], {
         },
         createDataViewScopeIdentity: (expr: any) => ({ expr: expr }),
         SQExprBuilder: {
-            compare: () => {}
+            compare: () => { }
         }
     }
 });
-global["jsCommon"] = {};
+global["jsCommon"] = {
+    PixelConverter: {
+        toPoint: function (value: any) { return value; }
+    }
+};
 /* tslint:enable */
 import AttributeSlicerVisual from "./AttributeSlicerVisual";
-import { AttributeSlicer } from "../AttributeSlicer";
-
-describe("AttributeSlicerVisual", () => {
+describe("AttributeSlicerVisual", function () {
     let parentEle: JQuery;
-    beforeEach(() => {
+    beforeEach(function () {
         parentEle = $("<div></div>");
     });
-
-    afterEach(() => {
+    afterEach(function () {
         if (parentEle) {
             parentEle.remove();
         }
         parentEle = undefined;
     });
-
     /**
      * Creates an instance of AttributeSlicerVisual
      */
     function createInstance() {
-        const initOptions = Utils.createFakeInitOptions();
-        const instance = new AttributeSlicerVisual(true);
-        const attributeSlicer = {
-
-        } as AttributeSlicer;
-        instance["createAttributeSlicer"] = (element: JQuery) => attributeSlicer;
+        let initOptions = {
+            element: parentEle,
+            viewport: {
+                width: 500,
+                height: 500,
+            },
+        } as any;
+        let instance = new AttributeSlicerVisual(true);
+        let attributeSlicer = {};
         instance.init(initOptions);
+        instance["mySlicer"] = <any>attributeSlicer;
         return {
             element: initOptions.element,
-            instance,
-            attributeSlicer,
+            instance: instance,
+            attributeSlicer: <AttributeSlicer>attributeSlicer,
         };
     }
-
-    /** 
-     * Creates update options with the given categories 
+    /**
+     * Creates update options with the given categories
      */
-    function createOptionsWithCategories(categories: any[], categoryName: string) {
-        return <powerbi.VisualUpdateOptions><any>{
+    function createOptionsWithCategories(categories: any, categoryName: string) {
+        return <VisualUpdateOptions><any>{
             viewport: {
                 width: 100,
                 height: 100,
             },
             dataViews: [{
-                categorical: {
-                    categories: [{
-                        identity: [],
+                metadata: {
+                    columns: [{
+                        identity: <any>[],
                         source: {
                             queryName: categoryName,
-                            type: {},
+                            type: { text: true },
+                        },
+                        roles: {
+                            Category: true,
+                        },
+                        type: { text: true },
+                    }],
+                },
+                categorical: {
+                    categories: [{
+                        identity: <any>[],
+                        source: {
+                            queryName: categoryName,
+                            type: { text: true },
                         },
                         values: categories.slice(0),
-                    }, ],
+                    }],
                 },
-            }, ],
+            }],
         };
     }
 
-    /** 
-     * Creates update options with the given categories 
+    /**
+     * Creates update options with the given categories
      */
     function createOptionsWithCategoriesAndValues(categories: any[], categoryName: string, values: any[][], valueName: string) {
+        "use strict";
         return <powerbi.VisualUpdateOptions><any>{
             viewport: {
                 width: 100,
                 height: 100,
             },
             dataViews: [{
+                metadata: {
+                    columns: [{
+                        identity: <any>[],
+                        source: {
+                            queryName: categoryName,
+                            type: { text: true },
+                        },
+                        roles: {
+                            Category: true,
+                        },
+                        type: { text: true },
+                    }, {
+                        identity: <any>[],
+                        source: {
+                            queryName: valueName,
+                            type: {},
+                        },
+                        roles: {
+                            Values: true,
+                        },
+                        type: {},
+                    }],
+                },
                 categorical: {
                     categories: [{
                         identity: [],
                         source: {
                             queryName: categoryName,
-                            type: {},
+                            type: { text: true },
                         },
                         values: categories.slice(0),
-                    }, ],
+                    }],
                     values: values.map(n => ({
                         source: {
-                            displayName: valueName
+                            displayName: valueName,
+                            type: {},
                         },
                         values: n[0],
                     })),
                 },
-            }, ],
+            }],
         };
     }
 
-    it ("should init", () => {
+    it("should init", function () {
         createInstance();
     });
-
-    it("should load only categories if that is all that is passed in via PBI", () => {
+    it("should load only categories if that is all that is passed in via PBI", function () {
         const { instance, attributeSlicer } = createInstance();
-        const fakeCats = ["CAT_1", "CAT_2"];
-        const update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
-        instance.update(update);
-
+        let fakeCats = ["CAT_1", "CAT_2"];
+        let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
+        instance.onUpdate(update, UpdateType.Data);
         // Make sure the data was passed correctly to attribute slicer
-        expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
+        expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
     });
-
-    it("should clear the selection when the categories are changed", () => {
+    it("should clear the selection when the categories are changed", function () {
         const { instance, attributeSlicer } = createInstance();
-        const categories = ["CAT_1", "CAT_2"];
-        const update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.update(update);
-
+        let categories = ["CAT_1", "CAT_2"];
+        let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
+        instance.onUpdate(update, UpdateType.Data);
+        delete instance["_state"];
         // Set our fake selected items
-        attributeSlicer.selectedItems = <any>[{ match: "WHATEVER" }];
-
-        const anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.update(anotherUpdate);
-
+        attributeSlicer.state = <any>{ selectedItems: [{ match: "WHATEVER" }] };
+        let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
+        instance.onUpdate(anotherUpdate, UpdateType.Data);
         // Make sure there is no more selected items
-        expect(attributeSlicer.selectedItems).to.be.empty;
+        expect(attributeSlicer.state.selectedItems).to.be.empty;
     });
-
-    it("should clear the search when the categories are changed", () => {
+    it("should clear the search when the categories are changed", function () {
         const { instance, attributeSlicer } = createInstance();
-        const categories = ["CAT_1", "CAT_2"];
-        const update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.update(update);
-
+        let categories = ["CAT_1", "CAT_2"];
+        let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
+        instance.onUpdate(update, UpdateType.Data);
+        delete instance["_state"];
         // Set our fake selected items
-        attributeSlicer.searchString = "SOME SEARCH STRING";
-
-        const anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.update(anotherUpdate);
-
+        attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+        let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
+        instance.onUpdate(anotherUpdate, UpdateType.Data);
         // Make sure there is no more search string
-        expect(attributeSlicer.searchString).to.be.empty;
+        expect(attributeSlicer.state.searchText).to.be.empty;
     });
-
     function performBasicUpdate(instance: AttributeSlicerVisual) {
         const fakeCats = ["CAT_1", "CAT_2"];
         const update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
@@ -197,7 +246,8 @@ describe("AttributeSlicerVisual", () => {
         const categories = ["CAT_1", "CAT_2"];
         const update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
         update.dataViews[0].metadata = <any>{
-            objects: metadata
+            objects: metadata,
+            columns: update.dataViews[0].metadata.columns,
         };
         instance.update(update);
     }
@@ -215,7 +265,8 @@ describe("AttributeSlicerVisual", () => {
         const update = createOptionsWithCategoriesAndValues(fakeCats, "SOME_CATEGORY_NAME", values, "VALUE_NAME");
         const metadata = require("./test_data/selectionMetadata.json");
         update.dataViews[0].metadata = <any>{
-            objects: metadata
+            objects: metadata,
+            columns: update.dataViews[0].metadata.columns,
         };
         instance.update(update);
     }
@@ -225,11 +276,30 @@ describe("AttributeSlicerVisual", () => {
         const categories = ["CAT_1", "CAT_2"];
         const update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
         update.dataViews[0].metadata = <any>$.extend(true, {
-            objects: metadata
+            objects: metadata,
+            columns: update.dataViews[0].metadata.columns,
         }, {
-            objects: addlMetadata
+            objects: addlMetadata,
         });
         instance.update(update);
+    }
+
+    function createSearchTextPBIObjects(text: string) {
+        return {
+            general: {
+                selfFilter: {
+                    where: () => {
+                        return [{
+                            condition: {
+                                right: {
+                                    value: text,
+                                },
+                            },
+                        }];
+                    },
+                },
+            },
+        };
     }
 
     it("should restore selection from PBI", () => {
@@ -237,7 +307,7 @@ describe("AttributeSlicerVisual", () => {
 
         performSelectionUpdate(instance);
 
-        expect(attributeSlicer.selectedItems).to.not.be.empty;
+        expect(attributeSlicer.state.selectedItems).to.not.be.empty;
     });
 
     it("should restore selection after a refresh", () => {
@@ -250,7 +320,7 @@ describe("AttributeSlicerVisual", () => {
         // A refresh is the same update twice
         performSelectionUpdate(instance);
 
-        expect(attributeSlicer.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
+        expect(attributeSlicer.state.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
     });
 
     it("should clear selection when the category field is changed in PBI", () => {
@@ -264,7 +334,7 @@ describe("AttributeSlicerVisual", () => {
 
         instance.update(update);
 
-        expect(attributeSlicer.selectedItems).to.be.empty;
+        expect(attributeSlicer.state.selectedItems).to.be.empty;
     });
 
     it("should not show values if there is no values field passed into PBI", () => {
@@ -272,7 +342,7 @@ describe("AttributeSlicerVisual", () => {
 
         performBasicUpdate(instance);
 
-        expect(attributeSlicer.showValues).to.be.false;
+        expect(attributeSlicer.state.settings.general.showValues).to.be.false;
     });
 
     it("should show values if there is a values field passed into PBI", () => {
@@ -280,7 +350,7 @@ describe("AttributeSlicerVisual", () => {
 
         performValueUpdate(instance);
 
-        expect(attributeSlicer.showValues).to.be.true;
+        expect(attributeSlicer.state.settings.general.showValues).to.be.true;
     });
 
     it("should not clear selection when the value field is changed in PBI", () => {
@@ -288,38 +358,43 @@ describe("AttributeSlicerVisual", () => {
 
         performSelectionUpdate(instance);
 
-        const selectedItems = attributeSlicer.selectedItems.slice(0);
+        const selectedItems = attributeSlicer.state.selectedItems.slice(0);
 
         performValueUpdateWithSelections(instance);
 
-        expect(attributeSlicer.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
+        expect(attributeSlicer.state.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
     });
 
-    it ("should clear the search when switching column types", () => {
+    it("should clear the search when switching column types", () => {
         const { instance, attributeSlicer } = createInstance();
 
-        attributeSlicer.searchString = "TEST_SEARCH";
+        attributeSlicer.state = <any>{
+            searchText: "TEST_SEARCH",
+        };
 
         const categories = ["CAT_1_DIFFERENT", "CAT_2_DIFFERENT"];
         const update = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
         instance.update(update);
 
-        expect(attributeSlicer.searchString).to.be.equal("");
+        expect(attributeSlicer.state.searchText).to.be.equal("");
     });
 
     it("should not clear the search string when the value field is changed in PBI", () => {
         const { instance, attributeSlicer } = createInstance();
 
         performBasicUpdate(instance);
+        attributeSlicer.state = <any>{
+            searchText: "TEST_SEARCH",
+        };
 
-        attributeSlicer.searchString = "TEST_SEARCH";
+        // performValueUpdate(instance);
+        const fakeCats = ["CAT_1", "CAT_2"];
+        const values = [[1, 2], [2, 3]]; // Values for each category
+        const update = createOptionsWithCategoriesAndValues(fakeCats, "SOME_CATEGORY_NAME", values, "VALUE_NAME");
+        update.dataViews[0].metadata.objects = createSearchTextPBIObjects("TEST_SEARCH");
+        instance.update(update);
 
-        // TODO: Temporary workaround
-        instance["doesDataSupportSearch"] = () => true;
-
-        performValueUpdate(instance);
-
-        expect(attributeSlicer.searchString).to.be.equal("TEST_SEARCH");
+        expect(attributeSlicer.state.searchText).to.be.equal("TEST_SEARCH");
     });
 
     it("should not clear the selection when just settings are changed", () => {
@@ -327,16 +402,16 @@ describe("AttributeSlicerVisual", () => {
 
         performSelectionUpdate(instance);
 
-        const selectedItems = attributeSlicer.selectedItems.slice(0);
+        const selectedItems = attributeSlicer.state.selectedItems.slice(0);
 
         performMetadataUpdateWithSelections(instance, {
             display: {
-                horizontal: true
+                horizontal: true,
             },
         });
 
-        expect(attributeSlicer.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
-        expect(attributeSlicer.renderHorizontal).to.be.true;
+        expect(attributeSlicer.state.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
+        expect(attributeSlicer.state.settings.display.horizontal).to.be.true;
     });
 
     it("should initially load horizontal setting", () => {
@@ -344,31 +419,37 @@ describe("AttributeSlicerVisual", () => {
 
         performMetadataUpdateWithSelections(instance, {
             display: {
-                horizontal: true
+                horizontal: true,
             },
         });
-        expect(attributeSlicer.renderHorizontal).to.be.true;
-        expect(attributeSlicer.selectedItems.length).to.be.greaterThan(0);
+        expect(attributeSlicer.state.settings.display.horizontal).to.be.true;
+        expect(attributeSlicer.state.selectedItems.length).to.be.greaterThan(0);
     });
 
     it("should not clear selection if search is changed");
+
+    it("should restore selection after a refresh");
     it("should restore selection after a page change");
+    it("should clear selection when the category field is changed in PBI");
+    it("should show values if there is a values field passed into PBI");
     it("should show different colors per column when multiple values fields are added to the values section");
+    it("should not clear selection when the value field is changed in PBI");
+    it("should not clear selection if search is changed");
+    it("should not clear selection when just settings are changed.");
     it("should adjust the width of the value column, when the PBI config changes");
     it("should not clear the selection if two searches are performed in quick succession, while the first is running");
     // it("should not crash when you search for something, then change the maxNumberOfItems setting");
+    it("should go to horizontal view mode, when selected in PBI");
     it("should retain horizontal view mode, after switching pages (in DESKTOP)");
     it("should scroll properly in horizontal view mode");
     it("should load additional data properly in horizontal view mode");
     it("should go to vertical view mode, when selected in PBI");
     // it("should not lose selection when toggling caseInsensitivity");
-
     // ie. Search for Microsof then Microsoft, the service will return the same data
     it("should not get into an infinite loop if the data doesn't change");
-
-    // it ("should support searching numerical columns (when a numerical column is the category)");
-    // it ("should NOT support searching date columns (when a date column is the category)");
-
+    it("should support searching numerical columns (when a numerical column is the category)");
+    it("should NOT support searching date columns (when a date column is the category)");
+    it("should clear the search when switching column types");
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager 
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear

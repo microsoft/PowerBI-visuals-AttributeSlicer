@@ -26,9 +26,12 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require("fs");
 
-const config = module.exports = {
+const config = {
     resolve: {
         extensions: ['', '.webpack.js', '.web.js', '.js', '.json']
+    },
+    resolveLoader: {
+        fallback: [path.join(__dirname, 'node_modules')],
     },
     module: {
         loaders: [
@@ -51,7 +54,7 @@ const config = module.exports = {
         d3: "d3",
         underscore: "_",
         "lodash": "_",
-        "powerbi-visuals/lib/powerbi-visuals": "powerbi"
+        "powerbi-visuals/lib/powerbi-visuals": "powerbi",
     },
     plugins: [
         new webpack.optimize.OccurenceOrderPlugin(),
@@ -65,7 +68,7 @@ const config = module.exports = {
 };
 
 if (process.env.NODE_ENV !== "production") {
-    config.devtool = "eval";    
+    config.devtool = "eval";
 } else {
     var banner = new webpack.BannerPlugin(fs.readFileSync("LICENSE").toString());
     var uglify = new webpack.optimize.UglifyJsPlugin({
@@ -74,10 +77,11 @@ if (process.env.NODE_ENV !== "production") {
         compress: false,
         beautify: false,
         output: {
-            ascii_only: true, // Necessary, otherwise it screws up the unicode characters that lineup is using for font-awesome 
+            ascii_only: true, // Necessary, otherwise it screws up the unicode characters that lineup is using for font-awesome
             comments: false,
         }
     });
     config.plugins.push(uglify);
-    // config.plugins.push(banner);
 }
+
+module.exports = config;

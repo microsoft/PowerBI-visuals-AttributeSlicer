@@ -99,6 +99,12 @@ export interface ISlicerState {
  * Represents an item in the slicer
  */
 export interface SlicerItem {
+
+    /**
+     * The unique identifier for this item
+     */
+    id: string;
+
     /**
      * The actual match
      */
@@ -163,4 +169,100 @@ export interface ISlicerValueSection {
      * The color of this section
      */
     color: string;
+}
+
+/**
+ * Represents the state of the attribute slicer
+ */
+export interface IAttributeSlicerState {
+    /**
+     * The currently selected search text
+     */
+    searchText: string;
+
+    /**
+     * The list of selected items
+     */
+    selectedItems?: {
+        id: any;
+        match: any;
+        value: any;
+        renderedValue: any;
+        selector: any;
+    }[];
+
+    /**
+     * The set of settings for the attribute slicer
+     */
+    settings: IAttributeSlicerSettings;
+}
+
+/**
+ * The attribute slicer settings
+ */
+export interface IAttributeSlicerSettings {
+
+    general: {
+        /**
+         * The text size in pt
+         */
+        textSize: number;
+
+        /**
+         * If we should show the options area
+         */
+        showOptions: boolean;
+
+        /**
+         * If we should show the search box
+         */
+        showSearch: boolean;
+
+        /**
+         * If we should show the values column
+         */
+        showValues: boolean;
+    };
+
+    display: {
+
+        /**
+         * The percentage based width of the value column 0 = hidden, 100 = whole screen
+         */
+        valueColumnWidth: number;
+
+        /**
+         * The display units to use when rendering values
+         */
+        labelDisplayUnits: number;
+
+        // TODO: This are basically unused the the base slicer
+
+        /**
+         * The precision of the numbers to render
+         */
+        labelPrecision: number;
+
+        /**
+         * If we are being rendered horizontally
+         */
+        horizontal: boolean;
+    };
+
+    selection: {
+        /**
+         * If we should single select
+         */
+        singleSelect: boolean;
+
+        /**
+         * If brushMode is enabled
+         */
+        brushMode: boolean;
+
+        /**
+         * If we should show the tokens
+         */
+        showSelections: boolean;
+    };
 }

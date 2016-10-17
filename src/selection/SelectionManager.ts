@@ -105,7 +105,7 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
     /**
      * Setter for single select mode
      */
-    private _singleSelectDontUse = false;
+    private _singleSelectDontUse = false; // tslint:disable-line
     public get singleSelect() {
         return this._singleSelectDontUse;
     }

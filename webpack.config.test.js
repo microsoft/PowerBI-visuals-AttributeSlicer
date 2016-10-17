@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-const path = require('path');
-const webpack = require('webpack');
-
-module.exports = {
-    devtool: 'eval',
+const config = {
+    devTool: "eval",
     resolve: {
-        // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: ['', '.webpack.js', '.web.js', '.js', '.json']
     },
+    // resolveLoader: {
+    //     fallback: [path.join(__dirname, 'node_modules')],
+    // },
     module: {
         loaders: [
             {
@@ -48,13 +46,8 @@ module.exports = {
         ],
     },
     externals: {
-        "jsdom": "",
-        "powerbi-visuals/lib/powerbi-visuals": "{}"
+        "powerbi-visuals/lib/powerbi-visuals": "{}",
     },
-    plugins: [
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.ProvidePlugin({
-            'Promise': 'exports?global.Promise!es6-promise'
-        })
-    ],
 };
+
+module.exports = config;

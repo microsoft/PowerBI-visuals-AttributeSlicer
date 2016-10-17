@@ -23,6 +23,7 @@
  */
 
 import { default as SelectionManager, ISelectableItem } from "./SelectionManager";
+import * as $ from "jquery";
 const EVENTS_NS = ".selection-manager";
 export default class JQuerySelectionManager<T extends ISelectableItem<any>> extends SelectionManager<T> {
 

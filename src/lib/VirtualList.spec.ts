@@ -27,6 +27,7 @@
 const VirtualList = require("./VirtualList");
 /* tslint:enable */
 import * as chai from "chai";
+import * as $ from "jquery";
 describe("VirtualList", () => {
     let parentEle: JQuery;
     beforeEach(() => {

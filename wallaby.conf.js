@@ -22,36 +22,60 @@
  * SOFTWARE.
  */
 
-
 var wallabyWebpack = require('wallaby-webpack');
-var wallabyPostprocessor = wallabyWebpack(require("./webpack.config.test"));
+
+var webpackPostprocessor = wallabyWebpack({
+    module: {
+      loaders: [
+          { 
+            test: /\.js$/, 
+            loader: "babel-loader",
+            exclude: /(node_modules|bower_components)/,
+            query: {
+              presets: ['es2015']
+            } 
+          },
+          {
+              test: /\.s?css$/,
+              loaders: ["style", "css", "sass"]
+          },
+          {
+              test: /\.json$/,
+              loader: 'json-loader'
+          },
+          {
+              test: /\.html$/,
+              loader: 'raw-loader'
+          }
+      ],
+    }
+});
 
 module.exports = function (wallaby) {
   return {
-    // set `load: false` to all source files and tests processed by webpack
-    // (except external files),
-    // as they should not be loaded in browser,
-    // their wrapped versions will be loaded instead
     files: [
-      // {pattern: 'lib/jquery.js', instrument: false},
-      {pattern: 'src/**/*.{ts,scss,json,html}', load: false},
-      {pattern: 'src/**/VirtualList.js', load: false},
-      {pattern: 'base/**/*.{ts,scss,json,html}', load: false},
-      {pattern: 'base/**/testSetup.js', load: false},
-      {pattern: 'node_modules/essex.powerbi.base/css/*.{scss}', load: false},
-      {pattern: '!src/**/*.spec.ts', load: false}
+      { pattern: 'node_modules/es6-promise/dist/es6-promise.js', instrument: false },
+      { pattern: 'src/**/*.{js,ts,css,scss,json,html}', load: false },
+      { pattern: 'base/**/*.{ts,js}', load: false },
+      { pattern: 'src/**/*.spec.ts', ignore: true, load:false },
+      { pattern: 'node_modules/**/*.{css,scss}', load:false, ignore: true /* ignoring loads faster, but gives css/scss errors */ }
     ],
 
     tests: [
-      {pattern: 'src/**/*.spec.ts', load: false}
+      { pattern: 'src/**/*.spec.ts', load: false }
     ],
 
-    postprocessor: wallabyPostprocessor,
-
-    setup: function () {
-      // required to trigger test loading
-      window.__moduleBundler.loadTests();
+    env: {
+      kind: "electron"
     },
-    testFramework: "mocha"
+
+    postprocessor: webpackPostprocessor,
+    setup: () => {
+      require('babel-polyfill'); // Required for Promises for some reason
+    },
+    testFramework: 'mocha',
+    bootstrap: function () {
+      window.__moduleBundler.loadTests();
+    }
   };
 };
