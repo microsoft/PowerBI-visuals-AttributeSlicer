@@ -348,7 +348,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
      */
     private onUpdateLoadState(dv: DataView, pbiState: IAttributeSlicerState) {
         // Important that this is done down here for selection to be retained
-        const oldState = this.state;
+        const oldState = this.generateState();
         if (!isStateEqual(oldState, pbiState)) {
 
             const oldSettings = oldState.settings;
