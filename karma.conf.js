@@ -45,6 +45,12 @@ module.exports = config => {
     autoWatch: isTddMode,
     browsers: isTddMode ? ['Chrome'] : [ 'PhantomJS' ],
     singleRun: !isTddMode,
-    concurrency: Infinity
+    concurrency: Infinity,
+    customLaunchers: {
+      'PhantomJS_debug': {
+        base: 'PhantomJS',
+        debug: true
+      }
+    },
   });
 };

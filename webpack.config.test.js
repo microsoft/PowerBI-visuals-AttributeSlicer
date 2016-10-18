@@ -46,6 +46,7 @@ const config = {
         ],
     },
     externals: {
+        "jsdom": "{}",
         "powerbi-visuals/lib/powerbi-visuals": "{}",
     },
 };
