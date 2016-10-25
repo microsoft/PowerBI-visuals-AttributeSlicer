@@ -23,18 +23,23 @@
  */
 
 /* tslint:disable */
-import { logger } from "essex.powerbi.base/dist/lib/utils/logger";
-import { capabilities } from "essex.powerbi.base/dist/lib/utils/capabilities";
-import PropertyPersister from "essex.powerbi.base/dist/lib/utils/PropertyPersister";
-import createPropertyPersister from "essex.powerbi.base/dist/lib/utils/createPropertyPersister";
-import Visual from "essex.powerbi.base/dist/lib/utils/Visual";
-import UpdateType from "essex.powerbi.base/dist/lib/utils/UpdateType";
-import { receiveUpdateType } from "essex.powerbi.base/dist/lib/Utils/receiveUpdateType";
-import { IDimensions, receiveDimensions, IReceiveDimensions } from "essex.powerbi.base/dist/lib/Utils/receiveDimensions";
-import {
-    publishReplace,
-    publishChange,
-} from "pbi-stateful/src/stateful";
+import { 
+    createPersistObjectBuilder, 
+    buildContainsFilter,
+    logger,
+    capabilities,
+    PropertyPersister,
+    createPropertyPersister,
+    Visual,
+    UpdateType,
+    receiveUpdateType,
+    IDimensions,
+    receiveDimensions,
+    IReceiveDimensions,
+    getSelectionIdsFromSelectors,
+    getSetting,
+} from "essex.powerbi.base";
+import { publishReplace, publishChange } from "pbi-stateful/src/stateful";
 import { StatefulVisual } from "pbi-stateful/src/StatefulVisual";
 
 import * as _ from "lodash";
@@ -48,15 +53,14 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import PixelConverter = jsCommon.PixelConverter;
 
 import { isStateEqual } from "../Utils";
-import { buildPersistObjectsFromState, buildStateFromPowerBI } from "./stateConversion";
-import { buildSelfFilter } from "./expressions";
-import converter from "./dataConversion";
+import { default as converter, computeRenderedValues } from "./dataConversion";
 import capabilitiesData from "./AttributeSlicerVisual.capabilities";
 import { createValueFormatter } from "./formatting";
-import { default as createPersistObjectBuilder } from "./persistence";
-import { ListItem, SlicerItem, SETTING_DESCRIPTORS } from "./interfaces";
+import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
+import { default as VisualState, calcStateDifferences } from "./state";
 import { IAttributeSlicerState } from "../interfaces";
 import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
+import SelectionManager = powerbi.visuals.utility.SelectionManager;
 const log = logger("essex.widget.AttributeSlicerVisual");
 const CUSTOM_CSS_MODULE = require("!css!sass!./css/AttributeSlicerVisual.scss");
 const stringify = require("json-stringify-safe");
@@ -84,20 +88,11 @@ function hashString(input: string): number {
 @receiveDimensions
 @capabilities(capabilitiesData)
 export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerState> {
+
     /**
      * My AttributeSlicer
      */
     protected mySlicer: AttributeSlicerImpl;
-
-    /**
-     * The display units for the values
-     */
-    protected labelDisplayUnits = 0;
-
-    /**
-     * The precision to use with the values
-     */
-    protected labelPrecision: number = 0;
 
     /**
      * The current dataView
@@ -122,12 +117,22 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     /*
      * The current set of cacheddata
      */
-    private data: SlicerItem[];
+    private data: IAttributeSlicerVisualData;
 
     /**
      * A property persister
      */
     private propertyPersister: PropertyPersister;
+
+    /**
+     * The selection manager for PBI
+     */
+    private selectionManager: SelectionManager;
+
+    /**
+     * The current state of this visual
+     */
+    private _internalState: VisualState;
 
     /**
      * Constructor
@@ -142,6 +147,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
         // HACK: PowerBI Swallows these events unless we prevent propagation upwards
         this.element.on(EVENTS_TO_IGNORE, (e: any) => e.stopPropagation());
+        this._internalState = VisualState.fromPBI(undefined);
     }
 
     /**
@@ -156,6 +162,9 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
      */
     public onInit(options: powerbi.VisualInitOptions): void {
         this.host = options.host;
+        this.selectionManager = new SelectionManager({
+            hostServices: this.host,
+        });
         this.propertyPersister = createPropertyPersister(this.host, 100);
 
         const slicerEle = $("<div>");
@@ -187,9 +196,9 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     public onUpdate(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
         log("Update", options);
         const dv = this.dataView = options.dataViews && options.dataViews[0];
-        const newState = buildStateFromPowerBI(dv);
-        this.onUpdateLoadData(updateType, dv, newState);
-        this.onUpdateLoadState(dv, newState);
+        const newState = VisualState.fromPBI<VisualState>(dv);
+        this.loadDataFromVisualUpdate(updateType, options.type, dv, newState);
+        this.loadStateFromVisualUpdate(newState, updateType);
     }
 
     /**
@@ -200,34 +209,40 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
         // The old state passed in the params, is the old *cached* version, so if we change the state ourselves
         // Then oldState will not actually reflect the correct old state.
-        const currentState = this.generateState();
         // Since the other one is cached.
-        if (!isStateEqual(state, currentState)) {
+        if (!isStateEqual(state, this._internalState)) {
             state = _.cloneDeep(state);
 
+            const oldState = this._internalState;
+
             // Set the state on the slicer
-            this.mySlicer.state = state;
+            this._internalState = VisualState.fromJSON(state);
+            this.mySlicer.state = this._internalState;
 
-            // Slicer is loaded, now sync with PBI
-            const labelPrecision =
-                this.labelPrecision !== (this.labelPrecision = ldget(state, "settings.display.labelPrecision", 0));
-            const labelDisplayUnits =
-                this.labelDisplayUnits !== (this.labelDisplayUnits = ldget(state, "settings.display.labelDisplayUnits", 0));
-
+            const { labelPrecision, labelDisplayUnits } = this._internalState;
             if ((labelPrecision || labelDisplayUnits) && this.mySlicer.data) {
-                const formatter = createValueFormatter(this.labelDisplayUnits, this.labelPrecision);
+                const formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
 
                 // Update the display values in the datas
                 this.mySlicer.data.forEach(n => {
-                    (n.sections || []).forEach(section => {
-                        section.displayValue = formatter.format(section.value);
+                    (n.valueSegments || []).forEach(segment => {
+                        segment.displayValue = formatter.format(segment.value);
                     });
                 });
 
                 // Tell the slicer to repaint
                 this.mySlicer.refresh();
             }
-            this.writeStateToPBI(state);
+
+            // The colors have changed, so we need to reload data
+            if (oldState.useGradient !== this._internalState.useGradient ||
+                oldState.startColor !== this._internalState.startColor ||
+                oldState.endColor !== this._internalState.endColor) {
+                this.data = converter(this.dataView, undefined, undefined, this._internalState);
+                this.mySlicer.data = this.data.items;
+            }
+
+            this.writeCurrentStateToPBI();
         }
     }
 
@@ -235,22 +250,29 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
      * Enumerates the instances for the objects that appear in the power bi panel
      */
     protected handleEnumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): powerbi.VisualObjectInstanceEnumeration {
-        super.handleEnumerateObjectInstances(options);
-        let instances = super.enumerateObjectInstances(options) || [{
-            /*tslint:disable */selector: null/* tslint:enable */,
-            objectName: options.objectName,
-            properties: {},
-        }] as VisualObjectInstance[];
-        const instance = instances[0];
-        const props = instance.properties;
-        const state = this.state;
-        if (state.settings[options.objectName]) {
-            _.merge(props, state.settings[options.objectName]);
+        let instances = (super.handleEnumerateObjectInstances(options) || []) as VisualObjectInstance[];
+        let builtObjects = this._internalState.buildEnumerationObjects(options.objectName, this.dataView, false);
+
+        // We only need to return individual data point colors, if the data has series data, and the user doesn't want to use gradients
+        if (options.objectName === "dataPoint" &&
+            !this._internalState.useGradient &&
+            this.data &&
+            this.data.segmentInfo &&
+            this.data.segmentInfo.length > 1) {
+            this.data.segmentInfo.forEach(s => {
+                builtObjects.push({
+                    objectName: "dataPoint",
+                    displayName: s.name,
+                    selector: powerbi.visuals.ColorHelper.normalizeSelector(
+                        powerbi.visuals.SelectionId.createWithId(s.identity).getSelector(), // Not sure if all of this is necessary
+                    false),
+                    properties: {
+                        fill: { solid: { color: s.color } },
+                    },
+                });
+            });
         }
-        if (options.objectName === "general") {
-            props["textSize"] = PixelConverter.toPoint(parseFloat(props["textSize"] + ""));
-        }
-        return instances;
+        return instances.concat(builtObjects);
     }
 
     /**
@@ -264,7 +286,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     public areEqual(state1: IAttributeSlicerState, state2: IAttributeSlicerState): boolean {
-        const result = _.isEqual(state1, state2);
+        const result = isStateEqual(state1, state2);
         log("areEqual?::%s", result, state1, state2);
         return result;
     }
@@ -281,40 +303,49 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     /**
-     * Generates a new state
+     * Generates a new state from the slicer state and the visual state
      */
     protected generateState() {
-        const baseState = this.mySlicer.state;
-        return _.merge({}, baseState, {
-            settings: {
-                display: {
-                    labelDisplayUnits: this.labelDisplayUnits || 0,
-                    labelPrecision: this.labelPrecision || 0,
-                },
-            },
-        });
+        const finalState = _.merge<IAttributeSlicerState>({},
+            _.omit(this._internalState, "selectedItems"),
+            _.omit(this.mySlicer.state, "selectedItems"));
+
+        // Merge works weird on arrays
+        finalState.selectedItems = _.cloneDeep(ldget(this.mySlicer, "state.selectedItems", []));
+
+        this._internalState = VisualState.fromJSON(finalState);
+
+        return this._internalState;
     }
 
     /**
      * Checks whether or not to load data from the dataView
      */
-    private onUpdateLoadData(updateType: UpdateType, dv: DataView, pbiState: IAttributeSlicerState) {
+    private loadDataFromVisualUpdate(
+        updateType: UpdateType,
+        pbiUpdateType: powerbi.VisualUpdateType,
+        dv: DataView,
+        pbiState: VisualState) {
         // Load data if the data has definitely changed, sometimes however it hasn't actually changed
         // ie search for Microsof then Microsoft
         if (dv) {
-            if ((updateType & UpdateType.Data) === UpdateType.Data || this.loadDeferred) {
-                const data = converter(dv);
+            if (this.shouldLoadDataIntoSlicer(updateType, pbiState, pbiUpdateType)) {
+                const data = converter(dv, undefined, undefined, pbiState);
 
                 log("Loading data from PBI");
 
-                this.data = data || [];
-                let filteredData = this.data.slice(0);
+                this.data = data || { items: [], segmentInfo: [] };
+                let filteredData = this.data.items.slice(0);
 
                 // If we are appending data for the attribute slicer
                 if (this.loadDeferred && this.mySlicer.data && !this.loadDeferred["search"]) {
                     // we only need to give it the new items
                     this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
                     delete this.loadDeferred;
+
+                    // Recompute the rendered values, cause otherwise only half will have the updated values
+                    computeRenderedValues(this.mySlicer.data as ListItem[]);
+                    this.mySlicer.refresh();
                 } else {
                     this.mySlicer.data = filteredData;
 
@@ -344,37 +375,28 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     /**
-     * Checks if the settings have changed from PBI
+     * Loads the given state from a visual update
      */
-    private onUpdateLoadState(dv: DataView, pbiState: IAttributeSlicerState) {
-        // Important that this is done down here for selection to be retained
-        const oldState = this.generateState();
-        if (!isStateEqual(oldState, pbiState)) {
+    private loadStateFromVisualUpdate(newState: VisualState, updateType: UpdateType) {
 
-            const oldSettings = oldState.settings;
-            const newSettings = pbiState.settings;
-            const differences: string[] = [];
-            Object.keys(newSettings).forEach(secN => {
-                const section = newSettings[secN];
-                Object.keys(section).forEach(setN => {
-                    const oldSetting = ldget(oldSettings, `${secN}.{setN}`);
-                    const newSetting = ldget(newSettings, `${secN}.{setN}`);
-                    if (!_.isEqual(oldSetting, newSetting)) {
-                        const descriptor = SETTING_DESCRIPTORS[secN][setN];
-                        differences.push(descriptor ? descriptor.displayName : setN);
-                    }
-                });
-            });
+        // If the state has changed, then synchronize our state with it.
+        if (!isStateEqual(this._internalState, newState)) {
+
+            const differences: string[] =
+                calcStateDifferences(this._internalState, newState)
+                    .filter(n => n !== "searchText" && n !== "Selection"); // These aren't really settings
 
             // New state has changed, so update the slicer
             log("PBI has changed, updating state");
-            this.state = pbiState;
+
+            // The use of "state" here is important, because we want to load our internal state from this state 
+            this.state = VisualState.fromJSON(newState);
 
             // If there are any settings updates
-            if (differences.length || !_.isEqual(oldSettings, newSettings)) {
-                const name = `Updated Settings${ differences.length ? ": " + differences.join(", ") : "" }`;
+            if (differences.length && (updateType & UpdateType.Settings) === UpdateType.Settings) {
+                const name = `Updated Settings ${ differences.length ? ": " + differences.join(", ") : "" }`;
                 // ctrevino - Publishing a state change here causes invisible states to pop in with multiple visuals.
-                publishReplace(this, name, pbiState);
+                (updateType === UpdateType.Settings ? publishChange : publishReplace)(this, name, newState);
             }
         }
     }
@@ -388,9 +410,8 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             log("onSelectionChanged");
             const selection = selectedItems.map(n => n.match).join(", ");
             const text = selection && selection.length ? `Select ${selection}` : "Clear Selection";
-            const newState = this.generateState();
-            this.setStateAndPublishChange(newState, text);
-            this.writeStateToPBI(newState);
+            this.syncStateAndPublishChange(text);
+            this.writeCurrentStateToPBI();
         },
     100);
 
@@ -409,7 +430,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     private onSearchPerformed(searchText: string) {
         if (!this.isHandlingSetState) {
             const text = searchText && searchText.length ? `Search for "${searchText}"` : "Clear Search";
-            this.setStateAndPublishChange(this.generateState(), text);
+            this.syncStateAndPublishChange(text);
         }
     }
 
@@ -427,7 +448,8 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         if (isSearch) {
             // Set the search filter on PBI
             const builder = createPersistObjectBuilder();
-            builder.persist("general", "selfFilter", buildSelfFilter(this.dataView, this.mySlicer.searchString));
+            const filter = buildContainsFilter(ldget(this.dataView, "categorical.categories[0].source"), this.mySlicer.searchString);
+            builder.persist("general", "selfFilter", filter);
             this.propertyPersister.persist(false, builder.build());
 
             // Set up the load deferred, and load more data
@@ -452,21 +474,42 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     /**
+     * A function used to determine whether or not a data update should be performed
+     */
+    private shouldLoadDataIntoSlicer(updateType: UpdateType, pbiState: VisualState, pbiUpdateType: powerbi.VisualUpdateType) {
+                // If there is a new dataset from PBI
+        return (updateType & UpdateType.Data) === UpdateType.Data ||
+
+                // If we cannot figure out the actual update type, then assume it is a data update
+                (updateType === UpdateType.Unknown && pbiUpdateType === powerbi.VisualUpdateType.Data) ||
+
+                // If attribute slicer requested more data, but the data actually hasn't changed 
+                // (ie, if you search for Microsof then Microsoft, most likely will return the same dataset)
+                this.loadDeferred;
+    }
+
+    /**
      * Sets the given state and calls publishChange to announce the change that caused this state
      */
-    private setStateAndPublishChange(newState: IAttributeSlicerState, text: string) {
-        this.state = newState;
-        publishChange(this, text, newState);
+    private syncStateAndPublishChange(text: string) {
+        this.state = this.generateState();
+        publishChange(this, text, this._internalState);
     }
 
     /**
      * Syncs the given state back to PBI
      */
-    private writeStateToPBI(state: IAttributeSlicerState) {
+    private writeCurrentStateToPBI() {
+        const state = this._internalState;
         log("AttributeSlicer loading state into PBI", state);
         if (state && this.host) {
-            // Stolen from PBI's timeline
-            this.propertyPersister.persist(true, buildPersistObjectsFromState(this.dataView, state));
+            // Restoring selection into PBI
+            this.selectionManager.clear();
+            const ids = getSelectionIdsFromSelectors(state.selectedItems.map(n => n.selector));
+            ids.forEach(n => {
+                this.selectionManager.select(n, true);
+            });
+            this.propertyPersister.persist(false, state.buildPersistObjects(this.dataView, true));
         }
     }
 }

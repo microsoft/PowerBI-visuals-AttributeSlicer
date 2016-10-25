@@ -22,88 +22,77 @@
  * SOFTWARE.
  */
 
-import VisualBase from "essex.powerbi.base/dist/lib/VisualBase";
-import VisualDataRoleKind = powerbi.VisualDataRoleKind;
-import { SETTING_DESCRIPTORS } from "./interfaces";
+import { VisualBase } from "essex.powerbi.base";
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
+import VisualState from "./state";
 const log = require("debug")("AttributeSlicer::Capabilities"); // tslint:disable-line
 import * as $ from "jquery";
+import data = powerbi.data;
+import VisualDataRoleKind = powerbi.VisualDataRoleKind;
+import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 
 const capabilities = $.extend(true, {}, VisualBase.capabilities, {
-        dataRoles: [
-            {
-                name: "Category",
-                kind: VisualDataRoleKind.Grouping,
-                displayName: "Category",
-            }, {
-                name: "Values",
-                kind: VisualDataRoleKind.Measure,
-                displayName: "Values",
-            },
-        ],
-        dataViewMappings: [{
-            conditions: [{ "Category": { max: 1, min: 0 }, "Values": { min: 0 }}],
-            categorical: {
-                categories: {
-                    for: { in: "Category" },
-                    dataReductionAlgorithm: { window: { count: DATA_WINDOW_SIZE } },
-                },
-                values: {
-                    select: [{ for: { in: "Values" }}],
-                    dataReductionAlgorithm: { top: {} },
-                },
-            },
-        }],
-        // sort this crap by default
-        sorting: {
-            default: {},
+    dataRoles: [
+        {
+            name: "Category",
+            kind: VisualDataRoleKind.Grouping,
+            displayName: "Category",
+        }, {
+            name: "Values",
+            kind: VisualDataRoleKind.Measure,
+            requiredTypes: [{ numeric: true }, { integer: true }],
+            displayName: "With Values",
+        }, {
+            name: "Series",
+            kind: VisualDataRoleKind.Grouping,
+            displayName: "Aggregated By",
         },
-        objects: $.extend(true, {}, {
-            general: {
-                displayName: "General",
-                properties: {
-                    filter: {
-                        type: { filter: {} },
-                        rule: {
-                            output: {
-                                property: "selected",
-                                selector: ["Values"],
-                            },
-                        },
-                    },
-                    // formatString: StandardObjectProperties.formatString,
-                    selection: {
-                        type: { text: {} },
-                    },
-                    selfFilter: {
-                        type: { filter: { selfFilter: true } },
-                    },
-                    selfFilterEnabled: {
-                        type: { operations: { searchEnabled: true } },
-                    },
+    ],
+    dataViewMappings: [{
+        conditions: [
+            { "Category": { max: 1 }, "Series": { max: 0 }},
+            { "Category": { max: 1 }, "Series": { max: 0 }, "Values": { max: 1, min: 0 }},
+            { "Category": { max: 1 }, "Series": { min: 1, max: 1 }, "Values": { max: 1, min: 1 }},
+            { "Category": { max: 1 }, "Series": { max: 0 }, "Values": { min: 0 }},
+        ],
+        categorical: {
+            categories: {
+                for: { in: "Category" },
+                dataReductionAlgorithm: { window: { count: DATA_WINDOW_SIZE } },
+            },
+            values: {
+                group: {
+                    by: "Series",
+                    select: [{ for: { in: "Values" }}],
+                    dataReductionAlgorithm:  { top: { count: 100 } },
                 },
             },
-        }, buildObjects()),
-    });
+            rowCount: { preferred: { min: 2 }, supported: { min: 0 } },
+        },
+    }],
+    // sort this crap by default
+    sorting: {
+        default: {},
+    },
+    supportsHighlight: true,
+    objects: $.extend(true, {}, VisualState.buildCapabilitiesObjects(), {
+        general: {
+            displayName: "General",
+            properties: {
+                selfFilterEnabled: {
+                    type: { operations: { searchEnabled: true } },
+                },
+            },
+        },
+        dataPoint: {
+            displayName: data.createDisplayNameGetter("Visual_DataPoint"),
+            description: data.createDisplayNameGetter("Visual_DataPointDescription"),
+            properties: {
+                fill: StandardObjectProperties.fill,
+            },
+        },
+    }),
+});
 
 export default capabilities;
 log("Attribute Slicer Capabilities: ", capabilities);
-
-function buildObjects() {
-    "use strict";
-    const objects = {};
-    Object.keys(SETTING_DESCRIPTORS).forEach(section => {
-        const objProps = objects[section] = {
-            properties: {},
-        };
-        const props = SETTING_DESCRIPTORS[section];
-        Object.keys(props).forEach(propName => {
-            if (propName === "displayName") {
-                objProps[propName] = props[propName];
-            } else {
-                objProps.properties[propName] = props[propName];
-            }
-        });
-    });
-    return objects;
-}

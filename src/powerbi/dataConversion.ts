@@ -22,16 +22,25 @@
  * SOFTWARE.
  */
 
-import { ListItem } from "./interfaces";
+import { ListItem, IAttributeSlicerVisualData, IColorSettings, ISlicerValueSegment } from "./interfaces";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import SelectionId = powerbi.visuals.SelectionId;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
+import * as d3 from "d3";
 
 /* tslint:disable */
 const { colors } = require("essex.powerbi.base");
 const { full } = colors;
+const ldget = require("lodash/get");
 /* tslint:enable */
+
+const pathFinder = /return\s+([\w\.\_\d\[\]]+)/;
+function get<T, J>(obj: T, getter: (obj: T) => J, defaultValue?: any): J {
+    "use strict";
+    const path = pathFinder.exec(getter.toString())[1];
+    return ldget(obj, path.split(".").slice(1).join("."), defaultValue) as J;
+}
 
 /**
  * Converts the given dataview into a list of listitems
@@ -39,7 +48,8 @@ const { full } = colors;
 export default function converter(
     dataView: DataView,
     valueFormatter?: IValueFormatter,
-    categoryFormatter?: IValueFormatter): ListItem[] {
+    categoryFormatter?: IValueFormatter,
+    settings?: IColorSettings): IAttributeSlicerVisualData {
     "use strict";
     if (!valueFormatter) {
         valueFormatter = createValueFormatter();
@@ -47,33 +57,20 @@ export default function converter(
     if (!categoryFormatter) {
         categoryFormatter = createCategoryFormatter(dataView);
     }
-    let converted: ListItem[];
-    const categorical = dataView && dataView.categorical;
-    const categories = categorical && categorical.categories;
-    const values = categorical && categorical.values;
-    let maxValue: number;
-    let minValue: number;
-    if (categories && categories.length && categories[0].values) {
-        converted = categories[0].values.map((category, catIdx) => {
-            let id = SelectionId.createWithId(categories[0].identity[catIdx]);
+    let items: ListItem[];
+    const categories = get(dataView, x => x.categorical.categories[0].values);
+    const identities = get(dataView, x => x.categorical.categories[0].identity);
+    const values = get(dataView, x => x.categorical.values);
+    if (categories) {
+        const segmentInfo = calculateSegmentInfo(values, settings);
+        items = categories.map((category, catIdx) => {
+            let id = SelectionId.createWithId(identities[catIdx]);
             let total = 0;
-            let sections: any;
+            let segments: any;
             if (values) {
-                sections = values.map((v, j) => {
-                    const value = v.values[catIdx];
-                    if (typeof value === "number") {
-                        total += <number>value;
-                    }
-                    return {
-                        color: colors[j] || "#ccc",
-                        value: value,
-                        displayValue: valueFormatter.format(value),
-                        width: 0,
-                    };
-                });
-                sections.forEach((s: any) => {
-                    s.width = (s.value / total) * 100;
-                });
+                const result = createSegments(values, segmentInfo, catIdx, valueFormatter);
+                total = result.total;
+                segments = result.segments;
             }
             const item =
                 createItem(
@@ -83,21 +80,15 @@ export default function converter(
                     id.getSelector(),
                     undefined,
                     "#ccc");
-            item.sections = sections;
-            if (typeof maxValue === "undefined" || item.value > maxValue) {
-                maxValue = item.value;
-            }
-            if (typeof minValue === "undefined" || item.value < minValue) {
-                minValue = item.value;
-            }
-            return item as any;
+            item.valueSegments = segments;
+            return item;
         });
-        converted.forEach((c) => {
-            c.renderedValue = c.value ? ((c.value - minValue) / (maxValue - minValue)) * 100 : undefined;
-        });
-        return converted;
+
+        // Computes the rendered values for each of the items
+        computeRenderedValues(items);
+
+        return { items, segmentInfo };
     }
-    return converted;
 }
 
 /**
@@ -120,4 +111,133 @@ export function createItem(
         selector: selector,
         equals: (b: ListItem) => id === b.id,
     };
+}
+
+/**
+ * Computes the rendered values for the given set of items
+ */
+export function computeRenderedValues(items: ListItem[], minMax?: { min: number, max: number; }) {
+    "use strict";
+    const { min, max } = minMax || computeMinMaxes(items);
+    const range = max - min;
+    items.forEach((c) => {
+        if (c.value) {
+            let renderedValue = 100;
+            if (range > 0) {
+                const offset = min > 0 ? 10 : 0;
+                renderedValue = (((c.value - min) / range) * (100 - offset)) + offset;
+            }
+            c.renderedValue = renderedValue;
+        }
+    });
+}
+
+/**
+ * Computes the minimum and maximum values for the given set of items
+ */
+export function computeMinMaxes(items: ListItem[]) {
+    "use strict";
+    let maxValue: number;
+    let minValue: number;
+    items.forEach((c) => {
+        if (typeof maxValue === "undefined" || c.value > maxValue) {
+            maxValue = c.value;
+        }
+        if (typeof minValue === "undefined" || c.value < minValue) {
+            minValue = c.value;
+        }
+    });
+    return {
+        min: minValue,
+        max: maxValue,
+    };
+}
+
+/**
+ * True if the given dataview supports multiple value segments
+ */
+export function dataSupportsValueSegments(dv: powerbi.DataView) {
+    "use strict";
+    return ldget(dv, "categorical.values.length", 0) > 1;
+}
+
+/**
+ * Creates segments for the given values, and the information on how the value is segmented
+ */
+function createSegments(
+    values: powerbi.DataViewValueColumns,
+    segmentInfos: { name: string, identity: any; color: string }[],
+    column: number,
+    valueFormatter: IValueFormatter) {
+    "use strict";
+    let total = 0;
+    const segments = segmentInfos.map((segmentInfo, j) => {
+        // Highlight here is a numerical value, the # of highlighted items in the total
+        const highlights = (values[j].highlights || []);
+        const highlight = highlights[column];
+        const value = values[j].values[column];
+        if (typeof value === "number") {
+            total += <number>value;
+        }
+        const { color, name } = segmentInfo;
+
+        // There is some sort of highlighting going on
+        const segment = {
+            name: name,
+            color: color,
+            value: value,
+            displayValue: valueFormatter.format(value),
+            width: 0,
+        } as ISlicerValueSegment;
+
+        if (highlights && highlights.length) {
+            let highlightWidth = 0;
+            if (value && typeof value === "number" && highlight) {
+                highlightWidth = (<number>highlight / value) * 100;
+            }
+            segment.highlightWidth = highlightWidth;
+        }
+
+        return segment;
+    });
+    segments.forEach((s: any) => {
+        s.width = (s.value / total) * 100;
+    });
+    return { segments, total };
+}
+
+/**
+ * Calculates the segments that are required to represent the pbi values
+ */
+function calculateSegmentInfo(values: powerbi.DataViewValueColumns, settings: IColorSettings) {
+    "use strict";
+    let segmentInfo: { name: any, identity: any }[] = [];
+    if (values && values.length) {
+        // If a column has the "Series" role, then we have series data
+        const isSeriesData = !!(values.source && values.source.roles["Series"]);
+        segmentInfo = isSeriesData ?
+            <any>values.grouped() :
+            values.map((n, i) => ({ name: (i + 1) + "", identity: n.identity }));
+    }
+
+    let gradientScale: d3.scale.Linear<string, number>;
+    if (settings && settings.useGradient) {
+        gradientScale = d3.scale.linear<string, number>()
+                .domain([0, segmentInfo.length])
+                .interpolate(d3.interpolateRgb as any)
+                .range([settings.startColor as any, settings.endColor as any]);
+    }
+    return _.sortBy(segmentInfo, ["name"]).map((v, j) => {
+        let color = full[j] || "#ccc";
+        if (gradientScale) {
+            color = gradientScale(j);
+        }
+        // Use the instance color if we are not using a gradient.
+        color = !gradientScale ? ldget(v, "objects.dataPoint.fill.solid.color", color) : color;
+        return {
+            name: v.name as string,
+            identity: v.identity,
+            color: color,
+        };
+    });
 }

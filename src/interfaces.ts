@@ -22,79 +22,6 @@
  * SOFTWARE.
  */
 
-
-/**
- * Represents the state of the slicer
- */
-export interface ISlicerState {
-
-    /**
-     * The currently selected search text
-     */
-    searchText: string;
-
-    /**
-     * If we are being rendered horizontally
-     */
-    horizontal: boolean;
-
-    /**
-     * The list of selected items
-     */
-    selectedItems: {
-        match: any;
-        value: any;
-        renderedValue: any;
-        selector: any;
-    }[];
-
-    /**
-     * The text size in pt
-     */
-    textSize: number;
-
-    /**
-     * If we should show the options area
-     */
-    showOptions: boolean;
-
-    /**
-     * If we should search case insensitively
-     */
-    caseInsensitive: boolean;
-
-    /**
-     * The percentage based width of the value column 0 = hidden, 100 = whole screen
-     */
-    valueColumnWidth: number;
-
-    /**
-     * The display units to use when rendering values
-     */
-    labelDisplayUnits: number;
-
-    /**
-     * The precision of the numbers to render
-     */
-    labelPrecision: number;
-
-    /**
-     * If we should single select
-     */
-    singleSelect: boolean;
-
-    /**
-     * If brushMode is enabled
-     */
-    brushMode: boolean;
-
-    /**
-     * If we should show the tokens
-     */
-    showSelections: boolean;
-}
-
-
 /**
  * Represents an item in the slicer
  */
@@ -135,38 +62,40 @@ export interface SlicerItem {
     onCreate?: (ele: JQuery) => void;
 
     /**
-     * The sections that make up this items value, the total of the widths must === 100
+     * The segments that make up this items value, the total of the widths must === 100
      */
-    sections?: ISlicerValueSection[];
+    valueSegments?: ISlicerValueSegment[];
 
     /**
      * The percentage value that should be displayed (0 - 100)
      * TODO: Better name, basically it is the value that should be displayed in the histogram
      */
     renderedValue?: number;
-
-    // Special property for Attribute Slicer to optimize lookup
-    $element?: JQuery;
 }
 
-export interface ISlicerValueSection {
+export interface ISlicerValueSegment {
     /**
-     * The raw value of the section
+     * The raw value of the segment
      */
     value: any;
 
     /**
-     * The display value of the section
+     * The display value of the segment
      */
     displayValue: any;
 
     /**
-     * The percentage width of this section
+     * The percentage width of this segment
      */
     width: number;
 
     /**
-     * The color of this section
+     * The percentage of the width which should be highlighted
+     */
+    highlightWidth?: number;
+
+    /**
+     * The color of this segment
      */
     color: string;
 }
@@ -178,7 +107,7 @@ export interface IAttributeSlicerState {
     /**
      * The currently selected search text
      */
-    searchText: string;
+    searchText?: string;
 
     /**
      * The list of selected items
@@ -187,82 +116,64 @@ export interface IAttributeSlicerState {
         id: any;
         match: any;
         value: any;
-        renderedValue: any;
+        renderedValue?: any;
         selector: any;
     }[];
 
     /**
-     * The set of settings for the attribute slicer
+     * The text size in pt
      */
-    settings: IAttributeSlicerSettings;
-}
+    textSize?: number;
 
-/**
- * The attribute slicer settings
- */
-export interface IAttributeSlicerSettings {
+    /**
+     * If we should show the options area
+     */
+    showOptions?: boolean;
 
-    general: {
-        /**
-         * The text size in pt
-         */
-        textSize: number;
+    /**
+     * If we should show the search box
+     */
+    showSearch?: boolean;
 
-        /**
-         * If we should show the options area
-         */
-        showOptions: boolean;
+    /**
+     * If we should show the values column
+     */
+    showValues?: boolean;
 
-        /**
-         * If we should show the search box
-         */
-        showSearch: boolean;
+    /**
+     * The percentage based width of the value column 0 = hidden, 100 = whole screen
+     */
+    valueColumnWidth?: number;
 
-        /**
-         * If we should show the values column
-         */
-        showValues: boolean;
-    };
+    /**
+     * The display units to use when rendering values
+     */
+    labelDisplayUnits?: number;
 
-    display: {
+    // TODO?: This are basically unused the the base slicer
 
-        /**
-         * The percentage based width of the value column 0 = hidden, 100 = whole screen
-         */
-        valueColumnWidth: number;
+    /**
+     * The precision of the numbers to render
+     */
+    labelPrecision?: number;
 
-        /**
-         * The display units to use when rendering values
-         */
-        labelDisplayUnits: number;
+    /**
+     * If we are being rendered horizontally
+     */
+    horizontal?: boolean;
 
-        // TODO: This are basically unused the the base slicer
+    /**
+     * If we should single select
+     */
+    singleSelect?: boolean;
 
-        /**
-         * The precision of the numbers to render
-         */
-        labelPrecision: number;
+    /**
+     * If brushMode is enabled
+     */
+    brushMode?: boolean;
 
-        /**
-         * If we are being rendered horizontally
-         */
-        horizontal: boolean;
-    };
-
-    selection: {
-        /**
-         * If we should single select
-         */
-        singleSelect: boolean;
-
-        /**
-         * If brushMode is enabled
-         */
-        brushMode: boolean;
-
-        /**
-         * If we should show the tokens
-         */
-        showSelections: boolean;
-    };
+    /**
+     * If we should show the tokens
+     */
+    showSelections?: boolean;
 }

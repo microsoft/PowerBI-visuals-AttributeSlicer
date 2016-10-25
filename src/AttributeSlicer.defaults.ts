@@ -44,24 +44,15 @@ export const DEFAULT_TEXT_SIZE = 12;
 export const DEFAULT_STATE: IAttributeSlicerState = {
     selectedItems: [],
     searchText: "",
-    settings: {
-        display: {
-            labelDisplayUnits: 0,
-            labelPrecision: 0,
-            horizontal: false,
-            valueColumnWidth: DEFAULT_VALUE_WIDTH,
-        },
-        selection: {
-            showSelections: true,
-            singleSelect: false,
-            brushMode: false,
-        },
-        general: {
-            // TODO: textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
-            textSize: 12,
-            showOptions: true,
-            showSearch: true,
-            showValues: true,
-        },
-    },
+    labelDisplayUnits: 0,
+    labelPrecision: 0,
+    horizontal: false,
+    valueColumnWidth: DEFAULT_VALUE_WIDTH,
+    showSelections: true,
+    singleSelect: false,
+    brushMode: false,
+    textSize: DEFAULT_TEXT_SIZE,
+    showOptions: true,
+    showSearch: true,
+    showValues: true,
 };

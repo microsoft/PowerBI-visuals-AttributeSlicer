@@ -615,109 +615,109 @@ describe("AttributeSlicer", () => {
     describe("state", () => {
         it ("setting should update the value of 'renderHorizontal'", () => {
             const { instance, element } = createInstance();
-            instance.state = <any>_.set({}, "settings.display.horizontal", true);
+            instance.state = <any>_.set({}, "horizontal", true);
             expect(instance.renderHorizontal).to.be.true;
             expect(element.is(".render-horizontal")).to.be.true;
         });
         it ("setting should return the value of 'renderHorizontal'", () => {
             const { instance } = createInstance();
             instance.renderHorizontal = true;
-            expect(instance.state.settings.display.horizontal).to.be.true;
+            expect(instance.state.horizontal).to.be.true;
         });
 
         it ("setting should update the value of 'renderHorizontal'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.display.horizontal", true);
+            instance.state = <any>_.set({}, "horizontal", true);
             expect(instance.renderHorizontal).to.be.true;
         });
         it ("setting should return the value of 'renderHorizontal'", () => {
             const { instance } = createInstance();
             instance.renderHorizontal = true;
-            expect(instance.state.settings.display.horizontal).to.be.true;
+            expect(instance.state.horizontal).to.be.true;
         });
         it ("setting should update the value of 'valueColumnWidth'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.display.valueColumnWidth", 56.6);
+            instance.state = <any>_.set({}, "valueColumnWidth", 56.6);
             expect(instance.valueWidthPercentage).to.be.equal(56.6);
         });
         it ("setting should return the value of 'valueColumnWidth'", () => {
             const { instance } = createInstance();
             instance.valueWidthPercentage = 56.6;
-            expect(instance.state.settings.display.valueColumnWidth).to.be.equal(56.6);
+            expect(instance.state.valueColumnWidth).to.be.equal(56.6);
         });
 
         it ("setting should update the value of 'textSize'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.general.textSize", 56.6);
+            instance.state = <any>_.set({}, "textSize", 56.6);
             expect(instance.fontSize).to.be.equal(56.6);
         });
         it ("setting should return the value of 'textSize'", () => {
             const { instance } = createInstance();
             instance.fontSize = 56.6;
-            expect(instance.state.settings.general.textSize).to.be.equal(56.6);
+            expect(instance.state.textSize).to.be.equal(56.6);
         });
         it ("setting should update the value of 'showOptions'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.general.showOptions", false);
+            instance.state = <any>_.set({}, "showOptions", false);
             expect(instance.showOptions).to.be.equal(false);
         });
         it ("setting should return the value of 'showOptions'", () => {
             const { instance } = createInstance();
             instance.showOptions = false;
-            expect(instance.state.settings.general.showOptions).to.be.equal(false);
+            expect(instance.state.showOptions).to.be.equal(false);
         });
         it ("setting should update the value of 'showValues'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.general.showValues", false);
+            instance.state = <any>_.set({}, "showValues", false);
             expect(instance.showValues).to.be.equal(false);
         });
         it ("setting should return the value of 'showValues'", () => {
             const { instance } = createInstance();
             instance.showValues = false;
-            expect(instance.state.settings.general.showValues).to.be.equal(false);
+            expect(instance.state.showValues).to.be.equal(false);
         });
         it ("setting should update the value of 'showSearch'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.general.showSearch", false);
+            instance.state = <any>_.set({}, "showSearch", false);
             expect(instance.showSearchBox).to.be.equal(false);
         });
         it ("setting should return the value of 'showSearch'", () => {
             const { instance } = createInstance();
             instance.showSearchBox = false;
-            expect(instance.state.settings.general.showSearch).to.be.equal(false);
+            expect(instance.state.showSearch).to.be.equal(false);
         });
 
         it ("setting should update the value of 'showSelections'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.selection.showSelections", false);
+            instance.state = <any>_.set({}, "showSelections", false);
             expect(instance.showSelections).to.be.equal(false);
         });
         it ("setting should return the value of 'showSelections'", () => {
             const { instance } = createInstance();
             instance.showSelections = false;
-            expect(instance.state.settings.selection.showSelections).to.be.equal(false);
+            expect(instance.state.showSelections).to.be.equal(false);
         });
 
         it ("setting should update the value of 'singleSelect'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.selection.singleSelect", true);
+            instance.state = <any>_.set({}, "singleSelect", true);
             expect(instance.singleSelect).to.be.equal(true);
         });
         it ("setting should return the value of 'singleSelect'", () => {
             const { instance } = createInstance();
             instance.singleSelect = true;
-            expect(instance.state.settings.selection.singleSelect).to.be.equal(true);
+            expect(instance.state.singleSelect).to.be.equal(true);
         });
 
         it ("setting should update the value of 'brushSelectionMode'", () => {
             const { instance } = createInstance();
-            instance.state = <any>_.set({}, "settings.selection.brushMode", true);
+            instance.state = <any>_.set({}, "brushMode", true);
             expect(instance.brushSelectionMode).to.be.equal(true);
         });
         it ("setting should return the value of 'brushSelectionMode'", () => {
             const { instance } = createInstance();
             instance.brushSelectionMode = true;
-            expect(instance.state.settings.selection.brushMode).to.be.equal(true);
+            expect(instance.state.brushMode).to.be.equal(true);
         });
 
         it ("setting should update the value of 'searchString'", () => {

@@ -35,8 +35,11 @@ import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 
 /* tslint:disable */
 $.extend(true, global["powerbi"], {
+    VisualUpdateType: {},
     visuals: {
-        StandardObjectProperties: {},
+        StandardObjectProperties: {
+            fill: {}
+        },
         valueFormatter: {
             create: function () {
                 return {
@@ -148,6 +151,13 @@ describe("AttributeSlicerVisual", function () {
      */
     function createOptionsWithCategoriesAndValues(categories: any[], categoryName: string, values: any[][], valueName: string) {
         "use strict";
+        const mappedValues = values.map(n => ({
+            source: {
+                displayName: valueName,
+                type: {},
+            },
+            values: n[0],
+        }));
         return <powerbi.VisualUpdateOptions><any>{
             viewport: {
                 width: 100,
@@ -186,13 +196,9 @@ describe("AttributeSlicerVisual", function () {
                         },
                         values: categories.slice(0),
                     }],
-                    values: values.map(n => ({
-                        source: {
-                            displayName: valueName,
-                            type: {},
-                        },
-                        values: n[0],
-                    })),
+                    values: $.extend(mappedValues, {
+                        grouped: () => mappedValues,
+                    }),
                 },
             }],
         };
@@ -227,9 +233,10 @@ describe("AttributeSlicerVisual", function () {
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
         instance.onUpdate(update, UpdateType.Data);
-        delete instance["_state"];
+        // delete instance["_state"];
         // Set our fake selected items
         attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+        // instance["settings"].searchText = "SOME SEARCH STRING";
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
         instance.onUpdate(anotherUpdate, UpdateType.Data);
         // Make sure there is no more search string
@@ -342,7 +349,7 @@ describe("AttributeSlicerVisual", function () {
 
         performBasicUpdate(instance);
 
-        expect(attributeSlicer.state.settings.general.showValues).to.be.false;
+        expect(attributeSlicer.state.showValues).to.be.false;
     });
 
     it("should show values if there is a values field passed into PBI", () => {
@@ -350,7 +357,7 @@ describe("AttributeSlicerVisual", function () {
 
         performValueUpdate(instance);
 
-        expect(attributeSlicer.state.settings.general.showValues).to.be.true;
+        expect(attributeSlicer.state.showValues).to.be.true;
     });
 
     it("should not clear selection when the value field is changed in PBI", () => {
@@ -411,7 +418,7 @@ describe("AttributeSlicerVisual", function () {
         });
 
         expect(attributeSlicer.state.selectedItems.map(n => n.match)).to.be.deep.equal(selectedItems.map(n => n.match));
-        expect(attributeSlicer.state.settings.display.horizontal).to.be.true;
+        expect(attributeSlicer.state.horizontal).to.be.true;
     });
 
     it("should initially load horizontal setting", () => {
@@ -422,7 +429,7 @@ describe("AttributeSlicerVisual", function () {
                 horizontal: true,
             },
         });
-        expect(attributeSlicer.state.settings.display.horizontal).to.be.true;
+        expect(attributeSlicer.state.horizontal).to.be.true;
         expect(attributeSlicer.state.selectedItems.length).to.be.greaterThan(0);
     });
 
@@ -432,7 +439,7 @@ describe("AttributeSlicerVisual", function () {
     it("should restore selection after a page change");
     it("should clear selection when the category field is changed in PBI");
     it("should show values if there is a values field passed into PBI");
-    it("should show different colors per column when multiple values fields are added to the values section");
+    it("should show different colors per column when multiple values fields are added to the values segment");
     it("should not clear selection when the value field is changed in PBI");
     it("should not clear selection if search is changed");
     it("should not clear selection when just settings are changed.");

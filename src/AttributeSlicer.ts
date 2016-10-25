@@ -159,7 +159,6 @@ export class AttributeSlicer {
                 if (item.onCreate) {
                     item.onCreate(ele);
                 }
-                item.$element = ele;
                 return ele[0];
             },
         });
@@ -171,7 +170,11 @@ export class AttributeSlicer {
         this.element.toggleClass("show-selections", this.showSelections);
 
         // We should just pass this info into the constructor
-        this.selectionManager.bindTo(this.listEle, ".item", (ele) => ele.data("item"), (i) => i.$element);
+        this.selectionManager.bindTo(
+            this.listEle,
+            ".item",
+            (ele) => ele.data("item"),
+            (i) => this.listEle.find(".item").filter((idx, ele) => $(ele).data("item").id === i.id));
 
         this.fontSize = this.fontSize;
 
@@ -201,26 +204,18 @@ export class AttributeSlicer {
         return {
             selectedItems: this.selectedItems.map(n => <any>_.cloneDeep(n)),
             searchText: this.searchString || "",
-            settings: {
-                display: {
-                    labelDisplayUnits: 0,
-                    labelPrecision: 0,
-                    horizontal: this.renderHorizontal,
-                    valueColumnWidth: this.valueWidthPercentage,
-                },
-                selection: {
-                    showSelections: this.showSelections,
-                    singleSelect: this.singleSelect,
-                    brushMode: this.brushSelectionMode,
-                },
-                general: {
-                    // TODO: textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
-                    textSize: this.fontSize,
-                    showOptions: this.showOptions,
-                    showSearch: this.showSearchBox,
-                    showValues: this.showValues,
-                },
-            },
+            labelDisplayUnits: 0,
+            labelPrecision: 0,
+            horizontal: this.renderHorizontal,
+            valueColumnWidth: this.valueWidthPercentage,
+            showSelections: this.showSelections,
+            singleSelect: this.singleSelect,
+            brushMode: this.brushSelectionMode,
+            // TODO: textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
+            textSize: this.fontSize,
+            showOptions: this.showOptions,
+            showSearch: this.showSearchBox,
+            showValues: this.showValues,
         };
     }
 
@@ -230,31 +225,30 @@ export class AttributeSlicer {
     public set state(state: IAttributeSlicerState) {
         this.loadingState = true;
         state = _.merge({}, _.cloneDeep(DEFAULT_STATE), state);
-        const settings = state.settings;
         const s = this;
         // const displayUnits = this.labelDisplayUnits !== (this.labelDisplayUnits = settings.display.labelDisplayUnits);
         // const precision = this.labelPrecision !== (this.labelPrecision = settings.display.labelPrecision);
-        s.singleSelect = settings.selection.singleSelect;
-        s.brushSelectionMode = settings.selection.brushMode;
-        s.showSelections = settings.selection.showSelections;
-        s.showOptions = settings.general.showOptions;
-        s.showSearchBox = settings.general.showSearch;
-        s.showValues = settings.general.showValues;
+        s.singleSelect = state.singleSelect;
+        s.brushSelectionMode = state.brushMode;
+        s.showSelections = state.showSelections;
+        s.showOptions = state.showOptions;
+        s.showSearchBox = state.showSearch;
+        s.showValues = state.showValues;
         const newSearchString = state.searchText;
         let searchString = false;
         if (newSearchString !== s.searchString) {
             searchString = true;
             s.searchString = newSearchString;
         }
-        s.fontSize = settings.general.textSize;
+        s.fontSize = state.textSize;
 
         this.selectedItems = (state.selectedItems || []).map(n => {
             return _.merge({}, n, {
                 equals: (m: SlicerItem) => m.id === n.id,
             });
         });
-        s.renderHorizontal = state.settings.display.horizontal;
-        s.valueWidthPercentage = settings.display.valueColumnWidth;
+        s.renderHorizontal = state.horizontal;
+        s.valueWidthPercentage = state.valueColumnWidth;
 
         this.loadingState = false;
     }

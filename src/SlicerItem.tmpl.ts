@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 
-import { SlicerItem } from "./interfaces";
+import { SlicerItem, ISlicerValueSegment } from "./interfaces";
 import { prettyPrintValue as pretty } from "./Utils";
 import * as $ from "jquery";
+import * as d3 from "d3";
 
 /**
  * Returns an element for the given item
  */
 export default function (item: SlicerItem, sizes: { category: number; value: number }) {
     "use strict";
-    const { match, matchPrefix, matchSuffix, sections, renderedValue } = item;
+    const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;
     const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
     return $(`
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
@@ -43,21 +44,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
                 </span>
                 <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
                     <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                    ${
-                        (sections || []).map(s => {
-                            let color = s.color;
-                            if (color) {
-                                color = `background-color:${color};`;
-                            }
-                            const displayValue = s.displayValue || s.value || "0";
-                            const style = `display:inline-block;width:${s.width}%;${color};height:100%`;
-                            return `
-                                <span style="${style}" title="${displayValue}" class="value-display">
-                                    &nbsp;<span class="value">${displayValue}</span>
-                                </span>
-                            `.trim().replace(/\n/g, "");
-                        }).join("")
-                    }
+                    ${ valueSegmentsTemplate(valueSegments) }
                     </span>
                 </span>
             </div>
@@ -65,3 +52,48 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
     `.trim().replace(/\n/g, ""));
 }
 
+/**
+ * Template string for the given valueSegments
+ */
+function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
+    "use strict";
+    return (valueSegments || []).map(s => {
+        const { color, highlightWidth } = s;
+        let backgroundColor = "";
+        if (color) {
+            backgroundColor = `background-color:${color};`;
+        }
+
+        // If we are highlighted at all, then make the background lighter so we can focus
+        // on the highlighted
+        if (typeof highlightWidth === "number") {
+            const { r, g, b } = d3.rgb(color);
+            backgroundColor = `background-color:rgba(${r}, ${g}, ${b}, .4)`;
+        }
+        const displayValue = s.displayValue || s.value || "0";
+        const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;`;
+        return `
+            <span style="${style}" title="${displayValue}" class="value-display">
+                &nbsp;<span class="value">${displayValue}</span>
+                ${ highlightsTemplate(s) }
+            </span>
+        `.trim().replace(/\n/g, "");
+    }).join("");
+}
+
+/**
+ * The template string for the highlights
+ */
+function highlightsTemplate(valueSegment: ISlicerValueSegment) {
+    "use strict";
+    const { highlightWidth, color } = valueSegment;
+    if (typeof highlightWidth === "number") {
+        let backgroundColor = "";
+        if (color) {
+            backgroundColor = `background-color:${color};`;
+        }
+        const style = `${backgroundColor}position:absolute;left:0;top:0;bottom:0;width:${highlightWidth}%;`;
+        return `<span class="value-display-highlight" style="${style}"></span>`;
+    }
+    return "";
+};

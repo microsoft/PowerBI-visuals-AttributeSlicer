@@ -57,15 +57,19 @@ export function createItem(category: string, value: any, id: string, renderedVal
     };
 }
 
+const OMITTED_EQUALITY_PROPS = ["selectedItems", "searchText"];
+
 /**
  * Returns true if the two given states are equal
  */
 export function isStateEqual(state: IAttributeSlicerState, stateTwo: IAttributeSlicerState) {
     "use strict";
     // TODO: Cheat
-    return _.isEqual(state && state.searchText, stateTwo && stateTwo.searchText) &&
-        _.isEqual(state && state.settings, stateTwo && stateTwo.settings) &&
-        areItemsEqual(state && state.selectedItems, stateTwo && stateTwo.selectedItems);
+    const s1 = state && state["toJSONObject"] ? state["toJSONObject"]() : state;
+    const s2 = stateTwo && stateTwo["toJSONObject"] ? stateTwo["toJSONObject"]() : stateTwo;
+    return _.isEqual(s1 && s1.searchText, s2 && s2.searchText) &&
+        _.isEqual(_.omit(s1, OMITTED_EQUALITY_PROPS), _.omit(s2, OMITTED_EQUALITY_PROPS)) &&
+        areItemsEqual(s1 && s1.selectedItems, s2 && s2.selectedItems);
 }
 
 /**

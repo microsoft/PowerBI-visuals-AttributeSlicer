@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 
-import { SlicerItem, IAttributeSlicerSettings, IAttributeSlicerState } from "../interfaces";
+import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "../interfaces";
 import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
-import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
-import * as $ from "jquery";
 
 /**
  * Represents a list item
@@ -37,58 +35,60 @@ export interface ListItem extends SlicerItem, TooltipEnabledDataPoint {
 }
 
 /**
- * Contains a list of settings descriptions
+ * Interface represents the color related settings
  */
-export const SETTING_DESCRIPTORS: IAttributeSlicerSettings = {
-    general: {
-        displayName: "General",
-        textSize: {
-            displayName: "Text Size",
-            type: { numeric: true },
-        } as any,
-        showOptions: {
-            displayName: "Show Options",
-            description: "Should the search box and other options be shown",
-            type: { bool: true },
-        } as any,
-    } as any,
-    selection: {
-        displayName: "Selection",
-        brushMode: {
-            displayName: "Brush Mode",
-            description: "Allow for the drag selecting of attributes",
-            type: { bool: true },
-        } as any,
-        singleSelect: {
-            displayName: "Single Select",
-            description: "Only allow for a single selected",
-            type: { bool: true },
-        } as any,
-        showSelections: {
-            displayName: "Use Tokens",
-            description: "Will show the selected attributes as tokens",
-            type: { bool: true },
-        } as any,
-    } as any,
-    display: {
-        displayName: "Display",
-        valueColumnWidth: {
-            displayName: "Value Width %",
-            description: "The percentage of the width that the value column should take up.",
-            type: { numeric: true },
-        } as any,
-        horizontal: {
-            displayName: "Horizontal",
-            description: "Display the attributes horizontally, rather than vertically",
-            type: { bool: true },
-        } as any,
-        labelDisplayUnits: 
-            $.extend(true, {}, StandardObjectProperties.labelDisplayUnits as any, { displayName: "Display Units" }),
-        labelPrecision: 
-            $.extend(true, {}, StandardObjectProperties.labelPrecision as any, { displayName: "Precision" }),
-    } as any
-};
+export interface IColorSettings {
 
+    /**
+     * Whether or not gradients should be used to color bars
+     */
+    useGradient?: boolean; 
+
+    /**
+     * The start color of the gradient, hex string
+     */
+    startColor?: string; 
+
+    /**
+     * The end color of the gradient, hext string
+     */
+    endColor?: string;
+}
+
+/**
+ * Represents attribute slicer visual data
+ */
+export interface IAttributeSlicerVisualData {
+    /**
+     * The attribute slicer items
+    */
+    items: ListItem[];
+
+    /**
+     * The value segment info for each of the items values
+     */
+    segmentInfo: IAttributeSlicerSegmentInfo[];
+}
+
+/**
+ * An interface describing the segments of value data coming into the attribute slicer
+ */
+export interface IAttributeSlicerSegmentInfo { 
+    /**
+     * The name of the segment
+     */
+    name: string;
+
+    /**
+     * The unique identity of this segment
+     */
+    identity: powerbi.DataViewScopeIdentity;
+
+    /**
+     * The segment color
+     */ 
+    color: string 
+}
 export type SlicerItem = SlicerItem;
-export type IAttributeSlicerSettings = IAttributeSlicerSettings;
 export type IAttributeSlicerState = IAttributeSlicerState;
+export type ISlicerValueSegment = ISlicerValueSegment;
