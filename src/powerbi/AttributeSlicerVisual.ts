@@ -292,7 +292,12 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     public getHashCode(state: IAttributeSlicerState): number {
-        return hashString(stringify(state));
+        const toCompare = JSON.parse(stringify(state)) as IAttributeSlicerState;
+
+         // Just get the id for comparison, the other stuff is basically computed
+        toCompare.selectedItems = (toCompare.selectedItems || []).map(n => n.id);
+
+        return hashString(stringify(toCompare));
     }
 
     /**
@@ -505,7 +510,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         if (state && this.host) {
             // Restoring selection into PBI
             this.selectionManager.clear();
-            const ids = getSelectionIdsFromSelectors(state.selectedItems.map(n => n.selector));
+            const ids = getSelectionIdsFromSelectors((state.selectedItems || []).map(n => n.selector));
             ids.forEach(n => {
                 this.selectionManager.select(n, true);
             });
