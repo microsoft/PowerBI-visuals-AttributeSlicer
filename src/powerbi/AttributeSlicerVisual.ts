@@ -81,6 +81,7 @@ function hashString(input: string): number {
     hash  = ((hash << 5) - hash) + chr;
     hash |= 0; // Convert to 32bit integer
   }
+  log("Attribute Slicer Hashing [%s] => %s", input, hash);
   return hash;
 }
 
@@ -292,12 +293,20 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     public getHashCode(state: IAttributeSlicerState): number {
+        if (!state) {
+            return 0;
+        }
         const toCompare = JSON.parse(stringify(state)) as IAttributeSlicerState;
 
          // Just get the id for comparison, the other stuff is basically computed
         toCompare.selectedItems = (toCompare.selectedItems || []).map(n => n.id);
 
-        return hashString(stringify(toCompare));
+        const orderedKeys = Object.keys(_.omit(toCompare, ["showSearch", "showValues"])).sort();
+        const orderedPayload = orderedKeys.map((k) => {
+            const value = stringify(toCompare[k]);
+            return `${k}:${value}`;
+        }).join(",");
+        return hashString(orderedPayload);
     }
 
     /**
