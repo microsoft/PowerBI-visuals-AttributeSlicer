@@ -451,12 +451,18 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
     private onScrolled(scrollPosition: [number, number]) {
         if (!this.isHandlingSetState) {
-            let state = Object["assign"]({}, this.state, { scrollPosition });
-            let eventText = scrollPosition[1] ?
-                `Scroll to (${scrollPosition[0]}, ${scrollPosition[1]})` :
-                `Scroll to ${scrollPosition[0]}`;
-            this.state.scrollPosition = scrollPosition;
-            publishChange(this, eventText, state);
+            if (!this.state.scrollPosition ||
+                this.state.scrollPosition[0] !== scrollPosition[0] ||
+                this.state.scrollPosition[1] !== scrollPosition[1]
+            ) {
+                let state = Object["assign"]({}, this.state, { scrollPosition });
+                let eventText = scrollPosition[1] ?
+                    `Scroll to (${scrollPosition[0]}, ${scrollPosition[1]})` :
+                    `Scroll to ${scrollPosition[0]}`;
+                this.state.scrollPosition = scrollPosition;
+                this._internalState = this._internalState.receive({ scrollPosition });
+                publishChange(this, eventText, state);
+            }
         }
     }
 
@@ -503,15 +509,12 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
      * A function used to determine whether or not a data update should be performed
      */
     private shouldLoadDataIntoSlicer(updateType: UpdateType, pbiState: VisualState, pbiUpdateType: powerbi.VisualUpdateType) {
-                // If there is a new dataset from PBI
-        return (updateType & UpdateType.Data) === UpdateType.Data ||
-
-                // If we cannot figure out the actual update type, then assume it is a data update
-                (updateType === UpdateType.Unknown && pbiUpdateType === powerbi.VisualUpdateType.Data) ||
-
+        const isDataLoad = (updateType & UpdateType.Data) === UpdateType.Data;
+        // If there is a new dataset from PBI
+        return (isDataLoad ||
                 // If attribute slicer requested more data, but the data actually hasn't changed
                 // (ie, if you search for Microsof then Microsoft, most likely will return the same dataset)
-                this.loadDeferred;
+                this.loadDeferred);
     }
 
     /**

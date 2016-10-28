@@ -223,12 +223,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * The scroll position of the visual
      */
-    @setting({
-        persist: false,
-        enumerable: false,
-        defaultValue: [0, 0],
-        displayName: "Scroll Position",
-    })
     public scrollPosition: [number, number];
 }
 
