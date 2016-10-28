@@ -112,7 +112,7 @@ export class AttributeSlicer {
     /**
      * The virtual list element
      */
-    private virtualListEle: any;
+    private virtualListEle: JQuery;
 
     /**
      * Whether or not we are currently loading a state
@@ -230,7 +230,7 @@ export class AttributeSlicer {
     public get scrollPosition(): [number, number] {
         const element = this.virtualListEle;
         if (element) {
-            return [element.scrollTop, element.scrollLeft];
+            return [element.scrollTop(), element.scrollLeft()];
         } else {
             return [0, 0];
         }
@@ -239,8 +239,8 @@ export class AttributeSlicer {
     public set scrollPosition(value: [number, number]) {
         const element = this.virtualListEle;
         if (element) {
-            element.scrollTop = value[0];
-            element.scrollLeft = value[1];
+            element.scrollTop(value[0]);
+            element.scrollLeft(value[1]);
         }
     }
 
