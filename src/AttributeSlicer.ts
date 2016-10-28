@@ -179,7 +179,14 @@ export class AttributeSlicer {
         this.fontSize = this.fontSize;
 
         this.virtualListEle = this.virtualList.container;
-        this.virtualListEle.scroll(() => this.checkLoadMoreData());
+        const emitScrollEvent = _.debounce((position: [number, number]) => {
+            this.events.raiseEvent("scroll", position);
+        }, 500) as any;
+        this.virtualListEle.scroll((event: any) => {
+            const position = [event.target.scrollTop, event.target.scrollLeft];
+            emitScrollEvent(position);
+            this.checkLoadMoreData();
+        });
 
         this.listEle.append(this.virtualListEle);
 
@@ -216,7 +223,25 @@ export class AttributeSlicer {
             showOptions: this.showOptions,
             showSearch: this.showSearchBox,
             showValues: this.showValues,
+            scrollPosition: this.scrollPosition,
         };
+    }
+
+    public get scrollPosition(): [number, number] {
+        const element = this.virtualListEle;
+        if (element) {
+            return [element.scrollTop, element.scrollLeft];
+        } else {
+            return [0, 0];
+        }
+    }
+
+    public set scrollPosition(value: [number, number]) {
+        const element = this.virtualListEle;
+        if (element) {
+            element.scrollTop = value[0];
+            element.scrollLeft = value[1];
+        }
     }
 
     /**
@@ -249,6 +274,7 @@ export class AttributeSlicer {
         });
         s.renderHorizontal = state.horizontal;
         s.valueWidthPercentage = state.valueColumnWidth;
+        this.scrollPosition = state.scrollPosition;
 
         this.loadingState = false;
     }

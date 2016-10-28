@@ -148,7 +148,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
         // HACK: PowerBI Swallows these events unless we prevent propagation upwards
         this.element.on(EVENTS_TO_IGNORE, (e: any) => e.stopPropagation());
-        this._internalState = VisualState.fromPBI(undefined);
+        this._internalState = VisualState.fromPBI<VisualState>(undefined);
     }
 
     /**
@@ -176,6 +176,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         mySlicer.events.on("canLoadMoreData", this.onCanLoadMoreData.bind(this));
         mySlicer.events.on("selectionChanged", this.onSelectionChanged.bind(this));
         mySlicer.events.on("searchPerformed", this.onSearchPerformed.bind(this));
+        mySlicer.events.on("scroll", this.onScrolled.bind(this));
 
         // Hide the searchbox by default
         mySlicer.showSearchBox = false;
@@ -198,6 +199,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         log("Update", options);
         const dv = this.dataView = options.dataViews && options.dataViews[0];
         const newState = VisualState.fromPBI<VisualState>(dv);
+        newState.scrollPosition = this.state.scrollPosition;
         this.loadDataFromVisualUpdate(updateType, options.type, dv, newState);
         this.loadStateFromVisualUpdate(newState, updateType);
     }
@@ -217,7 +219,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             const oldState = this._internalState;
 
             // Set the state on the slicer
-            this._internalState = VisualState.fromJSON(state);
+            this._internalState = VisualState.fromJSON<VisualState>(state);
             this.mySlicer.state = this._internalState;
 
             const { labelPrecision, labelDisplayUnits } = this._internalState;
@@ -327,7 +329,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         // Merge works weird on arrays
         finalState.selectedItems = _.cloneDeep(ldget(this.mySlicer, "state.selectedItems", []));
 
-        this._internalState = VisualState.fromJSON(finalState);
+        this._internalState = VisualState.fromJSON(finalState) as any;
 
         return this._internalState;
     }
@@ -391,7 +393,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     /**
      * Loads the given state from a visual update
      */
-    private loadStateFromVisualUpdate(newState: VisualState, updateType: UpdateType) {
+    private loadStateFromVisualUpdate(newState: IAttributeSlicerState, updateType: UpdateType) {
 
         // If the state has changed, then synchronize our state with it.
         if (!isStateEqual(this._internalState, newState)) {
@@ -404,7 +406,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             log("PBI has changed, updating state");
 
             // The use of "state" here is important, because we want to load our internal state from this state 
-            this.state = VisualState.fromJSON(newState);
+            this.state = VisualState.fromJSON<VisualState>(newState);
 
             // If there are any settings updates
             if (differences.length && (updateType & UpdateType.Settings) === UpdateType.Settings) {
@@ -445,6 +447,17 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         if (!this.isHandlingSetState) {
             const text = searchText && searchText.length ? `Search for "${searchText}"` : "Clear Search";
             this.syncStateAndPublishChange(text);
+        }
+    }
+
+    private onScrolled(scrollPosition: [number, number]) {
+        if (!this.isHandlingSetState) {
+            let state = Object["assign"]({}, this.state, { scrollPosition });
+            let eventText = scrollPosition[1] ?
+                `Scroll to (${scrollPosition[0]}, ${scrollPosition[1]})` :
+                `Scroll to ${scrollPosition[0]}`;
+            this.state.scrollPosition = scrollPosition;
+            publishChange(this, eventText, state);
         }
     }
 

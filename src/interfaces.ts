@@ -176,4 +176,6 @@ export interface IAttributeSlicerState {
      * If we should show the tokens
      */
     showSelections?: boolean;
+
+    scrollPosition?: [number, number];
 }

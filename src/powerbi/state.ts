@@ -219,6 +219,15 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
         parse: (value) => ldget(value, "solid.color", "#0229bf"),
     })
     public endColor?: string;
+
+    /**
+     * The scroll position of the visual
+     */
+    @pbiSetting({
+        persist: false,
+        hidden: true,
+    })
+    public scrollPosition: [number, number];
 }
 
 /**
@@ -278,7 +287,7 @@ function convertSelectionToPBI(value: ListItem[]) {
 /**
  * Calculates the properties that have changed between the two states
  */
-export function calcStateDifferences(newState: AttributeSlicerVisualState, oldState: AttributeSlicerVisualState) {
+export function calcStateDifferences(newState: IAttributeSlicerState, oldState: IAttributeSlicerState) {
     "use strict";
     const differences: string[] = [];
     newState = newState || <any>{};
@@ -288,7 +297,9 @@ export function calcStateDifferences(newState: AttributeSlicerVisualState, oldSt
         const newValue = oldState[prop];
         if (!_.isEqual(oldValue, newValue)) {
             const descriptor = getSetting(AttributeSlicerVisualState, prop);
-            differences.push(descriptor.displayName || prop);
+            if (descriptor) {
+                differences.push(descriptor.displayName || prop);
+            }
         }
     });
     return differences;
