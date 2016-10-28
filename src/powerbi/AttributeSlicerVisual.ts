@@ -23,8 +23,8 @@
  */
 
 /* tslint:disable */
-import { 
-    createPersistObjectBuilder, 
+import {
+    createPersistObjectBuilder,
     buildContainsFilter,
     logger,
     capabilities,
@@ -148,7 +148,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
         // HACK: PowerBI Swallows these events unless we prevent propagation upwards
         this.element.on(EVENTS_TO_IGNORE, (e: any) => e.stopPropagation());
-        this._internalState = VisualState.fromPBI<VisualState>(undefined);
+        this._internalState = VisualState.create() as VisualState;
     }
 
     /**
@@ -198,8 +198,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     public onUpdate(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
         log("Update", options);
         const dv = this.dataView = options.dataViews && options.dataViews[0];
-        const newState = VisualState.fromPBI<VisualState>(dv);
-        newState.scrollPosition = this.state.scrollPosition;
+        const newState = this._internalState.receiveFromPBI(dv);
         this.loadDataFromVisualUpdate(updateType, options.type, dv, newState);
         this.loadStateFromVisualUpdate(newState, updateType);
     }
@@ -219,7 +218,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             const oldState = this._internalState;
 
             // Set the state on the slicer
-            this._internalState = VisualState.fromJSON<VisualState>(state);
+            this._internalState = <VisualState>VisualState.create(state);
             this.mySlicer.state = this._internalState;
 
             const { labelPrecision, labelDisplayUnits } = this._internalState;
@@ -329,7 +328,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         // Merge works weird on arrays
         finalState.selectedItems = _.cloneDeep(ldget(this.mySlicer, "state.selectedItems", []));
 
-        this._internalState = VisualState.fromJSON(finalState) as any;
+        this._internalState = VisualState.create(finalState) as VisualState;
 
         return this._internalState;
     }
@@ -393,7 +392,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     /**
      * Loads the given state from a visual update
      */
-    private loadStateFromVisualUpdate(newState: IAttributeSlicerState, updateType: UpdateType) {
+    private loadStateFromVisualUpdate(newState: VisualState, updateType: UpdateType) {
 
         // If the state has changed, then synchronize our state with it.
         if (!isStateEqual(this._internalState, newState)) {
@@ -405,8 +404,8 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             // New state has changed, so update the slicer
             log("PBI has changed, updating state");
 
-            // The use of "state" here is important, because we want to load our internal state from this state 
-            this.state = VisualState.fromJSON<VisualState>(newState);
+            // The use of "state" here is important, because we want to load our internal state from this state
+            this.state = VisualState.create(newState);
 
             // If there are any settings updates
             if (differences.length && (updateType & UpdateType.Settings) === UpdateType.Settings) {
@@ -510,7 +509,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
                 // If we cannot figure out the actual update type, then assume it is a data update
                 (updateType === UpdateType.Unknown && pbiUpdateType === powerbi.VisualUpdateType.Data) ||
 
-                // If attribute slicer requested more data, but the data actually hasn't changed 
+                // If attribute slicer requested more data, but the data actually hasn't changed
                 // (ie, if you search for Microsof then Microsoft, most likely will return the same dataset)
                 this.loadDeferred;
     }

@@ -1,4 +1,4 @@
-import { setting as pbiSetting, parseSelectionIds, BaseSettings, getSetting, buildContainsFilter } from "essex.powerbi.base";
+import { setting, parseSelectionIds, HasSettings, getSetting, buildContainsFilter } from "essex.powerbi.base";
 import { IAttributeSlicerState, ListItem, IColorSettings } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
@@ -10,14 +10,14 @@ const ldget = require("lodash/get"); // tslint:disable-line
 /**
  * The set of settings loaded from powerbi
  */
-export default class AttributeSlicerVisualState extends BaseSettings implements IAttributeSlicerState, IColorSettings {
+export default class AttributeSlicerVisualState extends HasSettings implements IAttributeSlicerState, IColorSettings {
 
     /**
      * The currently selected search text
      */
-    @pbiSetting({
+    @setting({
         // persist: false, // Don't persist this setting, it is dynamic based on the dataview
-        name: "Self Filter",
+        name: "selfFilter",
         hidden: true,
         config: {
             type: { filter: { selfFilter: true } },
@@ -37,7 +37,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * Whether or not the slicer should show the values column
      */
-    @pbiSetting({
+    @setting({
         persist: false, // Don't persist this setting, it is dynamic based on the dataview
         parse: (v, d, dv) => ldget(dv, "categorical.values", []).length > 0,
         defaultValue: DEFAULT_STATE.showValues,
@@ -47,7 +47,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * Whether or not the search box should be shown
      */
-    @pbiSetting({
+    @setting({
         persist: false, // Don't persist this setting, it is dynamic based on the dataview
         parse(v, d, dv) {
             const isSelfFilterEnabled = ldget(dv, "metadata.objects.general.selfFilterEnabled", false);
@@ -59,7 +59,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If we are being rendered horizontally
      */
-    @pbiSetting({
+    @setting({
         category: "Display",
         displayName: "Horizontal",
         description: "Display the attributes horizontally, rather than vertically",
@@ -70,7 +70,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The percentage based width of the value column 0 = hidden, 100 = whole screen
      */
-    @pbiSetting({
+    @setting({
         category: "Display",
         displayName: "Value Width %",
         description: "The percentage of the width that the value column should take up.",
@@ -81,7 +81,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The list of selected items
      */
-    @pbiSetting({
+    @setting({
         name: "selection",
         displayName: "Selection",
         hidden: true,
@@ -102,7 +102,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The text size in pt
      */
-    @pbiSetting({
+    @setting({
         displayName: "Text Size",
         description: "The size of the text",
         defaultValue: DEFAULT_STATE.textSize,
@@ -114,7 +114,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If we should show the options area
      */
-    @pbiSetting({
+    @setting({
         displayName: "Show options",
         description: "Should the search box and other options be shown.",
         defaultValue: DEFAULT_STATE.showOptions,
@@ -124,7 +124,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The display units to use when rendering values
      */
-    @pbiSetting({
+    @setting({
         category: "Display",
         displayName: "Display Units",
         description: "The units to use when displaying values.",
@@ -136,7 +136,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The precision of the numbers to render
      */
-    @pbiSetting({
+    @setting({
         category: "Display",
         displayName: "Display Precision",
         description: "The precision to use when displaying values.",
@@ -148,7 +148,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If we should single select
      */
-    @pbiSetting({
+    @setting({
         category: "Selection",
         displayName: "Single Select",
         description: "Only allow for one item to be selected at a time",
@@ -159,7 +159,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If brushMode is enabled
      */
-    @pbiSetting({
+    @setting({
         category: "Selection",
         displayName: "Brush Mode",
         description: "Allow for the drag selecting of attributes",
@@ -170,7 +170,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If we should show the tokens
      */
-    @pbiSetting({
+    @setting({
         category: "Selection",
         displayName: "Use Tokens",
         description: "Will show the selected attributes as tokens",
@@ -181,7 +181,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @pbiSetting({
+    @setting({
         category: "Data Point",
         displayName: "Use Gradient",
         description: "If the gradient color scheme should be used when coloring the values in the slicer",
@@ -193,7 +193,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @pbiSetting({
+    @setting({
         category: "Data Point",
         displayName: "Start color",
         description: "The start color of the gradient",
@@ -208,7 +208,7 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @pbiSetting({
+    @setting({
         category: "Data Point",
         displayName: "End color",
         description: "The end color of the gradient",
@@ -223,9 +223,11 @@ export default class AttributeSlicerVisualState extends BaseSettings implements 
     /**
      * The scroll position of the visual
      */
-    @pbiSetting({
+    @setting({
         persist: false,
-        hidden: true,
+        enumerable: false,
+        defaultValue: [0, 0],
+        displayName: "Scroll Position",
     })
     public scrollPosition: [number, number];
 }

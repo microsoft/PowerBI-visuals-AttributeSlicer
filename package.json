@@ -27,7 +27,7 @@
     "@types/react-dom": "^0.14.17",
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
-    "essex.powerbi.base": "^0.7.7",
+    "essex.powerbi.base": "^0.8.0",
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^2.2.0",
     "json-stringify-safe": "^5.0.1",
