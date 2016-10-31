@@ -244,6 +244,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
                 this.mySlicer.data = this.data.items;
             }
 
+            this.mySlicer.scrollPosition = state.scrollPosition;
             this.writeCurrentStateToPBI();
         }
     }
@@ -459,7 +460,6 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
                 let eventText = scrollPosition[1] ?
                     `Scroll to (${scrollPosition[0]}, ${scrollPosition[1]})` :
                     `Scroll to ${scrollPosition[0]}`;
-                this.state.scrollPosition = scrollPosition;
                 this._internalState = this._internalState.receive({ scrollPosition });
                 publishChange(this, eventText, state);
             }
