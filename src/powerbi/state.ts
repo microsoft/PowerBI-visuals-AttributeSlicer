@@ -223,7 +223,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * The scroll position of the visual
      */
-    public scrollPosition: [number, number];
+    public scrollPosition: [number, number] = [0, 0];
 }
 
 /**
