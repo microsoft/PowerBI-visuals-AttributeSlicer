@@ -176,7 +176,6 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         mySlicer.events.on("canLoadMoreData", this.onCanLoadMoreData.bind(this));
         mySlicer.events.on("selectionChanged", this.onSelectionChanged.bind(this));
         mySlicer.events.on("searchPerformed", this.onSearchPerformed.bind(this));
-        mySlicer.events.on("scroll", this.onScrolled.bind(this));
 
         // Hide the searchbox by default
         mySlicer.showSearchBox = false;
@@ -450,22 +449,6 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         }
     }
 
-    private onScrolled(scrollPosition: [number, number]) {
-        if (!this.isHandlingSetState) {
-            if (!this.state.scrollPosition ||
-                this.state.scrollPosition[0] !== scrollPosition[0] ||
-                this.state.scrollPosition[1] !== scrollPosition[1]
-            ) {
-                let state = Object["assign"]({}, this.state, { scrollPosition });
-                let eventText = scrollPosition[1] ?
-                    `Scroll to (${scrollPosition[0]}, ${scrollPosition[1]})` :
-                    `Scroll to ${scrollPosition[0]}`;
-                this._internalState = this._internalState.receive({ scrollPosition });
-                publishChange(this, eventText, state);
-            }
-        }
-    }
-
     /**
      * Listener for can load more data
      */
@@ -522,6 +505,8 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
      */
     private syncStateAndPublishChange(text: string) {
         this.state = this.generateState();
+        const scrollPosition = this.mySlicer.scrollPosition;
+        this._internalState = this._internalState.receive({ scrollPosition });
         publishChange(this, text, this._internalState);
     }
 
