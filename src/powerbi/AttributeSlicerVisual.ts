@@ -288,7 +288,9 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
     }
 
     public areEqual(state1: IAttributeSlicerState, state2: IAttributeSlicerState): boolean {
-        const result = isStateEqual(state1, state2);
+        const s1Val = state1 && _.omit(state1, ["scrollPosition"]);
+        const s2Val = state2 && _.omit(state2, ["scrollPosition"]);
+        const result = isStateEqual(s1Val, s2Val);
         log("areEqual?::%s", result, state1, state2);
         return result;
     }
@@ -298,11 +300,10 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             return 0;
         }
         const toCompare = JSON.parse(stringify(state)) as IAttributeSlicerState;
-
          // Just get the id for comparison, the other stuff is basically computed
         toCompare.selectedItems = (toCompare.selectedItems || []).map(n => n.id);
 
-        const orderedKeys = Object.keys(_.omit(toCompare, ["showSearch", "showValues"])).sort();
+        const orderedKeys = Object.keys(_.omit(toCompare, ["showSearch", "showValues", "scrollPosition"])).sort();
         const orderedPayload = orderedKeys.map((k) => {
             const value = stringify(toCompare[k]);
             return `${k}:${value}`;
