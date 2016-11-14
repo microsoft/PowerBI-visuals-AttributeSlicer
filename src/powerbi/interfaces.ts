@@ -42,17 +42,32 @@ export interface IColorSettings {
     /**
      * Whether or not gradients should be used to color bars
      */
-    useGradient?: boolean; 
+    useGradient?: boolean;
 
     /**
      * The start color of the gradient, hex string
      */
-    startColor?: string; 
+    startColor?: string;
 
     /**
-     * The end color of the gradient, hext string
+     * The end color of the gradient, hex string
      */
     endColor?: string;
+
+    /**
+     * The start value of the gradient
+     */
+    startValue?: number;
+
+    /**
+     * The end value of the gradient
+     */
+    endValue?: number;
+
+    /**
+     * If true, the order of the bars will be reversed
+     */
+    reverseOrder?: boolean;
 }
 
 /**
@@ -73,7 +88,7 @@ export interface IAttributeSlicerVisualData {
 /**
  * An interface describing the segments of value data coming into the attribute slicer
  */
-export interface IAttributeSlicerSegmentInfo { 
+export interface IAttributeSlicerSegmentInfo {
     /**
      * The name of the segment
      */
@@ -86,8 +101,8 @@ export interface IAttributeSlicerSegmentInfo {
 
     /**
      * The segment color
-     */ 
-    color: string 
+     */
+    color: string
 }
 export type SlicerItem = SlicerItem;
 export type IAttributeSlicerState = IAttributeSlicerState;

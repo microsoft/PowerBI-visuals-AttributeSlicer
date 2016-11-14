@@ -71,6 +71,10 @@ export default function converter(
                 const result = createSegments(values, segmentInfo, catIdx, valueFormatter);
                 total = result.total;
                 segments = result.segments;
+
+                if (settings && settings.reverseOrder) {
+                    segments.reverse();
+                }
             }
             const item =
                 createItem(
@@ -212,25 +216,33 @@ function createSegments(
 function calculateSegmentInfo(values: powerbi.DataViewValueColumns, settings: IColorSettings) {
     "use strict";
     let segmentInfo: { name: any, identity: any }[] = [];
+    let segmentValues: number[] = [];
     if (values && values.length) {
         // If a column has the "Series" role, then we have series data
         const isSeriesData = !!(values.source && values.source.roles["Series"]);
         segmentInfo = isSeriesData ?
             <any>values.grouped() :
             values.map((n, i) => ({ name: (i + 1) + "", identity: n.identity }));
+        segmentValues = segmentInfo.map(n => parseFloat(n.name));
     }
 
-    let gradientScale: d3.scale.Linear<string, number>;
+    let gradientScale: d3.scale.Linear<number, number>;
     if (settings && settings.useGradient) {
-        gradientScale = d3.scale.linear<string, number>()
-                .domain([0, segmentInfo.length])
-                .interpolate(d3.interpolateRgb as any)
-                .range([settings.startColor as any, settings.endColor as any]);
+        const min = d3.min(segmentValues);
+        const max =  d3.max(segmentValues);
+        const finalMin = ldget(settings, "startValue", min);
+        const finalMax = ldget(settings, "endValue", max);
+        const finalStartColor = ldget(settings, "startColor", "#bac2ff");
+        const finalEndColor = ldget(settings, "endColor", "#0229bf");
+        gradientScale = d3.scale.linear()
+            .domain([finalMin, finalMax])
+            .interpolate(d3.interpolateRgb as any)
+            .range([finalStartColor, finalEndColor] as any);
     }
     return _.sortBy(segmentInfo, ["name"]).map((v, j) => {
         let color = full[j] || "#ccc";
         if (gradientScale) {
-            color = gradientScale(j);
+            color = gradientScale(parseFloat(v.name));
         }
         // Use the instance color if we are not using a gradient.
         color = !gradientScale ? ldget(v, "objects.dataPoint.fill.solid.color", color) : color;

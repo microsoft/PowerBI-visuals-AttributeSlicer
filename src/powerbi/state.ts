@@ -191,6 +191,18 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public useGradient?: boolean;
 
     /**
+     * If the order of the bars should be reversed
+     */
+    @setting({
+        category: "Data Point",
+        displayName: "Reverse Order",
+        description: "If enabled, the order of the bars will be reversed",
+        defaultValue: false,
+        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView),
+    })
+    public reverseOrder?: boolean;
+
+    /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
     @setting({
@@ -219,6 +231,32 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         parse: (value) => ldget(value, "solid.color", "#0229bf"),
     })
     public endColor?: string;
+
+    /**
+     * The value to use as the start color
+     */
+    @setting({
+        category: "Data Point",
+        displayName: "Start Value",
+        description: "The value to use as the start color",
+        config: {
+            type: { numeric: true },
+        },
+    })
+    public startValue?: number;
+
+    /**
+     * The value to use as the end color
+     */
+    @setting({
+        category: "Data Point",
+        displayName: "End Value",
+        description: "The value to use as the end color",
+        config: {
+            type: { numeric: true },
+        },
+    })
+    public endValue?: number;
 
     /**
      * The scroll position of the visual

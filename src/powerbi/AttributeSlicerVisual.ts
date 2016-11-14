@@ -238,7 +238,10 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             // The colors have changed, so we need to reload data
             if (oldState.useGradient !== this._internalState.useGradient ||
                 oldState.startColor !== this._internalState.startColor ||
-                oldState.endColor !== this._internalState.endColor) {
+                oldState.endColor !== this._internalState.endColor ||
+                oldState.startValue !== this._internalState.startValue ||
+                oldState.endValue !== this._internalState.endValue ||
+                oldState.reverseOrder !== this._internalState.reverseOrder) {
                 this.data = converter(this.dataView, undefined, undefined, this._internalState);
                 this.mySlicer.data = this.data.items;
             }
