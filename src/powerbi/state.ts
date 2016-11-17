@@ -235,9 +235,10 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * The value to use as the start color
      */
-    @setting({
+    @setting<AttributeSlicerVisualState>({
         category: "Data Point",
         displayName: "Start Value",
+        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
         description: "The value to use as the start color",
         config: {
             type: { numeric: true },
@@ -248,9 +249,10 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * The value to use as the end color
      */
-    @setting({
+    @setting<AttributeSlicerVisualState>({
         category: "Data Point",
         displayName: "End Value",
+        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
         description: "The value to use as the end color",
         config: {
             type: { numeric: true },

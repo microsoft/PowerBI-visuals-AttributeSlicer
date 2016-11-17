@@ -27,6 +27,7 @@ import IValueFormatter = powerbi.visuals.IValueFormatter;
 import SelectionId = powerbi.visuals.SelectionId;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
+import { serializeSelectors } from "essex.powerbi.base";
 import * as d3 from "d3";
 
 /* tslint:disable */
@@ -58,6 +59,7 @@ export default function converter(
         categoryFormatter = createCategoryFormatter(dataView);
     }
     let items: ListItem[];
+    const dvCats = get(dataView, x => x.categorical.categories);
     const categories = get(dataView, x => x.categorical.categories[0].values);
     const identities = get(dataView, x => x.categorical.categories[0].identity);
     const values = get(dataView, x => x.categorical.values);
@@ -78,7 +80,7 @@ export default function converter(
             }
             const item =
                 createItem(
-                    categoryFormatter ? categoryFormatter.format(category) : category as any,
+                    buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
                     total,
                     id.getKey(),
                     id.getSelector(),
@@ -93,6 +95,17 @@ export default function converter(
 
         return { items, segmentInfo };
     }
+}
+
+/**
+ * Builds the display string for the given category
+ */
+export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], catIdx: number, categoryFormatter?: IValueFormatter): string {
+    "use strict";
+    return (cats || []).map(n => {
+        const category = n.values[catIdx];
+        return (categoryFormatter ? categoryFormatter.format(category) : category as any);
+    }).join(" - ");
 }
 
 /**
@@ -112,7 +125,7 @@ export function createItem(
         color: color,
         value: value || 0,
         renderedValue: renderedValue,
-        selector: selector,
+        selector: serializeSelectors([selector])[0],
         equals: (b: ListItem) => id === b.id,
     };
 }

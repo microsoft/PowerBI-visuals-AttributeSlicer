@@ -88,6 +88,10 @@ function hashString(input: string): number {
 @Visual(require("../build").output.PowerBI)
 @receiveDimensions
 @capabilities(capabilitiesData)
+@receiveUpdateType(<any>{
+    checkHighlights: true,
+    ignoreCategoryOrder: false,
+})
 export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerState> {
 
     /**
