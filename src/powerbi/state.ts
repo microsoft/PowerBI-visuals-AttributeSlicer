@@ -181,7 +181,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @setting({
+    @setting<AttributeSlicerVisualState>({
         category: "Data Point",
         displayName: "Use Gradient",
         description: "If the gradient color scheme should be used when coloring the values in the slicer",
@@ -205,7 +205,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @setting({
+    @setting<AttributeSlicerVisualState>({
         category: "Data Point",
         displayName: "Start color",
         description: "The start color of the gradient",
@@ -220,7 +220,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     /**
      * If the gradient color scheme should be used when coloring the values in the slicer
      */
-    @setting({
+    @setting<AttributeSlicerVisualState>({
         category: "Data Point",
         displayName: "End color",
         description: "The end color of the gradient",
