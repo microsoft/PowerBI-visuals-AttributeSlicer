@@ -12,14 +12,15 @@
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
     "test": "npm-run-all --sequential clean tsc --parallel lint karma:once",
-    "build": "npm-run-all --sequential tsc pbibundle"
+    "build": "npm-run-all --sequential test pbibundle",
+    "build:release": "NODE_ENV=production npm-run-all --sequential test pbibundle"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
-    "essex.powerbi.base": "^0.8.0",
+    "essex.powerbi.base": "^0.8.16",
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^2.2.0",
     "json-stringify-safe": "^5.0.1",
@@ -27,7 +28,7 @@
     "lodash.get": "^4.4.2",
     "moment": "^2.12.0",
     "node-sass": "^3.8.0",
-    "pbi-stateful": "^0.9.0",
+    "pbi-stateful": "^0.11.0",
     "powerbi-visuals": "^0.5.9",
     "webpack-strip": "^0.1.0"
   },

@@ -54,10 +54,14 @@ $.extend(true, global["powerbi"], {
                         return 1;
                     },
                     getSelector() {
-                        return 1;
+                        return {
+                            data: [{
+                                expr: {},
+                            }],
+                        };
                     },
                 };
-            }
+            },
         },
     },
     data: {
@@ -103,6 +107,7 @@ describe("AttributeSlicerVisual", function () {
         let attributeSlicer = {};
         instance.init(initOptions);
         instance["mySlicer"] = <any>attributeSlicer;
+        instance["throwErrors"] = true;
         return {
             element: initOptions.element,
             instance: instance,
@@ -122,13 +127,10 @@ describe("AttributeSlicerVisual", function () {
                 metadata: {
                     columns: [{
                         identity: <any>[],
-                        source: {
-                            queryName: categoryName,
-                            type: { text: true },
-                        },
                         roles: {
                             Category: true,
                         },
+                        queryName: categoryName,
                         type: { text: true },
                     }],
                 },
@@ -167,24 +169,18 @@ describe("AttributeSlicerVisual", function () {
                 metadata: {
                     columns: [{
                         identity: <any>[],
-                        source: {
-                            queryName: categoryName,
-                            type: { text: true },
-                        },
                         roles: {
                             Category: true,
                         },
+                        queryName: categoryName,
                         type: { text: true },
                     }, {
                         identity: <any>[],
-                        source: {
-                            queryName: valueName,
-                            type: {},
-                        },
+                        queryName: valueName,
+                        type: {},
                         roles: {
                             Values: true,
                         },
-                        type: {},
                     }],
                 },
                 categorical: {
@@ -220,9 +216,9 @@ describe("AttributeSlicerVisual", function () {
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
         instance.onUpdate(update, UpdateType.Data);
-        delete instance["_state"];
+        // delete instance["_state"];
         // Set our fake selected items
-        attributeSlicer.state = <any>{ selectedItems: [{ match: "WHATEVER" }] };
+        instance["_internalState"].selectedItems = <any>[{ match: "WHATEVER" }];
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
         instance.onUpdate(anotherUpdate, UpdateType.Data);
         // Make sure there is no more selected items
@@ -235,7 +231,8 @@ describe("AttributeSlicerVisual", function () {
         instance.onUpdate(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
-        attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+        // attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+        instance["_internalState"].searchText = "SOME SEARCH STRING";
         // instance["settings"].searchText = "SOME SEARCH STRING";
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
         instance.onUpdate(anotherUpdate, UpdateType.Data);
@@ -458,7 +455,7 @@ describe("AttributeSlicerVisual", function () {
     it("should NOT support searching date columns (when a date column is the category)");
     it("should clear the search when switching column types");
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
-    // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager 
+    // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
     // the selection manager which would force the update of the other slicer...so on.
     // it("should not clear the selection manager, when loading selection from the dataView");
