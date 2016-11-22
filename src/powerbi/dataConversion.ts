@@ -23,6 +23,7 @@
  */
 
 import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
+import { ISerializedItem } from "../interfaces";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
@@ -76,6 +77,16 @@ export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], cat
 }
 
 /**
+ * Creates an item from a serialized item
+ */
+export function createItemFromSerializedItem(item: ISerializedItem) {
+    "use strict";
+    if (item) {
+        return createItem(item.match, item.value, item.id, item.selector, item.renderedValue, undefined, true);
+    }
+}
+
+/**
  * A utility method to create a slicer item
  */
 export function createItem(
@@ -84,7 +95,8 @@ export function createItem(
     id: string,
     selector: powerbi.data.Selector,
     renderedValue?: any,
-    color = ""): ListItem {
+    color = "",
+    noSerialize = false): ListItem {
     "use strict";
     return {
         id: id,
@@ -92,7 +104,7 @@ export function createItem(
         color: color,
         value: value || 0,
         renderedValue: renderedValue,
-        selector: serializeSelectors([selector])[0],
+        selector: noSerialize ? selector : serializeSelectors([selector])[0],
         equals: (b: ListItem) => id === b.id,
     };
 }

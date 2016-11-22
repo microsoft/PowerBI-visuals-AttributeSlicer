@@ -54,7 +54,7 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import PixelConverter = jsCommon.PixelConverter;
 
 import { isStateEqual } from "../Utils";
-import { default as converter } from "./dataConversion";
+import { default as converter, createItemFromSerializedItem } from "./dataConversion";
 import capabilitiesData from "./AttributeSlicerVisual.capabilities";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
@@ -248,6 +248,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             if (!oldState.colors.equals(this._internalState.colors)) {
                 this.data = converter(this.dataView, undefined, undefined, this._internalState.colors);
                 this.mySlicer.data = this.data.items;
+                this.mySlicer.selectedItems = this._internalState.selectedItems.map(createItemFromSerializedItem);
             }
 
             this.mySlicer.scrollPosition = state.scrollPosition;
@@ -353,7 +354,7 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
                     this.mySlicer.data = filteredData;
 
                     // Restore selection
-                    this.mySlicer.selectedItems = <any>(pbiState.selectedItems || []);
+                    this.mySlicer.selectedItems = (pbiState.selectedItems || []).map(createItemFromSerializedItem);
 
                     delete this.loadDeferred;
                 }

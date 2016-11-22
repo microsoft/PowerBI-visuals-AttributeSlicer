@@ -230,14 +230,16 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * @param newProps The properties to merge into state
      */
     public receive(newProps?: any) {
-        if (newProps && newProps.colors && newProps.colors.instanceColors) {
-            newProps.colors.instanceColors = newProps.colors.instanceColors.map((n: any) => deserializeObjectWithIdentity({
-                color: n.color,
-                name: n.name,
-                identity: n.identity,
-            }));
-        }
         const base = super.receive(newProps);
+        if (base) {
+            if (base.colors && base.colors.instanceColors) {
+                base.colors.instanceColors = base.colors.instanceColors.map((n: any) => deserializeObjectWithIdentity({
+                    color: n.color,
+                    name: n.name,
+                    identity: n.identity,
+                }));
+            }
+        }
         return base;
     }
 

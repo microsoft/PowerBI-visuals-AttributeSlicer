@@ -101,6 +101,17 @@ export interface ISlicerValueSegment {
 }
 
 /**
+ * Represents a serialized item
+ */
+export interface ISerializedItem {
+    id: any;
+    match: any;
+    value: any;
+    renderedValue?: any;
+    selector: any;
+}
+
+/**
  * Represents the state of the attribute slicer
  */
 export interface IAttributeSlicerState {
@@ -112,13 +123,7 @@ export interface IAttributeSlicerState {
     /**
      * The list of selected items
      */
-    selectedItems?: {
-        id: any;
-        match: any;
-        value: any;
-        renderedValue?: any;
-        selector: any;
-    }[];
+    selectedItems?: ISerializedItem[];
 
     /**
      * The text size in pt
