@@ -27,16 +27,14 @@ import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
 import VisualState from "./state";
 const log = require("debug")("AttributeSlicer::Capabilities"); // tslint:disable-line
 import * as $ from "jquery";
-import data = powerbi.data;
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
-import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 
 const capabilities = $.extend(true, {}, VisualBase.capabilities, {
     dataRoles: [
         {
             name: "Category",
             kind: VisualDataRoleKind.Grouping,
-            displayName: "Category",
+            displayName: "Items",
         }, {
             name: "Values",
             kind: VisualDataRoleKind.Measure,
@@ -45,7 +43,7 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
         }, {
             name: "Series",
             kind: VisualDataRoleKind.Grouping,
-            displayName: "Aggregated By",
+            displayName: "Segmented By",
         },
     ],
     dataViewMappings: [{
@@ -82,13 +80,6 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
                 selfFilterEnabled: {
                     type: { operations: { searchEnabled: true } },
                 },
-            },
-        },
-        dataPoint: {
-            displayName: data.createDisplayNameGetter("Visual_DataPoint"),
-            description: data.createDisplayNameGetter("Visual_DataPointDescription"),
-            properties: {
-                fill: StandardObjectProperties.fill,
             },
         },
     }),

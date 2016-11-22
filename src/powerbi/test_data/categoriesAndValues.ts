@@ -51,7 +51,7 @@ const data = {
                         "showSelections": true
                     },
                     "dataPoint": {
-                        "useGradient": true,
+                        "colorMode": 1,
                         "startColor": {
                             "solid": {
                                 "color": "#bac2ff"
@@ -545,8 +545,21 @@ import { IAttributeSlicerSegmentInfo } from "../interfaces";
 import * as _ from "lodash";
 export default function dataWithCategoriesAndValues() {
     "use strict";
+    const clonedOptions = <powerbi.VisualUpdateOptions><any>_.cloneDeep(data);
+
+    // Wont represent correctly with JSON stringify
+    const values = clonedOptions.dataViews[0].categorical.values;
+
+    (<any>values)["grouped"] = () => {
+        return values.map((n, i) => {
+            const v = _.cloneDeep(n);
+            v["name"] = "GROUPED_" + i;
+            // v["objects"] = objects[i] as any;
+            return v;
+        });
+    };
     return {
-        options: <powerbi.VisualUpdateOptions><any>_.cloneDeep(data),
+        options: clonedOptions,
         // These are the categories that this data has
         categories: ["AED", "AFN", "ALL", "AMD", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM"],
         segmentInfos: [{
@@ -559,118 +572,118 @@ export default function dataWithCategoriesAndValues() {
             identity: undefined,
         }] as IAttributeSlicerSegmentInfo[],
 
-        
+
         // Each one of these maps to a category, with 2 segments
         // it is basically the values that the slicer should be showing
         values: [{
             raw: [0.33999999999999997, 2],
             total: 2.34,
             renderedValue: 11.81773772013385,
-            segments: [{ 
+            segments: [{
                 width: 14.529914529914528,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 85.47008547008548,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.47357142857142864, 14],
             total: 14.473571428571429,
             renderedValue: 29.896139741160624,
-            segments: [{ 
+            segments: [{
                 width: 3.271973547845828,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 96.72802645215417,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.5294117647058824, 17],
             total: 17.529411764705884,
             renderedValue: 34.44918584419186,
-            segments: [{ 
+            segments: [{
                 width: 3.0201342281879193,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 96.97986577181207,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.4709523809523809, 21],
             total: 21.47095238095238,
             renderedValue: 40.32188015041389,
-            segments: [{ 
+            segments: [{
                 width: 2.193439641597729,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 97.80656035840227,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.41500000000000004, 4],
             total: 4.415,
             renderedValue: 14.909381793312328,
-            segments: [{ 
+            segments: [{
                 width: 9.39977349943375,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 90.60022650056625,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.5247540983606557, 61],
             total: 61.52475409836065,
             renderedValue: 100,
-            segments: [{ 
+            segments: [{
                 width: 0.8529153932443557,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 99.14708460675566,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.2866666666666667, 6],
             total: 6.286666666666667,
             renderedValue: 17.698069579801828,
-            segments: [{ 
+            segments: [{
                 width: 4.559915164369035,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 95.44008483563096,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.12, 1],
             total: 1.12,
             renderedValue: 10,
-            segments: [{ 
+            segments: [{
                 width: 10.714285714285712,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 89.28571428571428,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.5721428571428572, 14],
             total: 14.572142857142858,
             renderedValue: 30.043006137752236,
-            segments: [{ 
+            segments: [{
                 width: 3.9262781236213913,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 96.0737218763786,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }, {
             raw: [0.4315384615384615, 13],
             total: 13.431538461538462,
             renderedValue: 28.343563815096022,
-            segments: [{ 
+            segments: [{
                 width: 3.212874405818681,
-                color: "#01B8AA", 
-            }, { 
+                color: "#01B8AA",
+            }, {
                 width: 96.7871255941813,
-                color: "#FD625E", 
+                color: "#FD625E",
             }],
         }],
     };

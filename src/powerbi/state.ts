@@ -22,11 +22,21 @@
  * SOFTWARE.
  */
 
-import { setting, parseSelectionIds, HasSettings, getSetting, buildContainsFilter } from "essex.powerbi.base";
-import { IAttributeSlicerState, ListItem, IColorSettings } from "./interfaces";
+import {
+    setting,
+    parseSelectionIds,
+    HasSettings,
+    getSetting,
+    buildContainsFilter,
+    ColoredObjectsSettings,
+    coloredObjectsSettings,
+    deserializeObjectWithIdentity,
+    serializeObjectWithIdentity,
+} from "essex.powerbi.base";
+import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
-import { createItem, dataSupportsValueSegments } from "./dataConversion";
+import { createItem } from "./dataConversion";
 import { DEFAULT_STATE } from "../AttributeSlicer.defaults";
 
 const ldget = require("lodash/get"); // tslint:disable-line
@@ -34,7 +44,7 @@ const ldget = require("lodash/get"); // tslint:disable-line
 /**
  * The set of settings loaded from powerbi
  */
-export default class AttributeSlicerVisualState extends HasSettings implements IAttributeSlicerState, IColorSettings {
+export default class AttributeSlicerVisualState extends HasSettings implements IAttributeSlicerState {
 
     /**
      * The currently selected search text
@@ -203,91 +213,48 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public showSelections?: boolean;
 
     /**
-     * If the gradient color scheme should be used when coloring the values in the slicer
+     * The set of settings for the colored objects
      */
-    @setting<AttributeSlicerVisualState>({
+    @coloredObjectsSettings({
         category: "Data Point",
-        displayName: "Use Gradient",
-        description: "If the gradient color scheme should be used when coloring the values in the slicer",
-        defaultValue: false,
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView),
     })
-    public useGradient?: boolean;
-
-    /**
-     * If the order of the bars should be reversed
-     */
-    @setting({
-        category: "Data Point",
-        displayName: "Reverse Order",
-        description: "If enabled, the order of the bars will be reversed",
-        defaultValue: false,
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView),
-    })
-    public reverseOrder?: boolean;
-
-    /**
-     * If the gradient color scheme should be used when coloring the values in the slicer
-     */
-    @setting<AttributeSlicerVisualState>({
-        category: "Data Point",
-        displayName: "Start color",
-        description: "The start color of the gradient",
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
-        config: {
-            type: StandardObjectProperties.fill.type,
-        },
-        parse: (value) => ldget(value, "solid.color", "#bac2ff"),
-    })
-    public startColor?: string;
-
-    /**
-     * If the gradient color scheme should be used when coloring the values in the slicer
-     */
-    @setting<AttributeSlicerVisualState>({
-        category: "Data Point",
-        displayName: "End color",
-        description: "The end color of the gradient",
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
-        config: {
-            type: StandardObjectProperties.fill.type,
-        },
-        parse: (value) => ldget(value, "solid.color", "#0229bf"),
-    })
-    public endColor?: string;
-
-    /**
-     * The value to use as the start color
-     */
-    @setting<AttributeSlicerVisualState>({
-        category: "Data Point",
-        displayName: "Start Value",
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
-        description: "The value to use as the start color",
-        config: {
-            type: { numeric: true },
-        },
-    })
-    public startValue?: number;
-
-    /**
-     * The value to use as the end color
-     */
-    @setting<AttributeSlicerVisualState>({
-        category: "Data Point",
-        displayName: "End Value",
-        hidden: (settings, dataView) => !dataSupportsValueSegments(dataView) || !settings.useGradient,
-        description: "The value to use as the end color",
-        config: {
-            type: { numeric: true },
-        },
-    })
-    public endValue?: number;
+    public colors: ColoredObjectsSettings;
 
     /**
      * The scroll position of the visual
      */
     public scrollPosition: [number, number] = [0, 0];
+
+    /**
+     * Receives the new properties
+     * @param newProps The properties to merge into state
+     */
+    public receive(newProps?: any) {
+        if (newProps && newProps.colors && newProps.colors.instanceColors) {
+            newProps.colors.instanceColors = newProps.colors.instanceColors.map((n: any) => deserializeObjectWithIdentity({
+                color: n.color,
+                name: n.name,
+                identity: n.identity,
+            }));
+        }
+        const base = super.receive(newProps);
+        return base;
+    }
+
+    /**
+     * Creates a JSON object version of this state, suitable for storage
+     */
+    public toJSONObject() {
+        const jsonObj = super.toJSONObject() as AttributeSlicerVisualState;
+        if (this.colors && this.colors.instanceColors) {
+            jsonObj.colors.instanceColors = this.colors.instanceColors.map(n => serializeObjectWithIdentity({
+                color: n.color,
+                name: n.name,
+                identity: n.identity,
+            }));
+        }
+        return jsonObj;
+    }
 }
 
 /**

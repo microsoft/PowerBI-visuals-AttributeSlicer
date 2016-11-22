@@ -35,42 +35,6 @@ export interface ListItem extends SlicerItem, TooltipEnabledDataPoint {
 }
 
 /**
- * Interface represents the color related settings
- */
-export interface IColorSettings {
-
-    /**
-     * Whether or not gradients should be used to color bars
-     */
-    useGradient?: boolean;
-
-    /**
-     * The start color of the gradient, hex string
-     */
-    startColor?: string;
-
-    /**
-     * The end color of the gradient, hex string
-     */
-    endColor?: string;
-
-    /**
-     * The start value of the gradient
-     */
-    startValue?: number;
-
-    /**
-     * The end value of the gradient
-     */
-    endValue?: number;
-
-    /**
-     * If true, the order of the bars will be reversed
-     */
-    reverseOrder?: boolean;
-}
-
-/**
  * Represents attribute slicer visual data
  */
 export interface IAttributeSlicerVisualData {

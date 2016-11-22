@@ -12,6 +12,7 @@
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
     "test": "npm-run-all --sequential clean tsc --parallel lint karma:once",
+    "compile": "npm-run-all --sequential tsc pbibundle",	   
     "build": "npm-run-all --sequential test pbibundle",
     "build:release": "NODE_ENV=production npm-run-all --sequential test pbibundle"
   },
@@ -20,7 +21,7 @@
   "dependencies": {
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
-    "essex.powerbi.base": "^0.8.16",
+    "essex.powerbi.base": "^0.8.18",
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^2.2.0",
     "json-stringify-safe": "^5.0.1",

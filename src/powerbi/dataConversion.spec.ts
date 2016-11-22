@@ -24,6 +24,7 @@
 
 import { default as convert } from "./dataConversion";
 import { expect } from "chai";
+import VSState from "./state";
 import dataWithCategoriesAndValues from "./test_data/categoriesAndValues";
 import dataWithOnlyCategories from "./test_data/categoriesOnly";
 import dataWithCategoriesAndValuesWithSeries from "./test_data/categoriesAndValuesWithSeries";
@@ -112,7 +113,8 @@ describe("dataConversion", () => {
             });
             it("should convert the items segment colors correctly", () => {
                 const { options, values } = dataWithCategoriesAndValues();
-                const converted = convert(options.dataViews[0]);
+                const settings = VSState.createFromPBI<VSState>(options.dataViews[0]).colors; // HACK
+                const converted = convert(options.dataViews[0], undefined, undefined, settings);
                 converted.items.map(n => n.valueSegments).forEach((n, i) => {
                     // The segmentColors should be close
                     const segmentColors = n.map(m => m.color);
@@ -198,7 +200,8 @@ describe("dataConversion", () => {
             });
             it("should convert the items segment colors correctly", () => {
                 const { options, expected } = dataWithCategoriesAndValuesWithSeries();
-                const converted = convert(options.dataViews[0]);
+                const settings = VSState.createFromPBI<VSState>(options.dataViews[0]).colors; // HACK
+                const converted = convert(options.dataViews[0], undefined, undefined, settings);
                 converted.items.map(n => n.valueSegments).forEach((n, i) => {
                     // The segmentColors should be close
                     const segmentColors = n.map(m => m.color);
@@ -218,7 +221,8 @@ describe("dataConversion", () => {
             });
             it("should convert the segment infos colors correctly", () => {
                 const { options, expected } = dataWithCategoriesAndValuesWithSeries();
-                const converted = convert(options.dataViews[0]);
+                const settings = VSState.createFromPBI<VSState>(options.dataViews[0]).colors; // HACK
+                const converted = convert(options.dataViews[0], undefined, undefined, settings);
 
                 // There are no segments because only "Categories" has been given to the converter
                 expect(converted.segmentInfo.map(n => n.color))

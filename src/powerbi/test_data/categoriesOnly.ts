@@ -51,7 +51,7 @@ const data = {
                         "showSelections": true
                     },
                     "dataPoint": {
-                        "useGradient": true,
+                        "colorMode": 1,
                         "startColor": {
                             "solid": {
                                 "color": "#bac2ff"
@@ -413,9 +413,23 @@ const data = {
 
 import * as _ from "lodash";
 export default function dataWithOnlyCategories() {
+    const clonedOptions = <powerbi.VisualUpdateOptions><any>_.cloneDeep(data);
+
+    // // Wont represent correctly with JSON stringify
+    // const values = clonedOptions.dataViews[0].categorical.values;
+
+    // (<any>values)["grouped"] = () => {
+    //     return values.map((n, i) => {
+    //         const v = _.cloneDeep(n);
+    //         v["name"] = "GROUPED_" + i;
+    //         // v["objects"] = objects[i] as any;
+    //         return v;
+    //     });
+    // };
+
     "use strict"
     return {
-        options: <powerbi.VisualUpdateOptions><any>_.cloneDeep(data),
+        options: clonedOptions,
         // These are the categories that this data has
         categories: ["AED", "AFN", "ALL", "AMD", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM"],
     };

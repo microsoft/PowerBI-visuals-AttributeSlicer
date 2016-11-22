@@ -28,58 +28,7 @@ import { UpdateType } from "essex.powerbi.base";
 import * as $ from "jquery";
 import { expect } from "chai";
 import { AttributeSlicer } from "../AttributeSlicer";
-
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
-
-// global["powerbi"] = {};
-
-/* tslint:disable */
-$.extend(true, global["powerbi"], {
-    VisualUpdateType: {},
-    visuals: {
-        StandardObjectProperties: {
-            fill: {}
-        },
-        valueFormatter: {
-            create: function () {
-                return {
-                    format: function () { }
-                };
-            }
-        },
-        SelectionId: {
-            createWithId: function () {
-                return {
-                    getKey() {
-                        return 1;
-                    },
-                    getSelector() {
-                        return {
-                            data: [{
-                                expr: {},
-                            }],
-                        };
-                    },
-                };
-            },
-        },
-    },
-    data: {
-        QueryComparisonKind: {
-            Equal: "Equal"
-        },
-        createDataViewScopeIdentity: (expr: any) => ({ expr: expr }),
-        SQExprBuilder: {
-            compare: () => { }
-        }
-    }
-});
-global["jsCommon"] = {
-    PixelConverter: {
-        toPoint: function (value: any) { return value; }
-    }
-};
-/* tslint:enable */
 import AttributeSlicerVisual from "./AttributeSlicerVisual";
 describe("AttributeSlicerVisual", function () {
     let parentEle: JQuery;
