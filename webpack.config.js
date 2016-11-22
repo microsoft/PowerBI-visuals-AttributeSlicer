@@ -82,6 +82,7 @@ if (process.env.NODE_ENV !== "production") {
         }
     });
     config.plugins.push(uglify);
+    config.plugins.push(banner);
 }
 
 module.exports = config;
