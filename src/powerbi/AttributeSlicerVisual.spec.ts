@@ -398,11 +398,19 @@ describe("AttributeSlicerVisual", function () {
     it("should load additional data properly in horizontal view mode");
     it("should go to vertical view mode, when selected in PBI");
     // it("should not lose selection when toggling caseInsensitivity");
+
     // ie. Search for Microsof then Microsoft, the service will return the same data
     it("should not get into an infinite loop if the data doesn't change");
+
     it("should support searching numerical columns (when a numerical column is the category)");
     it("should NOT support searching date columns (when a date column is the category)");
     it("should clear the search when switching column types");
+
+    // Additional info - It was calling selectionManager.clear every time an update call was performed,
+    // even if the selection hasn't changed (or none at all), and because of the clear call, PBI thought
+    // selection was changed, and would clear the highlights on the slicer.
+    it("should highlight correctly if highlighted from another visual");
+
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
