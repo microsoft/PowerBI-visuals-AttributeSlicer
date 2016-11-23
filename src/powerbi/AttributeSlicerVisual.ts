@@ -511,9 +511,11 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         log("AttributeSlicer loading state into PBI", state);
         if (state && this.host) {
             // Restoring selection into PBI
-            this.selectionManager.clear();
             const ids = getSelectionIdsFromSelectors((state.selectedItems || []).map(n => n.selector));
-            ids.forEach(n => {
+            const currentlySelIds = this.selectionManager.getSelectionIds() || [];
+            const toSelect = ids.filter(n => !currentlySelIds.some(m => m.equals(n)));
+            const toDeselect = currentlySelIds.filter(n => !ids.some(m => m.equals(n)));
+            toSelect.concat(toDeselect).forEach(n => {
                 this.selectionManager.select(n, true);
             });
             this.propertyPersister.persist(false, state.buildPersistObjects(this.dataView, true));
