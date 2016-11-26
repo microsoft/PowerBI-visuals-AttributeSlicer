@@ -28,6 +28,7 @@ import IValueFormatter = powerbi.visuals.IValueFormatter;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
 import { serializeSelectors, IColorSettings, convertItemsWithSegments } from "essex.powerbi.base";
+const ldget = require("lodash/get"); //tslint:disable-line
 
 /**
  * Converts the given dataview into a list of listitems
@@ -45,7 +46,7 @@ export default function converter(
     if (!categoryFormatter) {
         categoryFormatter = createCategoryFormatter(dataView);
     }
-            // displayValue: valueFormatter.format(value),
+
     return convertItemsWithSegments(
         dataView,
         (segment: ISlicerValueSegment) => {
@@ -62,7 +63,9 @@ export default function converter(
                     undefined,
                     "#ccc");
             return item;
-    }, settings) as IAttributeSlicerVisualData;
+
+        // TOOD: This logic should move to pbi base
+    }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
 }
 
 /**
@@ -110,3 +113,26 @@ export function createItem(
 }
 
 export type IConversionSettings = IColorSettings & { reverseBars?: boolean };
+
+/**
+ * True if the given dataview supports multiple value segments
+ */
+export function dataSupportsValueSegments(dv: powerbi.DataView) {
+    "use strict";
+    return ldget(dv, "categorical.values.length", 0) > 0;
+}
+
+/**
+ * Returns true if individiual instances of the dataset can be uniquely colored
+ */
+export function dataSupportsColorizedInstances(dv: powerbi.DataView) {
+    "use strict";
+
+    // If there are no value segments, then there is definitely going to be no instances
+    if (dataSupportsValueSegments(dv)) {
+        // We can uniquely color items that have an identity associated with it
+        const grouped = dv.categorical.values.grouped();
+        return grouped.filter(n => !!n.identity).length > 0;
+    }
+    return false;
+}

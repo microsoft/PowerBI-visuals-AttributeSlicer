@@ -36,7 +36,7 @@ import {
 import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
-import { createItem } from "./dataConversion";
+import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "../AttributeSlicer.defaults";
 
 const ldget = require("lodash/get"); // tslint:disable-line
@@ -217,6 +217,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      */
     @coloredObjectsSettings({
         category: "Data Point",
+        enumerable: (s, dv) => dataSupportsColorizedInstances(dv),
     })
     public colors: ColoredObjectsSettings;
 
