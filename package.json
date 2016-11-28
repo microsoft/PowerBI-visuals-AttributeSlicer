@@ -15,7 +15,9 @@
     "test": "npm-run-all --sequential clean tsc --parallel lint karma:once",
     "compile": "npm-run-all --sequential tsc pbibundle",
     "build": "npm-run-all --sequential test pbibundle",
-    "build:release": "NODE_ENV=production npm-run-all --sequential test pbibundle"
+    "build:release": "NODE_ENV=production npm-run-all --sequential test pbibundle",
+    "preversion": "npm test",
+    "version": "npm run build:release && git add -A -f dist"
   },
   "author": "",
   "license": "MIT",
