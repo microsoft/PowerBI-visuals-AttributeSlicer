@@ -274,7 +274,13 @@
 
   .item:hover .value-display .value {
       display: inline-block;
-      vertical-align: middle;
+      top: .25em;
+      bottom: 0;
+      width: 100%;
+      left: 0;
+      position: absolute;
+      overflow: hidden;
+      text-overflow: ellipsis;
   }
   .value-display .value {
       display: none;
@@ -340,7 +346,7 @@
   //   // .list, .list .item {
   //   //   cursor: nw-resize;
   //   // }
-    
+
   //   // &.render-horizontal {
   //   //   .list, .list .item {
   //   //     cursor: ew-resize;

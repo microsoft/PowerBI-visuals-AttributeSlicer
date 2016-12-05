@@ -74,8 +74,8 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
         const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;`;
         return `
             <span style="${style}" title="${displayValue}" class="value-display">
-                &nbsp;<span class="value">${displayValue}</span>
                 ${ highlightsTemplate(s) }
+                &nbsp;<span class="value">${displayValue}</span>
             </span>
         `.trim().replace(/\n/g, "");
     }).join("");
