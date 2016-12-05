@@ -160,7 +160,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      */
     @setting({
         category: "Display",
-        displayName: "Display Units",
+        displayName: "Units",
         description: "The units to use when displaying values.",
         defaultValue: 0,
         config: StandardObjectProperties.labelDisplayUnits,
@@ -172,7 +172,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      */
     @setting({
         category: "Display",
-        displayName: "Display Precision",
+        displayName: "Precision",
         description: "The precision to use when displaying values.",
         defaultValue: 0,
         config: StandardObjectProperties.labelPrecision,
