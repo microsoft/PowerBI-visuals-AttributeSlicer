@@ -52,6 +52,7 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
             { "Category": { }, "Series": { max: 0 }, "Values": { max: 1, min: 0 }},
             { "Category": { }, "Series": { min: 1, max: 1 }, "Values": { max: 1, min: 1 }},
             { "Category": { }, "Series": { max: 0 }, "Values": { min: 0 }},
+            { "Category": { }, "Series": { max: 1 }, "Values": { min: 0, max: 0 }},
         ],
         categorical: {
             categories: {
