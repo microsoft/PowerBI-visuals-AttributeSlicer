@@ -31,6 +31,7 @@ import { prettyPrintValue } from "./Utils";
 import itemTemplate from "./SlicerItem.tmpl";
 import * as $ from "jquery";
 import { Promise } from "es6-promise";
+import * as _ from "lodash";
 
 describe("AttributeSlicer", () => {
     let parentEle: JQuery;
@@ -421,7 +422,7 @@ describe("AttributeSlicer", () => {
             instance.events.on("loadMoreData", (e: any) => {
                 callCount++;
                 if (callCount === 1) {
-                    // HACK: After some delay 
+                    // HACK: After some delay
                     setTimeout(() => {
                         expect(callCount).to.eq(1);
                         expect(instance.data).to.be.deep.equal(SIMPLE_DATA_SET_TWO);
@@ -448,7 +449,7 @@ describe("AttributeSlicer", () => {
             expectSearchBox().to.be.empty;
         });
 
-        // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts 
+        // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts
         // the debounce function, but then corrects back to the original string "ABC", so the search string has not actually changed
         it("should not rerequest (call the external search provider) with the same search text back to back", (done) => {
             const { instance } = createInstance();
@@ -460,7 +461,7 @@ describe("AttributeSlicer", () => {
             instance.events.on("loadMoreData", () => {
                 callCount++;
                 if (callCount === 1) {
-                    // HACK: After some delay 
+                    // HACK: After some delay
                     setTimeout(() => {
                         expect(callCount).to.eq(1);
                         done();

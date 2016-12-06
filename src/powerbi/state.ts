@@ -38,6 +38,7 @@ import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "../AttributeSlicer.defaults";
+import * as _ from "lodash";
 
 const ldget = require("lodash/get"); // tslint:disable-line
 

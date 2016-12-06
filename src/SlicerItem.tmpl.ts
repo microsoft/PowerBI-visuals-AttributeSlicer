@@ -60,8 +60,13 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
     return (valueSegments || []).map(s => {
         const { color, highlightWidth } = s;
         let backgroundColor = "";
+        let fontColor = "#333";
         if (color) {
             backgroundColor = `background-color:${color};`;
+            const d3Color = d3.hcl(color);
+            if (d3Color.l <= 60) {
+                fontColor = "#ececec";
+            }
         }
 
         // If we are highlighted at all, then make the background lighter so we can focus
@@ -69,9 +74,11 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
         if (typeof highlightWidth === "number") {
             const { r, g, b } = d3.rgb(color);
             backgroundColor = `background-color:rgba(${r}, ${g}, ${b}, .4)`;
+            fontColor = "#333";
         }
+
         const displayValue = s.displayValue || s.value || "0";
-        const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;`;
+        const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;color:${fontColor}`;
         return `
             <span style="${style}" title="${displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }
