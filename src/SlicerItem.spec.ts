@@ -156,7 +156,7 @@ describe("SlicerItem", () => {
         const { element } = templateWithMatchAndSingleSegmentWithHighlights();
         // background-color:rgba(${r}, ${g}, ${b}, .4)
         const result = element.find(".value-display").map((i, ele) => $(ele).css("backgroundColor")).toArray()[0];
-        expect(result).to.be.deep.equal(`rgba(255, 0, 0, 0.4)`); // It lightens the main part, .4 opacity on red
+        expect(result).to.be.deep.equal(`rgba(255, 0, 0, 0.2)`); // It lightens the main part, .2 opacity on red
 
         const highlightResult = element.find(".value-display-highlight").map((i, ele) => $(ele).css("backgroundColor")).toArray()[0];
         expect(highlightResult).to.be.deep.equal("red");

@@ -73,7 +73,7 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
         // on the highlighted
         if (typeof highlightWidth === "number") {
             const { r, g, b } = d3.rgb(color);
-            backgroundColor = `background-color:rgba(${r}, ${g}, ${b}, .4)`;
+            backgroundColor = `background-color:rgba(${r}, ${g}, ${b}, .2)`;
             fontColor = "#333";
         }
 
