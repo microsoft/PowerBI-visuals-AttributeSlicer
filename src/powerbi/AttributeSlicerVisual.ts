@@ -397,6 +397,11 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
             // New state has changed, so update the slicer
             log("PBI has changed, updating state");
 
+            // Without this here, any time you change a setting the slicer
+            // will automatically scroll to the last scroll position that was stored in the state.
+            // (which is updated when something is selected or the search is changed)
+            newState.scrollPosition = this.mySlicer.scrollPosition;
+
             // The use of "state" here is important, because we want to load our internal state from this state
             this.state = VisualState.create(newState).toJSONObject();
 
