@@ -24,7 +24,7 @@
 const config = {
     devTool: "eval",
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.json']
+        extensions: ['', '.js', '.json']
     },
     // resolveLoader: {
     //     fallback: [path.join(__dirname, 'node_modules')],

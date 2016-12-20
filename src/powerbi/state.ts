@@ -32,7 +32,7 @@ import {
     coloredObjectsSettings,
     deserializeObjectWithIdentity,
     serializeObjectWithIdentity,
-} from "essex.powerbi.base";
+} from "@essex/pbi-base";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;

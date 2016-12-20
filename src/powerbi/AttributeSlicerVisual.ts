@@ -39,9 +39,9 @@ import {
     getSelectionIdsFromSelectors,
     getSetting,
     computeRenderedValues,
-} from "essex.powerbi.base";
-import { publishReplace, publishChange } from "pbi-stateful/src/stateful";
-import { StatefulVisual } from "pbi-stateful/src/StatefulVisual";
+} from "@essex/pbi-base";
+import { publishReplace, publishChange } from "@essex/pbi-stateful/lib/stateful";
+import { StatefulVisual } from "@essex/pbi-stateful/lib/StatefulVisual";
 
 import * as _ from "lodash";
 import * as $ from "jquery";

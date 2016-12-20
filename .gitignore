@@ -1,6 +1,5 @@
 # Installed Modules
-/node_modules/
-/typings/
+node_modules/
 
 # Temp Files
 .DS_Store
@@ -11,8 +10,9 @@
 *~
 
 # Build Artifacts
-/build/
-/dist/
+build/
+dist/
+docs/
 *.js
 !/*.js
 *.d.ts

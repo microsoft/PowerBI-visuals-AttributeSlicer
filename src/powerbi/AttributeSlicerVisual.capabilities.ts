@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { VisualBase } from "essex.powerbi.base";
+import { VisualBase } from "@essex/pbi-base";
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
 import VisualState from "./state";
 const log = require("debug")("AttributeSlicer::Capabilities"); // tslint:disable-line

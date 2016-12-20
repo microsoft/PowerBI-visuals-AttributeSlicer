@@ -23,13 +23,14 @@
  */
 
 "use strict";
-require("essex.powerbi.base/dist/spec/visualHelpers"); // tslint:disable-line
-import { UpdateType } from "essex.powerbi.base";
+import '@essex/pbi-base/dist/spec/visualHelpers'; // tslint:disable-line
+import { UpdateType } from "@essex/pbi-base";
 import * as $ from "jquery";
 import { expect } from "chai";
 import { AttributeSlicer } from "../AttributeSlicer";
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 import AttributeSlicerVisual from "./AttributeSlicerVisual";
+
 describe("AttributeSlicerVisual", function () {
     let parentEle: JQuery;
     beforeEach(function () {
