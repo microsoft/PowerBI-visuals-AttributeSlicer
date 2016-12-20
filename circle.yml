@@ -15,3 +15,4 @@ dependencies:
 general:
   artifacts:
     - "dist/"
+    - "docs/"

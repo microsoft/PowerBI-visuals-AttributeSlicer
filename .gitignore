@@ -10,8 +10,9 @@ node_modules/
 *~
 
 # Build Artifacts
-/build/
+build/
 dist/
+docs/
 *.js
 !/*.js
 *.d.ts
