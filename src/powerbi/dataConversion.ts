@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 
+import * as PBIBase from "@essex/pbi-base"; // tslint:disable-line
 import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
 import { ISerializedItem } from "../interfaces";
+import "powerbi-visuals/lib/powerbi-visuals";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
-import { serializeSelectors, IColorSettings, convertItemsWithSegments } from "essex.powerbi.base";
+import { serializeSelectors, IColorSettings, convertItemsWithSegments } from "@essex/pbi-base";
 const ldget = require("lodash/get"); //tslint:disable-line
 
 /**

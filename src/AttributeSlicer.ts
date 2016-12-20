@@ -29,7 +29,7 @@ import JQuerySelectionManager from "./selection/JQuerySelectionManager";
 import { SlicerItem, IAttributeSlicerState } from "./interfaces";
 import { prettyPrintValue as pretty } from "./Utils";
 import itemTemplate from "./SlicerItem.tmpl";
-// import { logger } from "essex.powerbi.base"; // TODO: this should be a utils, not pbi
+// import { logger } from "@essex/pbi-base"; // TODO: this should be a utils, not pbi
 import { SEARCH_DEBOUNCE, DEFAULT_VALUE_WIDTH, DEFAULT_TEXT_SIZE, DEFAULT_STATE } from "./AttributeSlicer.defaults";
 
 /* tslint:disable */

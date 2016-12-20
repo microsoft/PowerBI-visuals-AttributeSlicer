@@ -17,8 +17,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@essex/pbi-base": "^0.8.19",
-    "@essex/pbi-stateful": "^0.11.1",
+    "@essex/pbi-base": "^0.8.22",
+    "@essex/pbi-stateful": "^0.12.0",
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
     "javascript-natural-sort": "^0.7.1",
