@@ -2,6 +2,43 @@
 # yarn lockfile v1
 
 
+"@essex/pbi-base@^0.8.19":
+  version "0.8.19"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2fpbi-base/-/pbi-base-0.8.19.tgz#10188ec288a8e89c8bae904ab96f617112533cac"
+  dependencies:
+    "@types/d3" "^3.5.36"
+    "@types/gulp" "^3.8.32"
+    "@types/jquery" "^2.0.33"
+    "@types/lodash" "^4.14.37"
+    "@types/node" "^6.0.45"
+    debug "^2.2.0"
+    del "^2.2.2"
+    font-awesome "^4.6.1"
+    gulp "^3.9.1"
+    gulp-concat "^2.6.0"
+    gulp-modify "^0.1.1"
+    gulp-replace "^0.5.4"
+    gulp-sequence "^0.4.6"
+    gulp-util "^3.0.7"
+    gulp-webpack "^1.5.0"
+    gulp-zip "^3.2.0"
+    jquery "^2.2.3"
+    lodash "^4.11.0"
+    powerbi-visuals "*"
+
+"@essex/pbi-stateful@^0.11.1":
+  version "0.11.1"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2fpbi-stateful/-/pbi-stateful-0.11.1.tgz#9db4de459649de789d8a6de7657a8220298aa62c"
+  dependencies:
+    "@types/debug" "0.0.29"
+    "@types/lodash" "^4.14.37"
+    "@types/node" "^6.0.41"
+    debug "^2.2.0"
+    json-stringify-safe "^5.0.1"
+    lodash "^4.16.4"
+    powerbi-visuals "^0.5.9"
+    react-frame-component "^0.6.6"
+
 "@types/chai@^3.4.34":
   version "3.4.34"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-3.4.34.tgz#d5335792823bb09cddd5e38c3d211b709183854d"
@@ -1737,11 +1774,11 @@ escape-html@~1.0.3:
   version "1.0.3"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
 
-escape-string-regexp@1.0.2, escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.2:
+escape-string-regexp@1.0.2, escape-string-regexp@^1.0.2:
   version "1.0.2"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/escape-string-regexp/-/escape-string-regexp-1.0.2.tgz#4dbc2fe674e71949caf3fb2695ce7f2dc1d9a8d1"
 
-escape-string-regexp@^1.0.3:
+escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.3:
   version "1.0.5"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
@@ -1756,30 +1793,6 @@ esprima@^2.5.0, esprima@^2.6.0:
 esprima@~3.1.0:
   version "3.1.2"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/esprima/-/esprima-3.1.2.tgz#954b5d19321ca436092fa90f06d6798531fe8184"
-
-essex.powerbi.base@^0.8.18:
-  version "0.8.19"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/essex.powerbi.base/-/essex.powerbi.base-0.8.19.tgz#8e4dcb66edb9695fff75ca93314ed5fe5dee9df6"
-  dependencies:
-    "@types/d3" "^3.5.36"
-    "@types/gulp" "^3.8.32"
-    "@types/jquery" "^2.0.33"
-    "@types/lodash" "^4.14.37"
-    "@types/node" "^6.0.45"
-    debug "^2.2.0"
-    del "^2.2.2"
-    font-awesome "^4.6.1"
-    gulp "^3.9.1"
-    gulp-concat "^2.6.0"
-    gulp-modify "^0.1.1"
-    gulp-replace "^0.5.4"
-    gulp-sequence "^0.4.6"
-    gulp-util "^3.0.7"
-    gulp-webpack "^1.5.0"
-    gulp-zip "^3.2.0"
-    jquery "^2.2.3"
-    lodash "^4.11.0"
-    powerbi-visuals "*"
 
 esutils@^2.0.2:
   version "2.0.2"
@@ -4253,19 +4266,6 @@ pause-stream@0.0.11:
   dependencies:
     through "~2.3"
 
-pbi-stateful@^0.11.1:
-  version "0.11.1"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/pbi-stateful/-/pbi-stateful-0.11.1.tgz#971606b2c0cb4be6b0fee66208b5f3bc2fec133f"
-  dependencies:
-    "@types/debug" "0.0.29"
-    "@types/lodash" "^4.14.37"
-    "@types/node" "^6.0.41"
-    debug "^2.2.0"
-    json-stringify-safe "^5.0.1"
-    lodash "^4.16.4"
-    powerbi-visuals "^0.5.9"
-    react-frame-component "^0.6.6"
-
 pbkdf2-compat@2.0.1:
   version "2.0.1"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/pbkdf2-compat/-/pbkdf2-compat-2.0.1.tgz#b6e0c8fa99494d94e0511575802a59a5c142f288"
@@ -5636,7 +5636,7 @@ typescript@1.8.9:
   version "1.8.9"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/typescript/-/typescript-1.8.9.tgz#b3b3a74059fd31cbd3ecad95d62465939e7ed5fa"
 
-typescript@^2.0.3:
+typescript@^2.1.4:
   version "2.1.4"
   resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/typescript/-/typescript-2.1.4.tgz#b53b69fb841126acb1dd4b397d21daba87572251"
 

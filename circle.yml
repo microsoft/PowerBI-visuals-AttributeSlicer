@@ -11,3 +11,7 @@ dependencies:
     - ./scripts/setup-circle.sh
     - yarn install
     - yarn add node-sass --force --target=4.0.0
+
+general:
+  artifacts:
+    - "dist/"

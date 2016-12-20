@@ -1,5 +1,5 @@
 {
-  "name": "essex.widget.attributeslicer",
+  "name": "@essex/powerbi-visual-attributeslicer",
   "version": "0.12.0",
   "description": "",
   "main": "src/index.js",
@@ -12,29 +12,22 @@
     "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
-    "test": "npm-run-all --sequential clean tsc --parallel lint karma:once",
-    "compile": "npm-run-all --sequential tsc pbibundle",
-    "build": "npm-run-all --sequential test pbibundle",
-    "build:release": "NODE_ENV=production npm-run-all --sequential test pbibundle",
-    "preversion": "npm test",
-    "version": "npm run build:release && git add -A -f dist"
+    "test": "npm-run-all clean tsc lint karma:once pbibundle docs"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@essex/pbi-base": "^0.8.19",
+    "@essex/pbi-stateful": "^0.11.1",
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
-    "essex.powerbi.base": "^0.8.18",
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^2.2.0",
     "json-stringify-safe": "^5.0.1",
     "lodash": "4.0.0",
     "lodash.get": "^4.4.2",
     "moment": "^2.12.0",
-    "node-sass": "^4.0.0",
-    "pbi-stateful": "^0.11.1",
-    "powerbi-visuals": "^0.5.9",
-    "webpack-strip": "^0.1.0"
+    "powerbi-visuals": "^0.5.9"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
@@ -86,7 +79,7 @@
     "karma-webpack": "^1.7.0",
     "lolex": "^1.4.0",
     "mocha": "2.3.4",
-    "node-sass": "3.4.2",
+    "node-sass": "^4.0.0",
     "npm-run-all": "^1.7.0",
     "phantomjs-prebuilt": "^2.1.7",
     "raw-loader": "0.5.1",
@@ -101,15 +94,12 @@
     "to-string-loader": "^1.1.5",
     "ts-node": "0.5.5",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.3",
-    "typings": "^0.7.12",
+    "typescript": "^2.1.4",
     "underscore": "1.8.3",
     "url-loader": "^0.5.7",
     "wallaby-webpack": "0.0.16",
     "webpack": "1.12.9",
+    "webpack-strip": "^0.1.0",
     "yargs": "3.31.0"
-  },
-  "publishConfig": {
-    "registry": "http://essex-private-npm.westus.cloudapp.azure.com:4873/"
   }
 }
