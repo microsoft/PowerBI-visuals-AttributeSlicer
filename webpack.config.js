@@ -21,14 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+const path = require('path');
+const webpack = require('webpack');
+const fs = require("fs");
+
 const config = {
-    devTool: "eval",
     resolve: {
         extensions: ['', '.webpack.js', '.web.js', '.js', '.json']
     },
-    // resolveLoader: {
-    //     fallback: [path.join(__dirname, 'node_modules')],
-    // },
+    resolveLoader: {
+        fallback: [path.join(__dirname, 'node_modules')],
+    },
     module: {
         loaders: [
             {
@@ -46,9 +50,39 @@ const config = {
         ],
     },
     externals: {
-        "jsdom": "{}",
-        "powerbi-visuals/lib/powerbi-visuals": "{}",
+        jquery: "jQuery",
+        d3: "d3",
+        underscore: "_",
+        "lodash": "_",
+        "powerbi-visuals/lib/powerbi-visuals": "powerbi",
     },
+    plugins: [
+        new webpack.optimize.OccurenceOrderPlugin(),
+        new webpack.ProvidePlugin({
+            'Promise': 'exports?global.Promise!es6-promise'
+        }),
+        new webpack.DefinePlugin({
+            'process.env.DEBUG': "\"" + (process.env.DEBUG || "") + "\""
+        })
+    ],
 };
+
+if (process.env.NODE_ENV !== "production") {
+    config.devtool = "eval";
+} else {
+    var banner = new webpack.BannerPlugin(fs.readFileSync("LICENSE").toString());
+    var uglify = new webpack.optimize.UglifyJsPlugin({
+        mangle: true,
+        minimize: true,
+        compress: false,
+        beautify: false,
+        output: {
+            ascii_only: true, // Necessary, otherwise it screws up the unicode characters that lineup is using for font-awesome
+            comments: false,
+        }
+    });
+    config.plugins.push(uglify);
+    config.plugins.push(banner);
+}
 
 module.exports = config;

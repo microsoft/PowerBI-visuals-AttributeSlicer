@@ -1,6 +1,5 @@
 # Installed Modules
-/node_modules/
-/typings/
+node_modules/
 
 # Temp Files
 .DS_Store
@@ -8,15 +7,15 @@
 /dump
 
 # IDE / Editors
-.vscode
 *~
 
 # Build Artifacts
 /build/
-/dist/
+dist/
 *.js
 !/*.js
 *.d.ts
 !/src/references.d.ts
 !/base/powerbi/powerbi.d.ts
 !/base/powerbi/references.d.ts
+build.out
