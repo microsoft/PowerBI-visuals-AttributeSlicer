@@ -1,0 +1,23 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.DS_Store": true,
+    "**/*~": true,
+    "lib/": true,
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "**/**/*.js": {
+      "when": "$(basename).tsx"
+    },
+    "**/*.d.ts": {
+      "when": "$(basename).ts"
+    },
+    "**/**/*.d.ts": {
+      "when": "$(basename).tsx"
+    }  
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib"
+}

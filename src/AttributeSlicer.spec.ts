@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) Microsoft
+ * All rights reserved.
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 import "../base/testSetup";
 
 import { expect } from "chai";
@@ -7,6 +31,7 @@ import { prettyPrintValue } from "./Utils";
 import itemTemplate from "./SlicerItem.tmpl";
 import * as $ from "jquery";
 import { Promise } from "es6-promise";
+import * as _ from "lodash";
 
 describe("AttributeSlicer", () => {
     let parentEle: JQuery;
@@ -41,7 +66,9 @@ describe("AttributeSlicer", () => {
         let vList = new fakeVL();
         parentEle.append(ele);
         let result = {
-            instance: new AttributeSlicer(ele, vList),
+            instance: new AttributeSlicer(ele, {
+                searchDebounce: 0,
+            }, vList),
             element: ele,
             vlist: vList,
         };
@@ -51,6 +78,7 @@ describe("AttributeSlicer", () => {
 
     const createData = (...items: string[]) => {
         return items.map((n: string) => ({
+            id: n,
             match: n,
             value: n,
             selected: false,
@@ -119,7 +147,7 @@ describe("AttributeSlicer", () => {
     describe("isMatch", () => {
         const matchTest = (text2: string, text1: string, expected: boolean, caseInsensitive = true) => {
             expect(AttributeSlicer.isMatch(<SlicerItem><any>{
-                match: text1
+                match: text1,
             }, text2, caseInsensitive)).to.be.equal(expected);
         };
         it("return true with search 'Hello', and item 'Hello' and caseInsensitive = true", () => matchTest("Hello", "Hello", true));
@@ -394,7 +422,7 @@ describe("AttributeSlicer", () => {
             instance.events.on("loadMoreData", (e: any) => {
                 callCount++;
                 if (callCount === 1) {
-                    // HACK: After some delay 
+                    // HACK: After some delay
                     setTimeout(() => {
                         expect(callCount).to.eq(1);
                         expect(instance.data).to.be.deep.equal(SIMPLE_DATA_SET_TWO);
@@ -421,7 +449,7 @@ describe("AttributeSlicer", () => {
             expectSearchBox().to.be.empty;
         });
 
-        // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts 
+        // this happens if the user types in say "ABC" and lets that search, then starts searching again which starts
         // the debounce function, but then corrects back to the original string "ABC", so the search string has not actually changed
         it("should not rerequest (call the external search provider) with the same search text back to back", (done) => {
             const { instance } = createInstance();
@@ -433,7 +461,7 @@ describe("AttributeSlicer", () => {
             instance.events.on("loadMoreData", () => {
                 callCount++;
                 if (callCount === 1) {
-                    // HACK: After some delay 
+                    // HACK: After some delay
                     setTimeout(() => {
                         expect(callCount).to.eq(1);
                         done();
@@ -451,6 +479,35 @@ describe("AttributeSlicer", () => {
             instance.events.on("canLoadMoreData", (e: any) => {
                 e.result = false;
                 done(); // At least it asked
+            });
+
+            // Pretend we just infinitely scrolled
+            const pretendItems = $("<div>").css({ height: 20000 });
+            vlist.container.append(pretendItems);
+            vlist.container[0].scrollTop = 20000;
+            vlist.container.scroll();
+        });
+
+        it("should append data to the original dataset if scrolled to the bottom", (done) => {
+            const { instance, vlist } = createInstance();
+            instance.data = SIMPLE_DATA.slice(0);
+
+            let once = false;
+            instance.events.on("canLoadMoreData", (e: any) => {
+                e.result = !once;
+                once = true;
+            });
+
+            instance.events.on("loadMoreData", (result: any) => {
+                result.result = new Promise(resolve => {
+                    resolve(SIMPLE_DATA_SET_TWO.slice(0));
+                    // Timeout to allow it to actually resolve
+                    setTimeout(() => {
+                        const expected = [].concat(SIMPLE_DATA).concat(SIMPLE_DATA_SET_TWO);
+                        expect(instance.data).to.deep.equal(expected);
+                        done();
+                    }, 20);
+                });
             });
 
             // Pretend we just infinitely scrolled
@@ -553,6 +610,183 @@ describe("AttributeSlicer", () => {
             element.find(".token").click();
 
             expect(instance.selectedItems).to.be.deep.equal([]);
+        });
+    });
+
+    describe("state", () => {
+        it ("setting should update the value of 'renderHorizontal'", () => {
+            const { instance, element } = createInstance();
+            instance.state = <any>_.set({}, "horizontal", true);
+            expect(instance.renderHorizontal).to.be.true;
+            expect(element.is(".render-horizontal")).to.be.true;
+        });
+        it ("setting should return the value of 'renderHorizontal'", () => {
+            const { instance } = createInstance();
+            instance.renderHorizontal = true;
+            expect(instance.state.horizontal).to.be.true;
+        });
+
+        it ("setting should update the value of 'renderHorizontal'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "horizontal", true);
+            expect(instance.renderHorizontal).to.be.true;
+        });
+        it ("setting should return the value of 'renderHorizontal'", () => {
+            const { instance } = createInstance();
+            instance.renderHorizontal = true;
+            expect(instance.state.horizontal).to.be.true;
+        });
+        it ("setting should update the value of 'valueColumnWidth'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "valueColumnWidth", 56.6);
+            expect(instance.valueWidthPercentage).to.be.equal(56.6);
+        });
+        it ("setting should return the value of 'valueColumnWidth'", () => {
+            const { instance } = createInstance();
+            instance.valueWidthPercentage = 56.6;
+            expect(instance.state.valueColumnWidth).to.be.equal(56.6);
+        });
+
+        it ("setting should update the value of 'textSize'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "textSize", 56.6);
+            expect(instance.fontSize).to.be.equal(56.6);
+        });
+        it ("setting should return the value of 'textSize'", () => {
+            const { instance } = createInstance();
+            instance.fontSize = 56.6;
+            expect(instance.state.textSize).to.be.equal(56.6);
+        });
+        it ("setting should update the value of 'showOptions'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "showOptions", false);
+            expect(instance.showOptions).to.be.equal(false);
+        });
+        it ("setting should return the value of 'showOptions'", () => {
+            const { instance } = createInstance();
+            instance.showOptions = false;
+            expect(instance.state.showOptions).to.be.equal(false);
+        });
+        it ("setting should update the value of 'showValues'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "showValues", false);
+            expect(instance.showValues).to.be.equal(false);
+        });
+        it ("setting should return the value of 'showValues'", () => {
+            const { instance } = createInstance();
+            instance.showValues = false;
+            expect(instance.state.showValues).to.be.equal(false);
+        });
+        it ("setting should update the value of 'showSearch'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "showSearch", false);
+            expect(instance.showSearchBox).to.be.equal(false);
+        });
+        it ("setting should return the value of 'showSearch'", () => {
+            const { instance } = createInstance();
+            instance.showSearchBox = false;
+            expect(instance.state.showSearch).to.be.equal(false);
+        });
+
+        it ("setting should update the value of 'showSelections'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "showSelections", false);
+            expect(instance.showSelections).to.be.equal(false);
+        });
+        it ("setting should return the value of 'showSelections'", () => {
+            const { instance } = createInstance();
+            instance.showSelections = false;
+            expect(instance.state.showSelections).to.be.equal(false);
+        });
+
+        it ("setting should update the value of 'singleSelect'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "singleSelect", true);
+            expect(instance.singleSelect).to.be.equal(true);
+        });
+        it ("setting should return the value of 'singleSelect'", () => {
+            const { instance } = createInstance();
+            instance.singleSelect = true;
+            expect(instance.state.singleSelect).to.be.equal(true);
+        });
+
+        it ("setting should update the value of 'brushSelectionMode'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>_.set({}, "brushMode", true);
+            expect(instance.brushSelectionMode).to.be.equal(true);
+        });
+        it ("setting should return the value of 'brushSelectionMode'", () => {
+            const { instance } = createInstance();
+            instance.brushSelectionMode = true;
+            expect(instance.state.brushMode).to.be.equal(true);
+        });
+
+        it ("setting should update the value of 'searchString'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>{ searchText: "HIDYHIDYHO" };
+            expect(instance.searchString).to.be.equal("HIDYHIDYHO");
+        });
+        it ("setting should return the value of 'searchString'", () => {
+            const { instance } = createInstance();
+            instance.searchString = "HIDYHIDYHO";
+            expect(instance.state.searchText).to.be.equal("HIDYHIDYHO");
+        });
+
+        const TEST_SELECTED_ITEMS = [{ id: "A" }, { id: "B" }];
+        it ("setting should update the value of 'selectedItems'", () => {
+            const { instance } = createInstance();
+            instance.state = <any>{ selectedItems: TEST_SELECTED_ITEMS.slice(0) };
+            expect(instance.selectedItems.map(n => ({ id: n.id }))).to.be.deep.equal(TEST_SELECTED_ITEMS);
+        });
+        it ("setting should return the value of 'selectedItems'", () => {
+            const { instance } = createInstance();
+            instance.selectedItems = <any>TEST_SELECTED_ITEMS.slice(0);
+            expect(instance.state.selectedItems).to.be.deep.equal(TEST_SELECTED_ITEMS.slice(0));
+        });
+
+
+/*
+            selectedItems: [],
+            searchText: "",
+            settings: {
+            */
+    });
+
+    describe("UI", () => {
+        it("should update the search string if the search box is changed", () => {
+            const { instance, element } = createInstance();
+
+            // Click on the token
+            element.find(".searchbox")
+                .val("TEST_SEARCH")
+                .trigger("input");
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    expect(instance.searchString).to.be.equal("TEST_SEARCH");
+                    resolve();
+                }, 10); // Add a delay so it overcomes the search debounce
+            });
+        });
+        it("should raise the load more data event if search box is changed", () => {
+            const { instance, element } = createInstance();
+            return new Promise(resolve => {
+
+                // Setup stuff to say that we need search updates.
+                instance.serverSideSearch = true;
+                instance.events.on("canLoadMoreData", (result: any) => {
+                    result.result = true;
+                });
+                instance.events.on("loadMoreData", () => {
+                    expect(instance.searchString).to.be.equal("TEST_SEARCH");
+                    resolve();
+                });
+
+                // Click on the token
+                element.find(".searchbox")
+                    .val("TEST_SEARCH")
+                    .trigger("input");
+            });
         });
     });
 
