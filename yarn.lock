@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@essex/pbi-base@^0.8.23":
-  version "0.8.23"
-  resolved "https://registry.yarnpkg.com/@essex/pbi-base/-/pbi-base-0.8.23.tgz#e8b2e5aec09f714fad050c5017f670f66897a4ef"
+"@essex/pbi-base@^0.8.24":
+  version "0.8.24"
+  resolved "https://registry.yarnpkg.com/@essex/pbi-base/-/pbi-base-0.8.24.tgz#4d84334a744823eac6386616949984ada1d98833"
   dependencies:
     "@types/d3" "^3.5.36"
     "@types/gulp" "^3.8.32"
