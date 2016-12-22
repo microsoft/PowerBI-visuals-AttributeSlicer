@@ -14,7 +14,7 @@
     "karma:once": "karma start",
     "test": "npm-run-all clean tsc lint karma:once pbibundle docs"
   },
-  "author": "Microsoft (Experimental)",
+  "author": "Microsoft",
   "license": "MIT",
   "dependencies": {
     "@essex/pbi-base": "^0.8.23",
