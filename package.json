@@ -12,7 +12,10 @@
     "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
-    "test": "npm-run-all clean tsc lint karma:once pbibundle docs"
+    "verify": "npm-run-all clean tsc lint karma:once docs",
+    "test": "npm-run-all verify pbibundle",
+    "preversion": "npm run verify",
+    "version": "npm run pbibundle"
   },
   "author": "Microsoft",
   "license": "MIT",
