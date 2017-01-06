@@ -69,7 +69,7 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
             rowCount: { preferred: { min: 2 }, supported: { min: 0 } },
         },
     }],
-    // sort this crap by default
+    // sort by default
     sorting: {
         default: {},
     },
