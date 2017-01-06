@@ -282,7 +282,7 @@ function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
     "use strict";
     const objects = ldget(dataView, "metadata.objects");
     if (objects) {
-        // HAX: Stupid crap to restore selection
+        // HACK: Extra special code to restore selection
         const selectedIds = parseSelectionIds(objects);
         if (selectedIds && selectedIds.length) {
             const serializedSelectedItems: ListItem[] = JSON.parse(ldget(objects, "general.selection"));
