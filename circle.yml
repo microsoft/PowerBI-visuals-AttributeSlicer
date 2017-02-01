@@ -23,12 +23,12 @@ dependencies:
 
 test:
   override:
-   # We need to seperate these out, cause the rest of the projects depend on network-navigator being built first.
-    - NODE_ENV=production lerna --scope @essex/network-navigator run test && NODE_ENV=production lerna run test --ignore @essex/network-navigator
+   # We need to seperate these out, cause the rest of the projects depend on attribute-slicer being built first.
+    - NODE_ENV=production lerna --scope @essex/attribute-slicer run test && NODE_ENV=production lerna run test --ignore @essex/attribute-slicer
 
 general:
   artifacts:
-    - "packages/network-navigator-powerbi/dist/"
-    - "packages/network-navigator-powerbi/docs/"
-    - "packages/network-navigator/docs/"
-    - "packages/network-navigator-react/docs/"
+    - "packages/attribute-slicer-powerbi/dist/"
+    - "packages/attribute-slicer-powerbi/docs/"
+    - "packages/attribute-slicer/docs/"
+    - "packages/attribute-slicer-react/docs/"

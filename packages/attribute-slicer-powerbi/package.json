@@ -9,7 +9,7 @@
     "tsc": "(tsc > build.out) || (! cat build.out | grep -v \"node_modules.*\" | grep -v \"^\\s.*\") || ! printf \"\\n\\033[0;31mCheck build.out for full error text\\n\"",
     "pbibundle": "gulp",
     "lint": "tslint 'src/**/*[!.d].{ts,tsx}'",
-    "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",
+    "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts > /dev/null || exit 1",
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
     "verify": "npm-run-all clean tsc lint karma:once docs",
