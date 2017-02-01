@@ -35,7 +35,7 @@ export class ExcelBindingManager {
     /**
      * Provides a namespace for all of the bindings that this manages
      */
-    private bindingNamespace = "Data.";
+    private bindingNamespace = "EssexOffice";
 
     /**
      * Gets called when a bindings data has changed

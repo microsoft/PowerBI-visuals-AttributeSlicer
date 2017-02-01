@@ -26,11 +26,24 @@
 @import "./Base";
 
 :local(.className) {
+
+    .advanced-slicer {
+        font-size: 12px;
+    }
+
     .value-display {
         background-color: blue;
         .value {
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+    }
+
+    .item {
+        &.selected-slicer-item {
+            .display-container:before {
+                background-color: #3599B8;
+            }
         }
     }
 
