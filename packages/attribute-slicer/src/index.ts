@@ -21,27 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-
-@import "../../../node_modules/@essex/pbi-base/css/main";
-@import "../../../node_modules/@essex/pbi-base/css/variables";
-@import "../../css/Base";
-
-:local(.className) {
-    .value-display {
-    background-color: $dataColor1;
-    }
-
-    .item:hover {
-        background-color: $neutralTertiaryAltColor;
-    }
-
-    .token {
-        background-color: $neutralLightColor;
-    }
-
-    .searchbox {
-        border: 1px solid #999;
-        padding-left: 2px;
-    }
-}
+export { AttributeSlicer } from "./AttributeSlicer";
+export * from "./interfaces";
+export * from "./Utils";
+export { default as JQuerySelectionManager } from "./selection/JQuerySelectionManager";
+export { default as SelectionManager } from "./selection/SelectionManager";
+export * from "./AttributeSlicer.defaults";

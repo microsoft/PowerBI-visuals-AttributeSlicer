@@ -24,7 +24,7 @@
 
 import * as PBIBase from "@essex/pbi-base"; // tslint:disable-line
 import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
-import { ISerializedItem } from "../interfaces";
+import { ISerializedItem } from "@essex/attribute-slicer";
 import "powerbi-visuals/lib/powerbi-visuals";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import DataView = powerbi.DataView;

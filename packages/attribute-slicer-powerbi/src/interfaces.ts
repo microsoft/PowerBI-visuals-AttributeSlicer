@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "../interfaces";
+import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "@essex/attribute-slicer";
 import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
 
 /**
