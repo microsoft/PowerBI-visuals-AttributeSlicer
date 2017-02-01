@@ -32,6 +32,14 @@
         background-color: $dataColor1;
     }
 
+    .item {
+        &.selected-slicer-item {
+            .display-container:before {
+                background-color: $dataColor9;
+            }
+        }
+    }
+
     .item:hover {
         background-color: $neutralTertiaryAltColor;
     }
