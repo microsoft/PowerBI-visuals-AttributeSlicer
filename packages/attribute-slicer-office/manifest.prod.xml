@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ContentApp">
+  <Id>706bd7ab-336b-4ea8-9e17-ddee7697bf90</Id>
+  <Version>0.0.1.0</Version>
+  <ProviderName>Microsoft Research</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Attribute Slicer"/>
+  <Description DefaultValue="A plugin for Microsoft Office Applications (Excel) to embed the Attribute Slicer from PowerBI into the Office Application"/>
+  <IconUrl DefaultValue="https://office.msrp-essex-services.net:8449/images/icon.png"/>
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://office.msrp-essex-services.net:8449/index.html"/>
+    <RequestedWidth>400</RequestedWidth>
+    <RequestedHeight>400</RequestedHeight>
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>

@@ -1,0 +1,48 @@
+{
+  "name": "attribute-slicer-office",
+  "version": "0.0.1",
+  "description": "A plugin for Microsoft Office Applications (Excel) to embed the Attribute Slicer from PowerBI into the Office Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "webpack",
+    "start": "webpack-dev-server --https --content-base ./public --cert cert/cert.crt --key cert/cert.key --host excel.dev --hot --port 8449",
+    "postinstall": "linklocal"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/PowerBI-visuals-AttributeSlicer.git"
+  },
+  "keywords": [
+    "Excel",
+    "AttributeSlicer",
+    "Attribute",
+    "Slicer",
+    "graph"
+  ],
+  "author": "Microsoft",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Microsoft/PowerBI-visuals-AttributeSlicer/issues"
+  },
+  "homepage": "https://github.com/Microsoft/PowerBI-visuals-AttributeSlicer#readme",
+  "devDependencies": {
+    "@essex/attribute-slicer": "file:../attribute-slicer",
+    "@types/debug": "^0.0.29",
+    "@types/node": "^7.0.4",
+    "@types/office-js": "^0.0.37",
+    "css-loader": "^0.26.1",
+    "debug": "^2.6.0",
+    "es6-promise": "^4.0.5",
+    "jquery": "^3.1.1",
+    "linklocal": "^2.8.0",
+    "node-sass": "^4.4.0",
+    "npm-run-all": "^4.0.1",
+    "raw-loader": "^0.5.1",
+    "sass-loader": "^4.1.1",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^2.0.0",
+    "typescript": "^2.1.5",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.2.1"
+  }
+}
