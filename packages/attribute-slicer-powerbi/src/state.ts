@@ -37,7 +37,7 @@ import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
-import { DEFAULT_STATE } from "../AttributeSlicer.defaults";
+import { DEFAULT_STATE } from "@essex/attribute-slicer";
 import * as _ from "lodash";
 
 const ldget = require("lodash/get"); // tslint:disable-line

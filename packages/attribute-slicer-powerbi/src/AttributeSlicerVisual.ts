@@ -53,14 +53,12 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import PixelConverter = jsCommon.PixelConverter;
 
-import { isStateEqual } from "../Utils";
+import { isStateEqual, IAttributeSlicerState, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
 import { default as converter, createItemFromSerializedItem } from "./dataConversion";
 import capabilitiesData from "./AttributeSlicerVisual.capabilities";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
 import { default as VisualState, calcStateDifferences } from "./state";
-import { IAttributeSlicerState } from "../interfaces";
-import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
 import SelectionManager = powerbi.visuals.utility.SelectionManager;
 const log = logger("essex.widget.AttributeSlicerVisual");
 const CUSTOM_CSS_MODULE = require("!css!sass!./css/AttributeSlicerVisual.scss");
@@ -86,7 +84,7 @@ function hashString(input: string): number {
   return hash;
 }
 
-@Visual(require("../build").output.PowerBI)
+@Visual(require("./build").output.PowerBI)
 @receiveDimensions
 @capabilities(capabilitiesData)
 @receiveUpdateType(<any>{

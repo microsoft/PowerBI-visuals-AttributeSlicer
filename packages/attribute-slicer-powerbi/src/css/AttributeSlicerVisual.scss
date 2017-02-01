@@ -23,13 +23,21 @@
  */
 
 
-@import "../../../node_modules/@essex/pbi-base/css/main";
-@import "../../../node_modules/@essex/pbi-base/css/variables";
-@import "../../css/Base";
+@import "../../node_modules/@essex/pbi-base/css/main";
+@import "../../node_modules/@essex/pbi-base/css/variables";
+@import "../../node_modules/@essex/attribute-slicer/src/css/Base";
 
 :local(.className) {
     .value-display {
-    background-color: $dataColor1;
+        background-color: $dataColor1;
+    }
+
+    .item {
+        &.selected-slicer-item {
+            .display-container:before {
+                background-color: $dataColor9;
+            }
+        }
     }
 
     .item:hover {

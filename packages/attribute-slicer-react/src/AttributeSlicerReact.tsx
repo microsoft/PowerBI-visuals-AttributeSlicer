@@ -25,9 +25,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as $ from "jquery";
-import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
+import { AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
 
-import "../css/AttributeSlicer.scss";
+// import "@essex/attribute-slicer/src/css/AttributeSlicer.scss";
 
 export interface IAttributeSlicerProps {
     data: any[];
