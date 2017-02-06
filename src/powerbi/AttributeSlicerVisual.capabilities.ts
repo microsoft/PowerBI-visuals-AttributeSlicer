@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { VisualBase } from "essex.powerbi.base";
+import { VisualBase } from "@essex/pbi-base";
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
 import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";

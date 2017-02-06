@@ -38,7 +38,7 @@ module.exports = function (wallaby) {
       {pattern: 'src/**/VirtualList.js', load: false},
       {pattern: 'base/**/*.{ts,scss,json,html}', load: false},
       {pattern: 'base/**/testSetup.js', load: false},
-      {pattern: 'node_modules/essex.powerbi.base/css/*.{scss}', load: false},
+      {pattern: 'node_modules/@essex/pbi-base/css/*.{scss}', load: false},
       {pattern: '!src/**/*.spec.ts', load: false}
     ],
 

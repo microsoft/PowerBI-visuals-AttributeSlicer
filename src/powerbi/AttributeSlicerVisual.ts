@@ -23,7 +23,7 @@
  */
 
 /* tslint:disable */
-import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister, colors as colorsArr } from "essex.powerbi.base";
+import { logger, updateTypeGetter, UpdateType, PropertyPersister, createPropertyPersister, colors as colorsArr } from "@essex/pbi-base";
 import capabilities from "./AttributeSlicerVisual.capabilities";
 const colors = colorsArr.full;
 const MY_CSS_MODULE = require("!css!sass!./css/AttributeSlicerVisual.scss");
@@ -35,7 +35,7 @@ const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown p
 
 import { ListItem, ISlicerVisualData, ISettings, SlicerItem } from "./interfaces";
 import { AttributeSlicer as AttributeSlicerImpl } from "../AttributeSlicer";
-import { VisualBase, Visual } from "essex.powerbi.base";
+import { VisualBase, Visual } from "@essex/pbi-base";
 import * as _ from "lodash";
 import * as $ from "jquery";
 import IVisual = powerbi.IVisual;

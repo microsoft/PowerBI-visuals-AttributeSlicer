@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
-import { Utils } from "essex.powerbi.base/spec/visualHelpers";
+import { Utils } from "@essex/pbi-base/dist/spec/visualHelpers";
 import * as $ from "jquery";
 import { expect } from "chai";
 /* tslint:disable */
 $.extend(true, global["powerbi"], {
     visuals: {
         StandardObjectProperties: {},
-        valueFormatter: { 
+        valueFormatter: {
             create: () => {
                 return {
                     format: () => {}
@@ -86,8 +86,8 @@ describe("AttributeSlicerVisual", () => {
         };
     }
 
-    /** 
-     * Creates update options with the given categories 
+    /**
+     * Creates update options with the given categories
      */
     function createOptionsWithCategories(categories: any[], categoryName: string) {
         return <powerbi.VisualUpdateOptions><any>{
@@ -110,8 +110,8 @@ describe("AttributeSlicerVisual", () => {
         };
     }
 
-    /** 
-     * Creates update options with the given categories 
+    /**
+     * Creates update options with the given categories
      */
     function createOptionsWithCategoriesAndValues(categories: any[], categoryName: string, values: any[][], valueName: string) {
         return <powerbi.VisualUpdateOptions><any>{
@@ -370,7 +370,7 @@ describe("AttributeSlicerVisual", () => {
     // it ("should NOT support searching date columns (when a date column is the category)");
 
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
-    // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager 
+    // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
     // the selection manager which would force the update of the other slicer...so on.
     // it("should not clear the selection manager, when loading selection from the dataView");
