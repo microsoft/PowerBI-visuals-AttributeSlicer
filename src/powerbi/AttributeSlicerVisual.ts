@@ -615,7 +615,7 @@ export default class AttributeSlicer extends VisualBase implements IVisual {
                 let sourceExpr = filter.whereItems[0].condition.args[0];
                 const selectionIds = values.map((n: any) => {
                     return SelectionId.createWithId(powerbi.data.createDataViewScopeIdentity(
-                        powerbi.data.SQExprBuilder.compare(data.QueryComparisonKind.Equal,
+                        powerbi.data.SQExprBuilder.compare(0,
                             sourceExpr,
                             n[0]
                         )
