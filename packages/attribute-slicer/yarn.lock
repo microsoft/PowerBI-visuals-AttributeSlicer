@@ -4153,9 +4153,9 @@ typedoc-default-themes@^0.4.0:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/typedoc-default-themes/-/typedoc-default-themes-0.4.1.tgz#98ebcf2202aac7711a06a9a8638f05ebd28b0e26"
 
-typedoc@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.5.1.tgz#150f92bdc4a36d8e114b27f1d296329d27e837dd"
+typedoc@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.5.5.tgz#7fde3f80eeeecad23100e0d7e4f321c5b79f11fa"
   dependencies:
     "@types/fs-extra" "0.0.33"
     "@types/handlebars" "^4.0.31"
@@ -4173,11 +4173,11 @@ typedoc@^0.5.1:
     progress "^1.1.8"
     shelljs "^0.7.0"
     typedoc-default-themes "^0.4.0"
-    typescript "2.0.6"
+    typescript "2.1.5"
 
-typescript@2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.0.6.tgz#5385499ac9811508c2c43e0ea07a1ddca435e111"
+typescript@2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.1.5.tgz#6fe9479e00e01855247cea216e7561bafcdbcd4a"
 
 typescript@^2.1.4:
   version "2.1.4"
