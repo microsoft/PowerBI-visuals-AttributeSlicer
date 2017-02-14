@@ -4,7 +4,9 @@
   "description": "A plugin for Microsoft Office Applications (Excel) to embed the Attribute Slicer from PowerBI into the Office Application",
   "main": "index.js",
   "scripts": {
-    "test": "webpack",
+    "build": "webpack",
+    "build:prod": "webpack --env=prod -p",
+    "test": "npm run build:prod",
     "start": "webpack-dev-server --https --content-base ./public --cert cert/cert.crt --key cert/cert.key --host excel.dev --hot --port 8449",
     "postinstall": "linklocal"
   },

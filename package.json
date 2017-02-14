@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "test": "lerna --scope \"@essex/attribute-slicer\" run test && lerna run test --scope \"@essex/attribute-slicer-office\"",
     "postinstall": "lerna exec --concurrency=1 -- yarn && lerna exec --concurrency=99 -- linklocal --named @essex/attribute-slicer ../attribute-slicer"
   },
   "devDependencies": {

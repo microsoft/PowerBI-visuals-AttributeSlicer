@@ -25,36 +25,70 @@
 const webpack = require('webpack');
 const path = require('path');
 const ENTRY = './src/app.ts';
+const fs = require("fs");
+const pkg = require("./package.json");
 
-module.exports = {
-    entry: ENTRY,
-    devtool: 'eval',
-    output: {
-        path: path.join(__dirname, 'public'),
-        filename: "bundle.js"
-    },
-    resolve: {
-        extensions: ['.webpack.js', '.web.js', '.js', '.ts', '.scss']
-    },
-    module: {
-        loaders: [
-            {
-                test: /\.ts?$/,
-                loader: 'ts-loader',
-            },
-            {
-                test: /\.scss$/,
-                loaders: ["style-loader", "css-loader", "sass-loader"]
-            },
-            {
-                test: /\.html$/,
-                loader: 'raw-loader'
-            }
+const baseConfig = function() {
+    return {
+        entry: ENTRY,
+        output: {
+            path: path.join(__dirname, 'public'),
+            filename: "bundle.js"
+        },
+        resolve: {
+            extensions: ['.webpack.js', '.web.js', '.js', '.ts', '.scss']
+        },
+        module: {
+            loaders: [
+                {
+                    test: /\.ts?$/,
+                    loader: 'ts-loader',
+                },
+                {
+                    test: /\.scss$/,
+                    loaders: ["style-loader", "css-loader", "sass-loader"]
+                },
+                {
+                    test: /\.html$/,
+                    loader: 'raw-loader'
+                }
+            ]
+        },
+        plugins: [
+            new webpack.ProvidePlugin({
+                'Promise': 'es6-promise'
+            })
         ]
-    },
-    plugins: [
-        new webpack.ProvidePlugin({
-            'Promise': 'es6-promise'
-        })
-    ]
+    };
 };
+
+module.exports = function (env) {
+    const config = baseConfig();
+    if (env !== "prod") {
+        config.devtool = "eval";
+    } else {
+        var banner = new webpack.BannerPlugin(fs.readFileSync("LICENSE").toString());
+        var uglify = new webpack.optimize.UglifyJsPlugin({
+            mangle: true,
+            minimize: true,
+            compress: false,
+            beautify: false,
+            output: {
+                ascii_only: true, // Necessary, otherwise it messes up the unicode characters that lineup is using for font-awesome
+                comments: false,
+            }
+        });
+        config.plugins.push(uglify);
+        config.plugins.push(banner);
+    }
+    config.plugins.push(
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify(env === "prod" || process.env.NODE_ENV === "production" ? "production" : "dev"),
+                'BUILD_VERSION': JSON.stringify(pkg.version + "+" + (process.env.BUILD_VERSION || "dev")),
+            },
+        })
+    );
+    return config;
+};
+
