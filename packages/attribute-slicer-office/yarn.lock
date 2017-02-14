@@ -10,14 +10,15 @@
     jquery "^2.2.0"
     lodash "4.0.0"
 
-"@essex/office-core@^0.0.2":
-  version "0.0.2"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.2.tgz#fdd2e55f8774677205148d14ec91507401acd2b7"
+"@essex/office-core@^0.0.3":
+  version "0.0.3"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.3.tgz#21d4bee1a985248bac893a8dfb1e64d27c09b7cf"
   dependencies:
     "@types/node" "^7.0.5"
     debug "^2.6.0"
     es6-promise "^4.0.5"
     jquery "^3.1.1"
+    lodash.debounce "^4.0.8"
 
 "@types/debug@^0.0.29":
   version "0.0.29"
@@ -1693,6 +1694,10 @@ lodash.camelcase@^4.3.0:
 lodash.clonedeep@^4.3.2:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
+
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
 
 lodash.indexof@^4.0.5:
   version "4.0.5"
