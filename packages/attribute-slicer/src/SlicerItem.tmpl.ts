@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 
+// This gets around some issues with typescript and pulling in jquery types multiple times
+const $ = require("jquery"); // tslint:disable-line
+
 import { SlicerItem, ISlicerValueSegment } from "./interfaces";
 import { prettyPrintValue as pretty } from "./Utils";
-import * as $ from "jquery";
 import * as d3 from "d3";
 
 /**

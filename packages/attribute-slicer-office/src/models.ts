@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { IRequirementColumnIndexMappings } from "./binding/models";
+import { IRequirementColumnIndexMappings } from "@essex/office-core";
 
 /**
  * Represents a mapping between requirement names an column indexes

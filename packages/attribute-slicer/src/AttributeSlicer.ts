@@ -23,7 +23,12 @@
  */
 
 import EventEmitter from "../base/EventEmitter";
-import * as $ from "jquery";
+
+/* tslint:disable */
+// This gets around some issues with typescript and pulling in jquery types multiple times
+const $ = require("jquery");
+/* tslint:enable */
+
 import * as _ from "lodash";
 import JQuerySelectionManager from "./selection/JQuerySelectionManager";
 import { SlicerItem, IAttributeSlicerState } from "./interfaces";

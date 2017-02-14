@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 
+// This gets around some issues with typescript and pulling in jquery types multiple times
+const $ = require("jquery"); // tslint:disable-line
+
 import { default as SelectionManager, ISelectableItem } from "./SelectionManager";
-import * as $ from "jquery";
 const EVENTS_NS = ".selection-manager";
 export default class JQuerySelectionManager<T extends ISelectableItem<any>> extends SelectionManager<T> {
 

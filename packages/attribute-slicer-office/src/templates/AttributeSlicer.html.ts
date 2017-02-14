@@ -21,6 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-export { ExcelBindingManager } from "./BindingManager";
-export * from "./utils";
-export * from "./models";
+
+declare var fabric: any;
+
+import { templateBuilder, IBindingManager } from "@essex/office-core";
+import * as $ from "jquery";
+export default function template(bindingManager: IBindingManager) {
+    return templateBuilder("attribute-slicer")
+        .appendDefault("Attribute Slicer", bindingManager)
+        .build();
+};

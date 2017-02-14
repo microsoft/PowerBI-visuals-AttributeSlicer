@@ -8,8 +8,10 @@
         <!--<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>-->
         <!--<link href="../content/Office.css" rel="stylesheet" type="text/css" />-->
         <!--<link href="../bower_components/microsoft.office.js/content/officethemes.css" rel="stylesheet" type="text/css" />-->
-        <link href="//appsforoffice.microsoft.com/fabric/1.0/fabric.min.css" rel="stylesheet">
-        <link href="//appsforoffice.microsoft.com/fabric/1.0/fabric.components.min.css" rel="stylesheet">
+        <link href="font-awesome/css/fa.css" rel="stylesheet">
+        <link rel="stylesheet" href="//static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/css/fabric.min.css">
+        <link rel="stylesheet" href="//static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/css/fabric.components.min.css">
+        <script src="//static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/js/fabric.min.js"></script>
         <script src="//appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
         <!-- To enable offline debugging using a local reference to Office.js, use:                        -->
@@ -18,10 +20,12 @@
         <!-- <script src="../../content/fabric.min.css"></script>  -->
         <!-- <script src="../../content/fabric.components.min.css"></script>  -->
         <!-- <script src="../../scripts/jquery.fabric.min.js"></script>  -->
+        <!-- For some reason, webpack hot module reloader is using a global Promise without checking if it is available -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
     </head>
 
-    <body class="ms-font-l" style="width:100%;height:100%;overflow:hidden">
-        <div id="attribute-slicer" style="width:100%;height:100%;overflow:hidden;padding:2px">
+    <body class="ms-font-l" style="width:100%;height:100%;overflow:hidden;position:relative;">
+        <div id="app" style="width:100%;height:100%;overflow:hidden;">
         </div>
         <script src="bundle.js"></script>
     </body>
