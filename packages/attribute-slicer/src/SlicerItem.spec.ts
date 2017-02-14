@@ -124,41 +124,42 @@ describe("SlicerItem", () => {
     });
     it("should display a single segment's width correctly", () => {
         const { element, segments } = templateWithMatchAndSingleSegment();
-        const result = element.find(".value-display").map((i, ele) => $(ele).css("width")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).css("width")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.width + "%"));
     });
     it("should display a single segment's color correctly", () => {
         const { element, segments } = templateWithMatchAndSingleSegment();
-        const result = element.find(".value-display").map((i, ele) => $(ele).css("backgroundColor")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).css("backgroundColor")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.color));
     });
     it("should display a single segment's displayValue correctly", () => {
         const { element, segments } = templateWithMatchAndSingleSegment();
-        const result = element.find(".value-display").map((i, ele) => $(ele).text().replace(/\s/g, "")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).text().replace(/\s/g, "")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.displayValue + ""));
     });
     it("should display a multiple segment's width correctly", () => {
         const { element, segments } = templateWithMatchAndMultipleSegments();
-        const result = element.find(".value-display").map((i, ele) => $(ele).css("width")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).css("width")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.width + "%"));
     });
     it("should display a multiple segment's color correctly", () => {
         const { element, segments } = templateWithMatchAndMultipleSegments();
-        const result = element.find(".value-display").map((i, ele) => $(ele).css("backgroundColor")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).css("backgroundColor")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.color));
     });
     it("should display a multiple segment's displayValue correctly", () => {
         const { element, segments } = templateWithMatchAndMultipleSegments();
-        const result = element.find(".value-display").map((i, ele) => $(ele).text().replace(/\s/g, "")).toArray();
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).text().replace(/\s/g, "")).toArray();
         expect(result).to.be.deep.equal(segments.map(n => n.displayValue + ""));
     });
     it("should display segment highlights correctly", () => {
         const { element } = templateWithMatchAndSingleSegmentWithHighlights();
         // background-color:rgba(${r}, ${g}, ${b}, .4)
-        const result = element.find(".value-display").map((i, ele) => $(ele).css("backgroundColor")).toArray()[0];
+        const result = element.find(".value-display").map((i: number, ele: any) => $(ele).css("backgroundColor")).toArray()[0];
         expect(result).to.be.deep.equal(`rgba(255, 0, 0, 0.2)`); // It lightens the main part, .2 opacity on red
 
-        const highlightResult = element.find(".value-display-highlight").map((i, ele) => $(ele).css("backgroundColor")).toArray()[0];
+        const highlightResult = element.find(".value-display-highlight")
+            .map((i: number, ele: any) => $(ele).css("backgroundColor")).toArray()[0];
         expect(highlightResult).to.be.deep.equal("red");
     });
 });
