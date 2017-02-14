@@ -6,12 +6,12 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Attribute Slicer -- Integ"/>
   <Description DefaultValue="A plugin for Microsoft Office Applications (Excel) to embed the Attribute Slicer from PowerBI into the Office Application"/>
-  <IconUrl DefaultValue="http://office-plugin-attributeslicer-integ.azurewebsites.net/images/icon.png"/>
+  <IconUrl DefaultValue="https://office-plugin-attributeslicer-integ.azurewebsites.net/images/icon.png"/>
   <Hosts>
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="http://office-plugin-attributeslicer-integ.azurewebsites.net/index.html"/>
+    <SourceLocation DefaultValue="https://office-plugin-attributeslicer-integ.azurewebsites.net/index.html"/>
     <RequestedWidth>400</RequestedWidth>
     <RequestedHeight>400</RequestedHeight>
   </DefaultSettings>
