@@ -29,6 +29,7 @@ import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsMa
 import { IAttributeSlicerIndexMappings } from "./models";
 import * as debug from "debug";
 const log = debug("AttributeSlicerOffice::AttributeSlicerOffice");
+const naturalSort = require("javascript-natural-sort");
 
 /**
  * The office version of the Attribute Slicer
@@ -130,43 +131,60 @@ export default class AttributeSlicerOffice {
         this.attributeSlicer.showSelections = false;
         this.attributeSlicer.showValues = true;
 
+        const itemMap = {};
+        const data: SlicerItem[] = [];
         let max: number;
         let min: number;
-        const data = rows.map((n, i) => {
+        rows.forEach((n, i) => {
             const rawValue = n[indexes.value];
             const parsedValue = parseFloat(rawValue);
+            const category = n[indexes.category];
             const id = i + "";
-            const item: SlicerItem = {
-                id,
-                match: n[indexes.category],
-                value: parsedValue,
-                equals: (b: any) => b.id === id,
-            };
+            let item: SlicerItem = itemMap[category];
+            if (!item) {
+                item = {
+                    id,
+                    match: category,
+                    value: undefined,
+                    equals: (b: any) => b.id === id,
+                }
+                itemMap[category] = item;
+                data.push(item);
+            }
             if (typeof parsedValue !== undefined) {
-                if (max === undefined || parsedValue > max) {
-                    max = parsedValue;
+                if (typeof item.value === "undefined") {
+                    item.value = 0;
                 }
-                if (min === undefined || parsedValue < min) {
-                    min = parsedValue;
-                }
-                item.valueSegments = [{
-                    value: parsedValue,
-                    displayValue: rawValue,
-                    width: 100,
-                    color: "#fd9481",
-                }];
+                item.value += parsedValue;
             }
             return item;
+        });
+        data.forEach(n => {
+            if (n.value !== undefined) {
+                n.valueSegments = [{
+                    value: n.value,
+                    displayValue: n.value.toFixed(2),
+                    width: 100,
+                    color: n.value < 0 ? "#e81123" : "#0078d7",
+                }];
+                if (max === undefined || n.value > max) {
+                    max = n.value;
+                }
+                if (min === undefined || n.value < min) {
+                    min = n.value;
+                }
+            }
         });
         const range = max - min;
         data.forEach(n => {
             let renderedValue = 100;
             if (range > 0) {
-                const offset = min > 0 ? 10 : 0;
+                const offset = 10;//min > 0 ? 10 : 0;
                 renderedValue = (((n.value - min) / range) * (100 - offset)) + offset;
             }
             n.renderedValue = renderedValue;
         });
+        data.sort((a, b) => indexes.value === undefined ? naturalSort(a.match, b.match) : b.value - a.value);
         this.attributeSlicer.data = data;
     }
 
