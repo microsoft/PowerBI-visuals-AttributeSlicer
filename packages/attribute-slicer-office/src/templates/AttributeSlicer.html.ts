@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-declare var fabric: any;
-
+import "../css/AttributeSlicerOffice.scss";
 import { templateBuilder, IBindingManager } from "@essex/office-core";
 import * as $ from "jquery";
 export default function template(bindingManager: IBindingManager) {
