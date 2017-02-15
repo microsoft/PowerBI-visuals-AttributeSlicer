@@ -191,6 +191,7 @@ export default class AttributeSlicerOffice {
             }
             n.renderedValue = renderedValue;
         });
+        this.attributeSlicer.showValues = indexes.value !== undefined;
         data.sort((a, b) => indexes.value === undefined ? naturalSort(a.match, b.match) : b.value - a.value);
         this.attributeSlicer.data = data;
     }
