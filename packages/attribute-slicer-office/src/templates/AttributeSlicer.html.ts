@@ -25,7 +25,8 @@ import "../css/AttributeSlicerOffice.scss";
 import { templateBuilder, IBindingManager } from "@essex/office-core";
 import * as $ from "jquery";
 export default function template(bindingManager: IBindingManager) {
-    return templateBuilder("attribute-slicer")
+    const template = templateBuilder("attribute-slicer")
         .appendDefault("Attribute Slicer", bindingManager)
         .build();
+    return template;
 };

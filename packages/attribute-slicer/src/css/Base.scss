@@ -177,7 +177,7 @@
       transform: rotate(360deg);
     }
   }
-  .load-spinner > div {
+  .slicer-load-spinner > div {
     position: absolute;
     display: block;
     width: 160px;
@@ -193,7 +193,7 @@
     animation: attribute-slicer-ring-animation 1s linear infinite;
   }
 
-  .load-spinner {
+  .slicer-load-spinner {
     background: none;
     position: absolute;
     display: none;
@@ -215,7 +215,7 @@
       color: #ccc;
   }
 
-  .loading .load-spinner {
+  .loading .slicer-load-spinner {
       display: block;
   }
 

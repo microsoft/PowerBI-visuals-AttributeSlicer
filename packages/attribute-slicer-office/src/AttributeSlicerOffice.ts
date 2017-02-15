@@ -25,7 +25,7 @@ const CSS_MODULE = require("@essex/attribute-slicer/src/css/AttributeSlicer.scss
 import dataRequirements from "./dataRequirements";
 import attributeSlicerTemplate from "./templates/AttributeSlicer.html";
 import { AttributeSlicer, SlicerItem } from "@essex/attribute-slicer";
-import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsManager, SettingsManager } from "@essex/office-core";
+import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsManager, SettingsManager, ILoadSpinnerTemplate } from "@essex/office-core";
 import { IAttributeSlicerIndexMappings } from "./models";
 import * as debug from "debug";
 const log = debug("AttributeSlicerOffice::AttributeSlicerOffice");
@@ -56,6 +56,11 @@ export default class AttributeSlicerOffice {
     private settingsManager: ISettingsManager;
 
     /**
+     * The load spinner for the slicer
+     */
+    private loadSpinner: ILoadSpinnerTemplate;
+
+    /**
      * Constructor for the Office Attribute Slicer
      * @param parentElement The parent element of the Attribute Slicer
      * @param bindingManager The binding manager to use
@@ -74,6 +79,7 @@ export default class AttributeSlicerOffice {
         });
         const template = attributeSlicerTemplate(this.bindingManager);
         this.element = template.element;
+        this.loadSpinner = template.default.loadSpinner;
         this.attributeSlicer = attributeSlicer || new AttributeSlicer(this.element.find(".attribute-slicer-container"));
         this.attributeSlicer.fontSize = 14;
         this.init();
@@ -84,6 +90,7 @@ export default class AttributeSlicerOffice {
      * Initializes the Attribute Slicer office plugin
      */
     private async init() {
+        await this.loadSpinner.show("Initializing");
         this.attributeSlicer.dimensions = {
             width: window.innerWidth,
             height: window.innerHeight,
@@ -91,14 +98,17 @@ export default class AttributeSlicerOffice {
         window.addEventListener("resize", this.onResize.bind(this));
 
         // Auto bind on load
+        await this.loadSpinner.show("Attempting to auto bind");
         await this.bindingManager.autoBind();
         await this.loadDataFromBindingManager();
+        await this.loadSpinner.hide();
     }
 
     /**
      * Loads data from the given binding
      */
     public async loadDataFromBindingManager() {
+        await this.loadSpinner.show("Loading data")
         const loadInfo = await this.bindingManager.getData();
         if (loadInfo) {
             const { columns, rows, columnIndexes } = loadInfo;
@@ -106,6 +116,7 @@ export default class AttributeSlicerOffice {
         } else {
             this.attributeSlicer.data = [];
         }
+        await this.loadSpinner.hide();
     }
 
     /**
