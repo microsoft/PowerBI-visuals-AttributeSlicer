@@ -135,35 +135,42 @@ export default class AttributeSlicerOffice {
         const data: SlicerItem[] = [];
         let max: number;
         let min: number;
+        let treatAsCount = false;
         rows.forEach((n, i) => {
-            const rawValue = n[indexes.value];
-            const parsedValue = parseFloat(rawValue);
-            const category = n[indexes.category];
-            const id = i + "";
-            let item: SlicerItem = itemMap[category];
-            if (!item) {
-                item = {
-                    id,
-                    match: category,
-                    value: undefined,
-                    equals: (b: any) => b.id === id,
+            (<string>n[indexes.category] || "(Blank)").split(",").forEach(category => {
+                const id = i + "";
+                let item: SlicerItem = itemMap[category];
+                if (!item) {
+                    item = {
+                        id,
+                        match: category,
+                        value: undefined,
+                        equals: (b: any) => b.id === id,
+                    }
+                    itemMap[category] = item;
+                    data.push(item);
                 }
-                itemMap[category] = item;
-                data.push(item);
-            }
-            if (typeof parsedValue !== undefined) {
-                if (typeof item.value === "undefined") {
-                    item.value = 0;
+                if (indexes.value !== undefined) {
+                    const rawValue = n[indexes.value];
+                    const parsedValue = parseFloat(rawValue);
+                    if (typeof item.value === "undefined") {
+                        item.value = 0;
+                    }
+                    if (!isNaN(parsedValue) && typeof parsedValue !== undefined) {
+                        item.value += parsedValue;
+                    } else {
+                        treatAsCount = true;
+                        item.value++;
+                    }
                 }
-                item.value += parsedValue;
-            }
-            return item;
+
+            });
         });
         data.forEach(n => {
             if (n.value !== undefined) {
                 n.valueSegments = [{
                     value: n.value,
-                    displayValue: n.value.toFixed(2),
+                    displayValue: treatAsCount ? n.value : n.value.toFixed(2),
                     width: 100,
                     color: n.value < 0 ? "#e81123" : "#0078d7",
                 }];

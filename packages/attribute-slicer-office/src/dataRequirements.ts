@@ -42,7 +42,7 @@ export default {
         },
     }, {
         name: "value",
-        required: true,
+        required: false,
         // We can really work with anything
         isMatch: (header: string) => {
             // Priority goes to the specific column headers
