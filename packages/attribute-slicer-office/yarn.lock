@@ -10,9 +10,9 @@
     jquery "^2.2.0"
     lodash "4.0.0"
 
-"@essex/office-core@^0.0.7":
-  version "0.0.7"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.7.tgz#f140d64b2936e7fbb6fd51cd9cb652b8f6bd6491"
+"@essex/office-core@^0.0.8":
+  version "0.0.8"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.8.tgz#cf4a69b16eb23a529c506c381888d8aeb177d063"
   dependencies:
     "@types/node" "^7.0.5"
     debug "^2.6.0"
