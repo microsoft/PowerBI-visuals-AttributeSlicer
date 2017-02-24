@@ -29,7 +29,7 @@ export default {
         // We can really work with anything
         isMatch: (header: string) => {
             // Priority goes to the specific column headers
-            if (header === "category" || header === "attribute") {
+            if (header === "category" || header === "attribute" || header === "categories" || header === "attributes") {
                 return {
                     quality: 1
                 };
@@ -43,10 +43,11 @@ export default {
     }, {
         name: "value",
         required: false,
+        type: "number",
         // We can really work with anything
         isMatch: (header: string) => {
             // Priority goes to the specific column headers
-            if (header === "value" || header === "val" || header === "total" || header === "count") {
+            if (header === "value" || header === "values" || header === "val" || header === "total" || header === "count") {
                 return {
                     quality: 1
                 };

@@ -25,9 +25,10 @@ const CSS_MODULE = require("@essex/attribute-slicer/src/css/AttributeSlicer.scss
 import dataRequirements from "./dataRequirements";
 import attributeSlicerTemplate from "./templates/AttributeSlicer.html";
 import { AttributeSlicer, SlicerItem } from "@essex/attribute-slicer";
-import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsManager, SettingsManager, ILoadSpinnerTemplate } from "@essex/office-core";
-import { IAttributeSlicerIndexMappings } from "./models";
+import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsManager, SettingsManager, ILoadSpinnerTemplate, AggregationType } from "@essex/office-core";
+import { ISlicerColumnMappings, OfficeSlicerItem } from "./models";
 import * as debug from "debug";
+import converter from "./dataConversion";
 const log = debug("AttributeSlicerOffice::AttributeSlicerOffice");
 const naturalSort = require("javascript-natural-sort");
 
@@ -113,7 +114,7 @@ export default class AttributeSlicerOffice {
         const loadInfo = await this.bindingManager.getData();
         if (loadInfo) {
             const { columns, rows, columnIndexes } = loadInfo;
-            this.loadFromRawData(columns, rows, <IAttributeSlicerIndexMappings>columnIndexes);
+            this.loadFromRawData(columns, rows, <ISlicerColumnMappings>columnIndexes);
         } else {
             this.attributeSlicer.data = [];
         }
@@ -126,71 +127,13 @@ export default class AttributeSlicerOffice {
      * @param The raw row values
      * @param indexes The indexes to map row data into specific column data
      */
-    public loadFromRawData(columns: string[], rows: any[][], indexes: IAttributeSlicerIndexMappings) {
+    public loadFromRawData(columns: string[], rows: any[][], indexes: ISlicerColumnMappings) {
         this.attributeSlicer.serverSideSearch = false;
         this.attributeSlicer.showSelections = false;
         this.attributeSlicer.showValues = true;
 
-        const itemMap = {};
-        const data: SlicerItem[] = [];
-        let max: number;
-        let min: number;
-        let treatAsCount = false;
-        rows.forEach((n, i) => {
-            (<string>n[indexes.category] || "(Blank)").split(",").forEach(category => {
-                const id = i + "";
-                let item: SlicerItem = itemMap[category];
-                if (!item) {
-                    item = {
-                        id,
-                        match: category,
-                        value: undefined,
-                        equals: (b: any) => b.id === id,
-                    }
-                    itemMap[category] = item;
-                    data.push(item);
-                }
-                if (indexes.value !== undefined) {
-                    const rawValue = n[indexes.value];
-                    const parsedValue = parseFloat(rawValue);
-                    if (typeof item.value === "undefined") {
-                        item.value = 0;
-                    }
-                    if (!isNaN(parsedValue) && typeof parsedValue !== undefined) {
-                        item.value += parsedValue;
-                    } else {
-                        treatAsCount = true;
-                        item.value++;
-                    }
-                }
+        const data = converter(columns, rows, indexes);
 
-            });
-        });
-        data.forEach(n => {
-            if (n.value !== undefined) {
-                n.valueSegments = [{
-                    value: n.value,
-                    displayValue: treatAsCount ? n.value : n.value.toFixed(2),
-                    width: 100,
-                    color: n.value < 0 ? "#e81123" : "#0078d7",
-                }];
-                if (max === undefined || n.value > max) {
-                    max = n.value;
-                }
-                if (min === undefined || n.value < min) {
-                    min = n.value;
-                }
-            }
-        });
-        const range = max - min;
-        data.forEach(n => {
-            let renderedValue = 100;
-            if (range > 0) {
-                const offset = 10;//min > 0 ? 10 : 0;
-                renderedValue = (((n.value - min) / range) * (100 - offset)) + offset;
-            }
-            n.renderedValue = renderedValue;
-        });
         this.attributeSlicer.showValues = indexes.value !== undefined;
         data.sort((a, b) => indexes.value === undefined ? naturalSort(a.match, b.match) : b.value - a.value);
         this.attributeSlicer.data = data;

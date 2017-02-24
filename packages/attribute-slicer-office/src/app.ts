@@ -26,21 +26,13 @@ import * as $ from "jquery";
 import * as debug from "debug";
 const log = debug("Essex::AttributeSlicerOffice::App");
 
-const search = window.location.search || "";
-if (search.indexOf("?dialog=binding-wizard") >= 0) {
-    // TODO: Optimize to separate chunks
-    require("@essex/office-core/dist/binding/wizard-dialog").default($("#app"));
-} else {
-
-    // The initialize function must be run each time a new page is loaded
-    Office.initialize = function (reason) {
-        $(document).ready(async function () {
-            log("Initialized");
-            setTimeout(function() {
-                const AttributeSlicerOffice = require("./AttributeSlicerOffice").default;
-                new AttributeSlicerOffice($("#app"));
-            }, 10);
-        });
-    };
-
-}
+// The initialize function must be run each time a new page is loaded
+Office.initialize = function (reason) {
+    $(document).ready(async function () {
+        log("Initialized");
+        setTimeout(function() {
+            const AttributeSlicerOffice = require("./AttributeSlicerOffice").default;
+            new AttributeSlicerOffice($("#app"));
+        }, 10);
+    });
+};

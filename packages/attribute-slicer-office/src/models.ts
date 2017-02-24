@@ -22,12 +22,26 @@
  * SOFTWARE.
  */
 
-import { IRequirementColumnIndexMappings } from "@essex/office-core";
+import { IRequirementColumnMappings, IColumnMappingInfo } from "@essex/office-core";
+import { SlicerItem } from "@essex/attribute-slicer";
 
 /**
  * Represents a mapping between requirement names an column indexes
  */
-export interface IAttributeSlicerIndexMappings extends IRequirementColumnIndexMappings {
-    category: number;
-    value: number;
+export interface ISlicerColumnMappings extends IRequirementColumnMappings {
+    category: IColumnMappingInfo;
+    value: IColumnMappingInfo;
+}
+
+/**
+ * Represents an office slicer item
+ */
+export interface OfficeSlicerItem extends SlicerItem {
+    aggregations?: {
+        min?: number;
+        max?: number;
+        avg?: number;
+        count?: number;
+        sum?: number;
+    };
 }
