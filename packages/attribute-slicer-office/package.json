@@ -30,8 +30,10 @@
   "devDependencies": {
     "@essex/attribute-slicer": "file:../attribute-slicer",
     "@essex/office-core": "^0.0.9",
+    "@types/chai": "^3.4.35",
     "@types/debug": "^0.0.29",
     "@types/jquery": "^2.0.40",
+    "@types/mocha": "^2.2.39",
     "@types/node": "^7.0.4",
     "@types/office-js": "^0.0.37",
     "css-loader": "^0.26.1",
