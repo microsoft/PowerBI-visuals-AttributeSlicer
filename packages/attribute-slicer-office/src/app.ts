@@ -24,15 +24,42 @@
 
 import * as $ from "jquery";
 import * as debug from "debug";
+import * as uuid from "node-uuid";
+import { Bookkeeper, SettingsManager, ExcelBindingManager } from "@essex/office-core";
+import dataRequirements from "./dataRequirements";
+import AttributeSlicerOffice from "./AttributeSlicerOffice";
 const log = debug("Essex::AttributeSlicerOffice::App");
+const NAMESPACE = "attribute-slicer";
 
 // The initialize function must be run each time a new page is loaded
 Office.initialize = function (reason) {
     $(document).ready(async function () {
         log("Initialized");
-        setTimeout(function() {
-            const AttributeSlicerOffice = require("./AttributeSlicerOffice").default;
-            new AttributeSlicerOffice($("#app"));
+        setTimeout(async function() {
+            const settingsManager = new SettingsManager(NAMESPACE);
+            let id = await settingsManager.get("componentId");
+            if (!id) {
+                id = uuid.v4();
+                await settingsManager.set("componentId", id);
+            }
+
+            let bookKeeper: Bookkeeper;
+            if (reason === Office.InitializationReason.Inserted) {
+                await Excel.run(async ctx => {
+                    const activeWS = ctx.workbook.worksheets.getActiveWorksheet();
+                    activeWS.load("name");
+
+                    await ctx.sync();
+
+                    bookKeeper = new Bookkeeper(id, "Attribute Slicer", activeWS.name);
+                    await bookKeeper.initialize();
+
+                    return ctx.sync();
+                });
+            }
+            const bindingManager = new ExcelBindingManager(NAMESPACE, dataRequirements, bookKeeper, settingsManager);
+
+            new AttributeSlicerOffice($("#app"), settingsManager, bindingManager);
         }, 10);
     });
 };

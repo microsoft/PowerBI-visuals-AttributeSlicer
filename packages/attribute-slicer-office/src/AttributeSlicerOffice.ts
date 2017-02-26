@@ -25,7 +25,15 @@ const CSS_MODULE = require("@essex/attribute-slicer/src/css/AttributeSlicer.scss
 import dataRequirements from "./dataRequirements";
 import attributeSlicerTemplate from "./templates/AttributeSlicer.html";
 import { AttributeSlicer, SlicerItem } from "@essex/attribute-slicer";
-import { ExcelBindingManager, getDataFromBinding, IDataRequirements, ISettingsManager, SettingsManager, ILoadSpinnerTemplate, AggregationType } from "@essex/office-core";
+import {
+    ExcelBindingManager,
+    getDataFromBinding,
+    IDataRequirements,
+    ISettingsManager,
+    SettingsManager,
+    ILoadSpinnerTemplate,
+    AggregationType,
+} from "@essex/office-core";
 import { ISlicerColumnMappings, OfficeSlicerItem } from "./models";
 import * as debug from "debug";
 import converter from "./dataConversion";
@@ -65,20 +73,18 @@ export default class AttributeSlicerOffice {
     /**
      * Constructor for the Office Attribute Slicer
      * @param parentElement The parent element of the Attribute Slicer
+     * @param settingsManager The settings manager to use
      * @param bindingManager The binding manager to use
      * @param attributeSlicer The Attribute Slicer instance to use
-     * @param settingsManager The settings manager to use
      */
-    constructor(parentElement: JQuery, bindingManager?: ExcelBindingManager, attributeSlicer?: AttributeSlicer, settingsManager?: ISettingsManager) {
+    constructor(parentElement: JQuery, settingsManager: ISettingsManager, bindingManager: ExcelBindingManager, attributeSlicer?: AttributeSlicer) {
         const className = CSS_MODULE && (CSS_MODULE.className || (CSS_MODULE.locals && CSS_MODULE.locals.className));
         if (className) {
             parentElement.addClass(className);
         }
-
-        this.settingsManager = settingsManager || new SettingsManager("attribute-slicer");
-        this.bindingManager = bindingManager || new ExcelBindingManager("attribute-slicer", dataRequirements, this.settingsManager, () => {
-            this.loadDataFromBindingManager();
-        });
+        this.settingsManager = settingsManager;
+        this.bindingManager = bindingManager;
+        this.bindingManager.onDataChanged = this.loadDataFromBindingManager.bind(this);
         const template = attributeSlicerTemplate(this.bindingManager);
         this.element = template.element;
         this.loadSpinner = template.default.loadSpinner;
@@ -98,6 +104,15 @@ export default class AttributeSlicerOffice {
             height: window.innerHeight,
         };
         window.addEventListener("resize", this.onResize.bind(this));
+
+        this.attributeSlicer.events.on("selectionChanged", (items: OfficeSlicerItem[]) => {
+            this.bindingManager.applyFilter({
+                criteria: (items || []).map(n => ({
+                    value: n.match,
+                    operator: "eq",
+                })),
+            });
+        });
 
         // Auto bind on load
         await this.loadSpinner.show("Attempting to auto bind");
