@@ -10,15 +10,16 @@
     jquery "^2.2.0"
     lodash "4.0.0"
 
-"@essex/office-core@^0.0.10":
-  version "0.0.10"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.10.tgz#519da67e326a13b1a8875d76a5fbea9dbe70ab21"
+"@essex/office-core@^0.0.11":
+  version "0.0.11"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.11.tgz#3373f9376de20e89dbc92bd1a2449e2a79b68d4a"
   dependencies:
     "@types/node" "^7.0.5"
     debug "^2.6.0"
     es6-promise "^4.0.5"
     jquery "^3.1.1"
     lodash.debounce "^4.0.8"
+    lodash.isequal "^4.5.0"
 
 "@types/chai@^3.4.35":
   version "3.4.35"
@@ -1716,6 +1717,10 @@ lodash.debounce@^4.0.8:
 lodash.indexof@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/lodash.indexof/-/lodash.indexof-4.0.5.tgz#53714adc2cddd6ed87638f893aa9b6c24e31ef3c"
+
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
 
 lodash.memoize@^4.1.0:
   version "4.1.2"
