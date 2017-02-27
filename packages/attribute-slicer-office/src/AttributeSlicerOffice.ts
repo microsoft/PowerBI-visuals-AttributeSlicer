@@ -29,6 +29,7 @@ import {
     ExcelBindingManager,
     getDataFromBinding,
     IDataRequirements,
+    IDataResult,
     ISettingsManager,
     SettingsManager,
     ILoadSpinnerTemplate,
@@ -128,7 +129,7 @@ export default class AttributeSlicerOffice {
         // Get the selection here, cause it will get overridden by the data load, so load before the data changes
         const selection = await this.settingsManager.get<string[]>("selection");
 
-        const data = await this.bindingManager.getData<{ category: any; value: any }>();
+        const data = await this.bindingManager.getData<{ category: any; value: any}>();
         if (data) {
             this.loadFromRawData(data);
         } else {
@@ -154,14 +155,14 @@ export default class AttributeSlicerOffice {
      * @param The raw row values
      * @param indexes The indexes to map row data into specific column data
      */
-    public loadFromRawData(parsedData: { category: any; value: any }[]) {
+    public loadFromRawData(parsedData: IDataResult<{ category: any; value: any}>) {
         this.attributeSlicer.serverSideSearch = false;
         this.attributeSlicer.showSelections = false;
         this.attributeSlicer.showValues = true;
 
         const data = converter(parsedData);
 
-        const hasValues = parsedData.length > 0 && parsedData[0].value !== undefined;
+        const hasValues = data.length > 0 && data[0].value !== undefined;
         this.attributeSlicer.showValues = hasValues;
         data.sort((a, b) => !hasValues ? naturalSort(a.match, b.match) : b.value - a.value);
         this.attributeSlicer.data = data;

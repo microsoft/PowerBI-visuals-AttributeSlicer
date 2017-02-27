@@ -22,18 +22,19 @@
  * SOFTWARE.
  */
 import { ISlicerColumnMappings, OfficeSlicerItem } from "./models";
-import { AggregationType } from "@essex/office-core";
-export default function converter(parsedItems: { category: any; value: any }[]) {
+import { AggregationType, IAggregation, IDataResult } from "@essex/office-core";
+export default function converter(parsedData: IDataResult<{ category: any; value: any}>) {
     const itemMap = {};
     const data: OfficeSlicerItem[] = [];
+    const agg = parsedData.aggregations["value"];
     let nonNumeric = false;
     let max: number;
     let min: number;
-    parsedItems.forEach((n, i) => {
+    parsedData.data.forEach((n, i) => {
         let category: string = n.category;
         category = typeof category === undefined ? "(Blank)" : category + "";
         category.split(",").forEach(category => {
-            const id = category;
+            const id = i + "";
             let item: OfficeSlicerItem = itemMap[category];
             if (!item) {
                 item = {
@@ -60,6 +61,19 @@ export default function converter(parsedItems: { category: any; value: any }[]) 
                 }
                 if (!isNaN(parsedValue) && typeof parsedValue !== undefined) {
                     item.value = parsedValue;
+
+                    item.aggregations.sum = (item.aggregations.sum || 0) + parsedValue;
+                    item.aggregations.count = (item.aggregations.count || 0) + 1;
+
+                    const oldMax = item.aggregations.max;
+                    if (oldMax === undefined || oldMax < parsedValue) {
+                        item.aggregations.max = parsedValue;
+                    }
+
+                    const oldMin = item.aggregations.min;
+                    if (oldMin === undefined || oldMin > parsedValue) {
+                        item.aggregations.min = parsedValue;
+                    }
                 } else {
                     nonNumeric = true;
                 }
@@ -67,6 +81,7 @@ export default function converter(parsedItems: { category: any; value: any }[]) 
 
         });
     });
+    let aggType: AggregationType = agg ? agg.type : (nonNumeric ? AggregationType.Count : AggregationType.Avg);
     data.forEach(n => {
         if (n.value !== undefined) {
 
@@ -75,9 +90,27 @@ export default function converter(parsedItems: { category: any; value: any }[]) 
                 n.aggregations.avg = (n.aggregations.sum || 0) / n.aggregations.count;
             }
 
+            let showAsFixed = false;
+            if (aggType === AggregationType.Count) {
+                n.value = n.aggregations.count;
+            }
+            if (aggType === AggregationType.Sum) {
+                n.value = n.aggregations.sum;
+            }
+            if (aggType === AggregationType.Max) {
+                n.value = n.aggregations.max;
+            }
+            if (aggType === AggregationType.Min) {
+                n.value = n.aggregations.min;
+            }
+            if (aggType === AggregationType.Avg) {
+                n.value = n.aggregations.avg;
+                showAsFixed = true;
+            }
+
             n.valueSegments = [{
                 value: n.value,
-                displayValue: n.value.toFixed(2),
+                displayValue: showAsFixed ? n.value.toFixed(2) : n.value,
                 width: 100,
                 color: n.value < 0 ? "#e81123" : "#0078d7",
             }];
