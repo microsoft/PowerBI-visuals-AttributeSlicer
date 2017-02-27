@@ -10,9 +10,9 @@
     jquery "^2.2.0"
     lodash "4.0.0"
 
-"@essex/office-core@^0.0.9":
-  version "0.0.9"
-  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.9.tgz#125998b97ed95896abfe4adc7ea55c33c3b5ff38"
+"@essex/office-core@^0.0.10":
+  version "0.0.10"
+  resolved "http://essex-private-npm.westus.cloudapp.azure.com:4873/@essex%2foffice-core/-/office-core-0.0.10.tgz#519da67e326a13b1a8875d76a5fbea9dbe70ab21"
   dependencies:
     "@types/node" "^7.0.5"
     debug "^2.6.0"
@@ -42,13 +42,13 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@^7.0.5":
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.5.tgz#96a0f0a618b7b606f1ec547403c00650210bfbb7"
-
-"@types/node@^7.0.4":
+"@types/node@*", "@types/node@^7.0.4":
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.4.tgz#9aabc135979ded383325749f508894c662948c8b"
+
+"@types/node@^7.0.5":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.5.tgz#96a0f0a618b7b606f1ec547403c00650210bfbb7"
 
 "@types/office-js@^0.0.37":
   version "0.0.37"
