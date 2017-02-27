@@ -34,7 +34,7 @@ import {
     ILoadSpinnerTemplate,
     AggregationType,
 } from "@essex/office-core";
-import { ISlicerColumnMappings, OfficeSlicerItem } from "./models";
+import { OfficeSlicerItem } from "./models";
 import * as debug from "debug";
 import converter from "./dataConversion";
 const log = debug("AttributeSlicerOffice::AttributeSlicerOffice");
@@ -105,12 +105,10 @@ export default class AttributeSlicerOffice {
         };
         window.addEventListener("resize", this.onResize.bind(this));
 
-        this.attributeSlicer.events.on("selectionChanged", (items: OfficeSlicerItem[]) => {
+        this.attributeSlicer.events.on("selectionChanged", async (items: OfficeSlicerItem[]) => {
+            await this.settingsManager.set("selection", items.map(n => n.id));
             this.bindingManager.applyFilter({
-                criteria: (items || []).map(n => ({
-                    value: n.match,
-                    operator: "eq",
-                })),
+                criteria: (items || []).map(n => this.bindingManager.createCriteria("category", n.match, undefined, "eq")),
             });
         });
 
@@ -126,13 +124,27 @@ export default class AttributeSlicerOffice {
      */
     public async loadDataFromBindingManager() {
         await this.loadSpinner.show("Loading data")
-        const loadInfo = await this.bindingManager.getData();
-        if (loadInfo) {
-            const { columns, rows, columnIndexes } = loadInfo;
-            this.loadFromRawData(columns, rows, <ISlicerColumnMappings>columnIndexes);
+
+        // Get the selection here, cause it will get overridden by the data load, so load before the data changes
+        const selection = await this.settingsManager.get<string[]>("selection");
+
+        const data = await this.bindingManager.getData<{ category: any; value: any }>();
+        if (data) {
+            this.loadFromRawData(data);
         } else {
             this.attributeSlicer.data = [];
         }
+
+        await this.loadSpinner.show("Loading selection");
+
+        if (selection) {
+            if (selection.length > this.attributeSlicer.data.length) {
+                log("Invalid selection!");
+            } else {
+                this.attributeSlicer.selectedItems = this.attributeSlicer.data.filter(n => selection.indexOf(n.id) >= 0);
+            }
+        }
+
         await this.loadSpinner.hide();
     }
 
@@ -142,15 +154,16 @@ export default class AttributeSlicerOffice {
      * @param The raw row values
      * @param indexes The indexes to map row data into specific column data
      */
-    public loadFromRawData(columns: string[], rows: any[][], indexes: ISlicerColumnMappings) {
+    public loadFromRawData(parsedData: { category: any; value: any }[]) {
         this.attributeSlicer.serverSideSearch = false;
         this.attributeSlicer.showSelections = false;
         this.attributeSlicer.showValues = true;
 
-        const data = converter(columns, rows, indexes);
+        const data = converter(parsedData);
 
-        this.attributeSlicer.showValues = indexes.value !== undefined;
-        data.sort((a, b) => indexes.value === undefined ? naturalSort(a.match, b.match) : b.value - a.value);
+        const hasValues = parsedData.length > 0 && parsedData[0].value !== undefined;
+        this.attributeSlicer.showValues = hasValues;
+        data.sort((a, b) => !hasValues ? naturalSort(a.match, b.match) : b.value - a.value);
         this.attributeSlicer.data = data;
     }
 

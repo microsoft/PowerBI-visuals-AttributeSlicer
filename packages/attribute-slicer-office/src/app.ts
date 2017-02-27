@@ -43,7 +43,6 @@ Office.initialize = function (reason) {
                 await settingsManager.set("componentId", id);
             }
 
-            let bookKeeper: Bookkeeper;
             if (reason === Office.InitializationReason.Inserted) {
                 await Excel.run(async ctx => {
                     const activeWS = ctx.workbook.worksheets.getActiveWorksheet();
@@ -51,12 +50,15 @@ Office.initialize = function (reason) {
 
                     await ctx.sync();
 
-                    bookKeeper = new Bookkeeper(id, "Attribute Slicer", activeWS.name);
-                    await bookKeeper.initialize();
+                    await settingsManager.set("sheet", activeWS.name);
 
                     return ctx.sync();
                 });
             }
+
+            const bookKeeper = new Bookkeeper(id, "Attribute Slicer", await settingsManager.get("sheet"));
+            await bookKeeper.initialize();
+
             const bindingManager = new ExcelBindingManager(NAMESPACE, dataRequirements, bookKeeper, settingsManager);
 
             new AttributeSlicerOffice($("#app"), settingsManager, bindingManager);
