@@ -25,6 +25,7 @@ import { IDataRequirements } from "@essex/office-core";
 export default {
     fields: [{
         name: "category",
+        category: true,
         required: true,
         // We can really work with anything
         isMatch: (header: string) => {
