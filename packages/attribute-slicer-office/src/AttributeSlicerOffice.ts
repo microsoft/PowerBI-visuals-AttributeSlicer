@@ -72,6 +72,16 @@ export default class AttributeSlicerOffice {
     private loadSpinner: ILoadSpinnerTemplate;
 
     /**
+     * True if we are currently loading data
+     */
+    private loadingData = false;
+
+    /**
+     * True if we are currently loading data
+     */
+    private savingSelection = false;
+
+    /**
      * Constructor for the Office Attribute Slicer
      * @param parentElement The parent element of the Attribute Slicer
      * @param settingsManager The settings manager to use
@@ -107,10 +117,16 @@ export default class AttributeSlicerOffice {
         window.addEventListener("resize", this.onResize.bind(this));
 
         this.attributeSlicer.events.on("selectionChanged", async (items: OfficeSlicerItem[]) => {
+            const criteria = (items || []).map(n => this.bindingManager.createCriteria("category", n.match, undefined, "eq"));
+            if (this.loadingData) {
+                return;
+            }
+            this.savingSelection = true;
             await this.settingsManager.set("selection", items.map(n => n.id));
-            this.bindingManager.applyFilter({
-                criteria: (items || []).map(n => this.bindingManager.createCriteria("category", n.match, undefined, "eq")),
-            });
+            await this.bindingManager.applyFilter(criteria.length ? {
+                criteria,
+            }: undefined);
+            this.savingSelection = false;
         });
 
         // Auto bind on load
@@ -124,7 +140,12 @@ export default class AttributeSlicerOffice {
      * Loads data from the given binding
      */
     public async loadDataFromBindingManager() {
-        await this.loadSpinner.show("Loading data")
+        if (this.savingSelection) {
+            return;
+        }
+
+        this.loadingData = true;
+        await this.loadSpinner.show("Loading data");
 
         // Get the selection here, cause it will get overridden by the data load, so load before the data changes
         const selection = await this.settingsManager.get<string[]>("selection");
@@ -147,6 +168,7 @@ export default class AttributeSlicerOffice {
         }
 
         await this.loadSpinner.hide();
+        this.loadingData = false;
     }
 
     /**
