@@ -25,43 +25,14 @@
 import * as $ from "jquery";
 import * as debug from "debug";
 import * as uuid from "node-uuid";
-import { Bookkeeper, SettingsManager, ExcelBindingManager } from "@essex/office-core";
+import { Bookkeeper, SettingsManager, ExcelBindingManager, OfficeContentApplication } from "@essex/office-core";
 import dataRequirements from "./dataRequirements";
 import AttributeSlicerOffice from "./AttributeSlicerOffice";
 const log = debug("Essex::AttributeSlicerOffice::App");
 const NAMESPACE = "attribute-slicer";
 
-// The initialize function must be run each time a new page is loaded
-Office.initialize = function (reason) {
-    $(document).ready(async function () {
-        log("Initialized");
-        setTimeout(async function() {
-            const settingsManager = new SettingsManager(NAMESPACE);
-            let id = await settingsManager.get("componentId");
-            if (!id) {
-                id = uuid.v4();
-                await settingsManager.set("componentId", id);
-            }
-
-            if (reason === Office.InitializationReason.Inserted) {
-                await Excel.run(async ctx => {
-                    const activeWS = ctx.workbook.worksheets.getActiveWorksheet();
-                    activeWS.load("name");
-
-                    await ctx.sync();
-
-                    await settingsManager.set("sheet", activeWS.name);
-
-                    return ctx.sync();
-                });
-            }
-
-            const bookKeeper = new Bookkeeper(id, "Attribute Slicer", await settingsManager.get("sheet"));
-            await bookKeeper.initialize();
-
-            const bindingManager = new ExcelBindingManager(NAMESPACE, dataRequirements, bookKeeper, settingsManager);
-
-            new AttributeSlicerOffice($("#app"), settingsManager, bindingManager);
-        }, 10);
-    });
-};
+// Initialize the application
+const app = new OfficeContentApplication("Attribute Slicer", NAMESPACE, null);
+app.onInitialized(() => {
+    new AttributeSlicerOffice($("#app"), app.settingsManager, app.bindingManager);
+});

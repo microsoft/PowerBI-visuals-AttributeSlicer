@@ -26,7 +26,7 @@ import dataRequirements from "./dataRequirements";
 import attributeSlicerTemplate from "./templates/AttributeSlicer.html";
 import { AttributeSlicer, SlicerItem } from "@essex/attribute-slicer";
 import {
-    ExcelBindingManager,
+    IBindingManager,
     getDataFromBinding,
     IDataRequirements,
     IDataResult,
@@ -59,7 +59,7 @@ export default class AttributeSlicerOffice {
     /**
      *  The binding manager
      */
-    private bindingManager: ExcelBindingManager;
+    private bindingManager: IBindingManager;
 
     /**
      * The settings manager for the attribute slicer
@@ -88,7 +88,7 @@ export default class AttributeSlicerOffice {
      * @param bindingManager The binding manager to use
      * @param attributeSlicer The Attribute Slicer instance to use
      */
-    constructor(parentElement: JQuery, settingsManager: ISettingsManager, bindingManager: ExcelBindingManager, attributeSlicer?: AttributeSlicer) {
+    constructor(parentElement: JQuery, settingsManager: ISettingsManager, bindingManager: IBindingManager, attributeSlicer?: AttributeSlicer) {
         const className = CSS_MODULE && (CSS_MODULE.className || (CSS_MODULE.locals && CSS_MODULE.locals.className));
         if (className) {
             parentElement.addClass(className);
