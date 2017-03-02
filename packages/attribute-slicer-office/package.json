@@ -29,7 +29,7 @@
   "homepage": "https://github.com/Microsoft/PowerBI-visuals-AttributeSlicer#readme",
   "devDependencies": {
     "@essex/attribute-slicer": "file:../attribute-slicer",
-    "@essex/office-core": "^0.0.23",
+    "@essex/office-core": "^0.0.24",
     "@types/chai": "^3.4.35",
     "@types/debug": "^0.0.29",
     "@types/jquery": "^2.0.40",
