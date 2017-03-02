@@ -34,5 +34,5 @@ const NAMESPACE = "attribute-slicer";
 // Initialize the application
 const app = new OfficeContentApplication("Attribute Slicer", NAMESPACE, dataRequirements);
 app.onInitialized(() => {
-    new AttributeSlicerOffice($("#app"), app.settingsManager, app.bindingManager,);
+    new AttributeSlicerOffice($("#app"), app.settingsManager, app.bindingManager);
 });
