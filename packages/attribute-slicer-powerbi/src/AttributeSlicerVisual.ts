@@ -359,9 +359,9 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
 
                 const columnName = ldget(dv, "categorical.categories[0].source.queryName");
 
-                // if the user has changed the categories, then selection is done for
-                if (!columnName ||
-                    (this.currentCategory && this.currentCategory !== columnName)) {
+                // Only clear selection IF
+                // We've already loaded a dataset, and the user has changed the dataset to something else
+                if (this.currentCategory && (!columnName || this.currentCategory !== columnName)) {
                     // This will really be undefined behaviour for pbi-stateful because this indicates the user changed datasets
                     log("Clearing Selection, Categories Changed");
                     pbiState.selectedItems = [];
@@ -514,14 +514,36 @@ export default class AttributeSlicer extends StatefulVisual<IAttributeSlicerStat
         log("AttributeSlicer loading state into PBI", state);
         if (state && this.host) {
             // Restoring selection into PBI
+            const highlight = false;
+            let objects: powerbi.VisualObjectInstancesToPersist = state.buildPersistObjects(this.dataView, true);
+            let selection = false;
             const ids = getSelectionIdsFromSelectors((state.selectedItems || []).map(n => n.selector));
-            const currentlySelIds = this.selectionManager.getSelectionIds() || [];
-            const toSelect = ids.filter(n => !currentlySelIds.some(m => m.equals(n)));
-            const toDeselect = currentlySelIds.filter(n => !ids.some(m => m.equals(n)));
-            toSelect.concat(toDeselect).forEach(n => {
-                this.selectionManager.select(n, true);
-            });
-            this.propertyPersister.persist(false, state.buildPersistObjects(this.dataView, true));
+            if (highlight) {
+                const currentlySelIds = this.selectionManager.getSelectionIds() || [];
+                const toSelect = ids.filter(n => !currentlySelIds.some(m => m.equals(n)));
+                const toDeselect = currentlySelIds.filter(n => !ids.some(m => m.equals(n)));
+                toSelect.concat(toDeselect).forEach(n => {
+                    this.selectionManager.select(n, true);
+                });
+            } else {
+                selection = true;
+                let filter: any;
+                if (ids && ids.length) {
+                    let selectors = ids.map(n => n.getSelector());
+                    filter = data.Selector.filterFromSelector(selectors);
+                }
+                let operation = filter ? "merge" : "remove";
+                const opObjs = objects[operation] = objects[operation] || [];
+                opObjs.push(<powerbi.VisualObjectInstance>{
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        filter,
+                    },
+                });
+            }
+
+            this.propertyPersister.persist(selection, objects);
         }
     }
 }

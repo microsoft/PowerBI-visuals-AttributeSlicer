@@ -412,6 +412,11 @@ describe("AttributeSlicerVisual", function () {
     // selection was changed, and would clear the highlights on the slicer.
     it("should highlight correctly if highlighted from another visual");
 
+    it("should restore selection/filters correctly when loading a report");
+
+    it("should be able to be put on the same report as another attribute slicer, and have them filter each other");
+    it("should be able to be put on the same report as another attribute slicer, and have them drill down (one way) A -> B -> C");
+
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
