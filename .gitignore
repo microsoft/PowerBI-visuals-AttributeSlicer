@@ -6,6 +6,10 @@ node_modules/
 .scripts
 dump
 
+# Error Logs
+*debug.log
+*error.log
+
 # IDE / Editors
 *~
 
