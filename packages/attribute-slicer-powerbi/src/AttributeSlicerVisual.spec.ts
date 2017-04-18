@@ -157,7 +157,7 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let fakeCats = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // Make sure the data was passed correctly to attribute slicer
         expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
     });
@@ -165,12 +165,12 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
-        instance["_internalState"].selectedItems = <any>[{ match: "WHATEVER" }];
+        attributeSlicer.state.selectedItems = <any>[{ match: "WHATEVER" }];
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.onUpdate(anotherUpdate, UpdateType.Data);
+        instance.updateWithType(anotherUpdate, UpdateType.Data);
         // Make sure there is no more selected items
         expect(attributeSlicer.state.selectedItems).to.be.empty;
     });
@@ -178,14 +178,14 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
-        // attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
-        instance["_internalState"].searchText = "SOME SEARCH STRING";
-        // instance["settings"].searchText = "SOME SEARCH STRING";
+        instance["state"].searchText = "SOME SEARCH STRING";
+        attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.onUpdate(anotherUpdate, UpdateType.Data);
+        instance.updateWithType(anotherUpdate, UpdateType.Data);
         // Make sure there is no more search string
         expect(attributeSlicer.state.searchText).to.be.empty;
     });
