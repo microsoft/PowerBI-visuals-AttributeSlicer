@@ -132,14 +132,6 @@ export default class AttributeSlicer extends VisualBase {
      */
     constructor(noCss = false) {
         super("Attribute Slicer", noCss);
-
-        const className = CUSTOM_CSS_MODULE && CUSTOM_CSS_MODULE.locals && CUSTOM_CSS_MODULE.locals.className;
-        if (className) {
-            this.element.addClass(className);
-        }
-
-        // HACK: PowerBI Swallows these events unless we prevent propagation upwards
-        this.element.on(EVENTS_TO_IGNORE, (e: any) => e.stopPropagation());
         this.state = VisualState.create() as VisualState;
     }
 
@@ -154,11 +146,20 @@ export default class AttributeSlicer extends VisualBase {
      * Called when the visual is being initialized
      */
     public init(options: powerbi.VisualInitOptions): void {
+        super.init(options);
         this.host = options.host;
         this.selectionManager = new SelectionManager({
             hostServices: this.host,
         });
         this.propertyPersister = createPropertyPersister(this.host, 100);
+
+        const className = CUSTOM_CSS_MODULE && CUSTOM_CSS_MODULE.locals && CUSTOM_CSS_MODULE.locals.className;
+        if (className) {
+            this.element.addClass(className);
+        }
+
+        // HACK: PowerBI Swallows these events unless we prevent propagation upwards
+        this.element.on(EVENTS_TO_IGNORE, (e: any) => e.stopPropagation());
 
         const slicerEle = $("<div>");
         this.element.append(slicerEle);
@@ -187,9 +188,15 @@ export default class AttributeSlicer extends VisualBase {
      * Called when the visual is being updated
      */
     public updateWithType(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
+        super.updateWithType(options, updateType);
+
         this.isHandlingUpdate = true;
         try {
             log("Update", options);
+
+            if (updateType === UpdateType.Resize) {
+                this.setDimensions(options.viewport);
+            }
 
             // We should ALWAYS have a dataView, if we do not, PBI has not loaded yet
             const dv = this.dataView = options.dataViews && options.dataViews[0];
@@ -257,8 +264,8 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * Gets the inline css used for this element
      */
-    protected getCustomCssModules(): any[] {
-        return [CUSTOM_CSS_MODULE];
+    protected getCss(): any[] {
+        return super.getCss().concat([CUSTOM_CSS_MODULE + ""]);
     }
 
     /**
