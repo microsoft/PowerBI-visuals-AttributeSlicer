@@ -312,7 +312,7 @@ export default class AttributeSlicer extends VisualBase {
 
                 // Only clear selection IF
                 // We've already loaded a dataset, and the user has changed the dataset to something else
-                if (this.currentCategory && (!columnNames || !_.isEqual(this.currentCategory, columnNames)))  {
+                if (this.currentCategory && !_.isEqual(this.currentCategory, columnNames))  {
                     // This will really be undefined behaviour for pbi-stateful because this indicates the user changed datasets
                     log("Clearing Selection, Categories Changed");
                     if (!_.isEqual(pbiState.selectedItems, [])) {
