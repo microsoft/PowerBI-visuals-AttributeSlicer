@@ -403,7 +403,8 @@ describe("AttributeSlicerVisual", function () {
     // ie. Search for Microsof then Microsoft, the service will return the same data
     it("should not get into an infinite loop if the data doesn't change");
 
-    it("should support searching numerical columns (when a numerical column is the category)");
+    // Re-add when PowerBI supports searching numerical columns
+    // it("should support searching numerical columns (when a numerical column is the category)");
     it("should NOT support searching date columns (when a date column is the category)");
     it("should clear the search when switching column types");
 
