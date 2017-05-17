@@ -304,19 +304,25 @@ export default class AttributeSlicer extends VisualBase {
 
                     delete this.loadDeferred;
                 }
-
-                const columnName = ldget(dv, "categorical.categories[0].source.queryName");
-
+               
+                var columnNames : Array<String> = [];
+                _.forOwn(ldget(dv,"categorical.categories"),(value,key: any) => {
+                    columnNames.push(value.source.queryName);
+                })
+                
                 // Only clear selection IF
                 // We've already loaded a dataset, and the user has changed the dataset to something else
-                if (this.currentCategory && (!columnName || this.currentCategory !== columnName)) {
+                if (this.currentCategory && (!columnNames || !_.isEqual(this.currentCategory,columnNames)))  {
                     // This will really be undefined behaviour for pbi-stateful because this indicates the user changed datasets
                     log("Clearing Selection, Categories Changed");
-                    pbiState.selectedItems = [];
-                    pbiState.searchText = "";
+                    if (!_.isEqual(pbiState.selectedItems,[])){
+                        pbiState.selectedItems = [];
+                        this._onSelectionChangedDebounced([])
+                    }
+                    pbiState.searchText = "";                  
                 }
 
-                this.currentCategory = columnName;
+                this.currentCategory = columnNames;
             }
         } else {
             this.mySlicer.data = [];
