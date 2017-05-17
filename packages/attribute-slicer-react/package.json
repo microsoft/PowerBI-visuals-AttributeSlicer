@@ -6,7 +6,7 @@
   "typings": "src/index.d.ts",
   "scripts": {
     "lint": "tslint 'src/**/*[!.d].{ts,tsx}'",
-    "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts > /dev/null || exit 1",
+    "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",
     "verify": "tsc && npm-run-all lint karma:once docs",
@@ -68,8 +68,8 @@
     "sinon-chai": "^2.8.0",
     "style-loader": "0.13.0",
     "tslint": "^3.15.1",
-    "typedoc": "^0.5.1",
-    "typescript": "^2.1.4",
+    "typedoc": "^0.7.0",
+    "typescript": "^2.3.2",
     "underscore": "1.8.3",
     "wallaby-webpack": "^0.0.26",
     "webpack": "^1.14.0"
