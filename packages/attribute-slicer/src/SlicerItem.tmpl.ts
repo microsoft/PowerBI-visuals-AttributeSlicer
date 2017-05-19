@@ -33,6 +33,8 @@ import * as d3 from "d3";
 export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean) {
     "use strict";
     const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;
+    const alignStyle = alignTextLeft ? "text-align:left;" : ""
+    const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%;${alignStyle}`;
     return $(`
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
             <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
