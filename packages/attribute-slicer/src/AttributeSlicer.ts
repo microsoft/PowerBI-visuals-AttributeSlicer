@@ -128,16 +128,19 @@ export class AttributeSlicer {
      * Whether or not to left align item text
      */
     private _leftAlignText = false;
-    get leftAlignText() {
+    public get leftAlignText() {
         return this._leftAlignText;
     }
 
     /**
      * Sets wheter or not to left align item text
      */
-    set leftAlignText(value: boolean){
+    public set leftAlignText(value: boolean){
         if (value !== this._leftAlignText) {
             this._leftAlignText = value;
+            if (this.virtualList) {
+                this.virtualList.rerender();
+            }
         }
     }
 
