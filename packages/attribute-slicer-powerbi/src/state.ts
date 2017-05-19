@@ -154,7 +154,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         description: "On to left align item text.",
         defaultValue: DEFAULT_STATE.leftAlignText,
     })
-    public leftAlignText?: boolean;   
+    public leftAlignText?: boolean;
 
     /**
      * If we should show the options area
