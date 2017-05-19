@@ -125,6 +125,23 @@ export class AttributeSlicer {
     private searchDebounce = SEARCH_DEBOUNCE;
 
     /**
+     * Whether or not to left align item text
+     */
+    private _leftAlignText = false;
+    get leftAlignText() {
+        return this._leftAlignText;
+    }
+    
+    /**
+     * Sets wheter or not to left align item text
+     */
+    set leftAlignText(value: boolean){
+        if (value !== this._leftAlignText){
+            this._leftAlignText = value;
+        }
+    }
+
+    /**
      * Updates the list height
      */
     private updateListHeight = _.debounce(() => {
@@ -152,7 +169,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes());
+                const ele = itemTemplate(item, this.calcColumnSizes(),this.leftAlignText);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -220,6 +237,7 @@ export class AttributeSlicer {
             brushMode: this.brushSelectionMode,
             // TODO: textSize: PixelConverter.toPoint(this.mySlicer.fontSize),
             textSize: this.fontSize,
+            leftAlignText: this.leftAlignText,
             showOptions: this.showOptions,
             showSearch: this.showSearchBox,
             showValues: this.showValues,
@@ -275,6 +293,7 @@ export class AttributeSlicer {
         s.renderHorizontal = state.horizontal;
         s.valueWidthPercentage = state.valueColumnWidth;
         this.scrollPosition = state.scrollPosition;
+        this.leftAlignText = state.leftAlignText;
 
         this.loadingState = false;
     }

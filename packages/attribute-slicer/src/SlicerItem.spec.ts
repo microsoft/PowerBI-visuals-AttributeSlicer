@@ -36,7 +36,8 @@ describe("SlicerItem", () => {
         } as any as SlicerItem, {
             category: 23,
             value: 77,
-        });
+        },
+        false);
     };
     const templateWithMatch = () => {
         return {

@@ -291,7 +291,7 @@ describe("AttributeSlicer", () => {
             const { instance } = createInstance();
             instance.data = SIMPLE_DATA_WITH_VALUES;
 
-            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 0, category: 100 });
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 0, category: 100 },false);
 
             const actual = itemEle.find(".value-container").css("max-width");
             expect(actual).to.equal("0%");
@@ -301,7 +301,7 @@ describe("AttributeSlicer", () => {
             const { instance } = createInstance();
             instance.data = SIMPLE_DATA_WITH_VALUES;
 
-            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 12.34, category: 87.66 });
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 12.34, category: 87.66 },false);
 
             const actual = itemEle.find(".value-container").css("max-width");
             expect(actual).to.equal("12.34%");
@@ -311,7 +311,7 @@ describe("AttributeSlicer", () => {
             const { instance } = createInstance();
             instance.data = SIMPLE_DATA_WITH_VALUES;
 
-            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 100, category: 0 });
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 100, category: 0 },false);
 
             const actual = itemEle.find(".category-container").css("max-width");
             expect(actual).to.equal("0%");
@@ -321,7 +321,7 @@ describe("AttributeSlicer", () => {
             const { instance } = createInstance();
             instance.data = SIMPLE_DATA_WITH_VALUES;
 
-            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 87.66, category: 12.34 });
+            const itemEle = itemTemplate(SIMPLE_DATA[0], { value: 87.66, category: 12.34 },false);
 
             const actual = itemEle.find(".category-container").css("max-width");
             expect(actual).to.equal("12.34%");
