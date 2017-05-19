@@ -52,6 +52,7 @@ export const DEFAULT_STATE: IAttributeSlicerState = {
     singleSelect: false,
     brushMode: false,
     textSize: DEFAULT_TEXT_SIZE,
+    leftAlignText: false,
     showOptions: true,
     showSearch: true,
     showValues: true,

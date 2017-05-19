@@ -131,6 +131,11 @@ export interface IAttributeSlicerState {
     textSize?: number;
 
     /**
+     * If we should left align the text
+     */
+    leftAlignText?: boolean;
+
+    /**
      * If we should show the options area
      */
     showOptions?: boolean;

@@ -30,10 +30,11 @@ import * as d3 from "d3";
 /**
  * Returns an element for the given item
  */
-export default function (item: SlicerItem, sizes: { category: number; value: number }) {
+export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean) {
     "use strict";
     const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;
-    const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
+    const alignStyle = alignTextLeft ? "text-align:left;" : "";
+    const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%;${alignStyle}`;
     return $(`
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
             <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
