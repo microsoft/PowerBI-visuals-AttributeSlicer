@@ -8,7 +8,7 @@
     "clean": "rimraf dist",
     "pbibundle": "gulp",
     "compile": "node ./bin/compile",
-    "lint": "tslint 'src/**/*[!.d].{ts,tsx}'",
+    "lint": "tslint \"src/**/*[!.d].{ts,tsx}\"",
     "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",
     "karma:tdd": "karma start --tdd",
     "karma:once": "karma start",

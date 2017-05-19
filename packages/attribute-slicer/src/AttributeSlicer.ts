@@ -131,12 +131,12 @@ export class AttributeSlicer {
     get leftAlignText() {
         return this._leftAlignText;
     }
-    
+
     /**
      * Sets wheter or not to left align item text
      */
     set leftAlignText(value: boolean){
-        if (value !== this._leftAlignText){
+        if (value !== this._leftAlignText) {
             this._leftAlignText = value;
         }
     }
@@ -169,7 +169,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes(),this.leftAlignText);
+                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
