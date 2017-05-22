@@ -268,6 +268,7 @@ export class AttributeSlicer {
             showSearch: this.showSearchBox,
             showValues: this.showValues,
             scrollPosition: this.scrollPosition,
+            alwaysShowValues: this.alwaysShowValues,
         };
     }
 
