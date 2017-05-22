@@ -30,10 +30,11 @@ import * as d3 from "d3";
 /**
  * Returns an element for the given item
  */
-export default function (item: SlicerItem, sizes: { category: number; value: number }) {
+export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean, showValueLabels?: boolean) {
     "use strict";
     const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;
-    const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%`;
+    const alignStyle = alignTextLeft ? "text-align:left;" : "";
+    const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%;${alignStyle}`;
     return $(`
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
             <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
@@ -44,7 +45,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
                 </span>
                 <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
                     <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                    ${ valueSegmentsTemplate(valueSegments) }
+                    ${ valueSegmentsTemplate(valueSegments, showValueLabels) }
                     </span>
                 </span>
             </div>
@@ -55,7 +56,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
 /**
  * Template string for the given valueSegments
  */
-function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
+function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLabels: boolean) {
     "use strict";
     return (valueSegments || []).map(s => {
         const { color, highlightWidth } = s;
@@ -79,10 +80,11 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[]) {
 
         const displayValue = s.displayValue || s.value || "0";
         const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;color:${fontColor}`;
+        const spanclass = showValueLabels ? "always-display value" : "value";
         return `
             <span style="${style}" title="${displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }
-                &nbsp;<span class="value">${displayValue}</span>
+                &nbsp;<span class="${spanclass}">${displayValue}</span> 
             </span>
         `.trim().replace(/\n/g, "");
     }).join("");

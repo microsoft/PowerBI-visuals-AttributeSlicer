@@ -272,7 +272,7 @@
     overflow: hidden;
   }
 
-  .item:hover .value-display .value {
+  .value-display .always-display.value, .item:hover .value-display .value {
       display: inline-block;
       top: .25em;
       bottom: 0;

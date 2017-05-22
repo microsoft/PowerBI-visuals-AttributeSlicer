@@ -147,6 +147,16 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public textSize?: number;
 
     /**
+     * If we should left align the text
+     */
+     @setting({
+        displayName: "Text Align Left",
+        description: "On to left align item text.",
+        defaultValue: DEFAULT_STATE.leftAlignText,
+    })
+    public leftAlignText?: boolean;
+
+    /**
      * If we should show the options area
      */
     @setting({
@@ -212,6 +222,14 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         defaultValue: DEFAULT_STATE.showSelections,
     })
     public showSelections?: boolean;
+
+   @setting({
+        category: "Values",
+        displayName: "Display Values",
+        description: "Display value labels.",
+        defaultValue: DEFAULT_STATE.displayValueLabels,
+    })
+    public displayValueLabels?: boolean;
 
     /**
      * The set of settings for the colored objects
