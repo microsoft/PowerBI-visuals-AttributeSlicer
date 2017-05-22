@@ -131,6 +131,11 @@ export interface IAttributeSlicerState {
     textSize?: number;
 
     /**
+     * The text color 
+     */
+    itemTextColor?: string;
+
+    /**
      * If we should left align the text
      */
     leftAlignText?: boolean;

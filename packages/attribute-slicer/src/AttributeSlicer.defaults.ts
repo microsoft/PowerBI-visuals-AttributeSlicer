@@ -52,6 +52,7 @@ export const DEFAULT_STATE: IAttributeSlicerState = {
     singleSelect: false,
     brushMode: false,
     textSize: DEFAULT_TEXT_SIZE,
+    itemTextColor: "#000",
     leftAlignText: false,
     showOptions: true,
     showSearch: true,

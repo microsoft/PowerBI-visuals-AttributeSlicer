@@ -165,6 +165,20 @@ export class AttributeSlicer {
         }
     }
 
+    private _itemTextColor = "#000";
+    public get itemTextColor() {
+        return this._itemTextColor;
+    }
+
+    public set itemTextColor(color: string){
+        if (color !== this._itemTextColor) {
+            this._itemTextColor = color;
+            if (this.virtualList) {
+                this.virtualList.rerender();
+            }
+        }
+    }
+
 
 
     /**
@@ -195,7 +209,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.displayValueLabels);
+                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.displayValueLabels, this.itemTextColor);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -269,6 +283,7 @@ export class AttributeSlicer {
             showValues: this.showValues,
             scrollPosition: this.scrollPosition,
             displayValueLabels: this.displayValueLabels,
+            itemTextColor: this.itemTextColor,
         };
     }
 
@@ -322,6 +337,7 @@ export class AttributeSlicer {
         this.scrollPosition = state.scrollPosition;
         this.leftAlignText = state.leftAlignText;
         this.displayValueLabels = state.displayValueLabels;
+        this.itemTextColor = state.itemTextColor;
 
         this.loadingState = false;
     }
