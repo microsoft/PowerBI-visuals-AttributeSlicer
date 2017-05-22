@@ -752,8 +752,8 @@ describe("AttributeSlicer", () => {
 
         it ("setting should return the value of 'textColor'", () => {
             const { instance } = createInstance();
-            instance.itemTextColor = "#000";
-            expect(instance.state.itemTextColor).to.be.equal("#000");
+            instance.itemTextColor = "#333";
+            expect(instance.state.itemTextColor).to.be.equal("#333");
         });
 
 /*
