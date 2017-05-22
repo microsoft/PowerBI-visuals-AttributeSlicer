@@ -30,7 +30,7 @@ import * as d3 from "d3";
 /**
  * Returns an element for the given item
  */
-export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean, alwaysShowValues?: boolean) {
+export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean, showValueLabels?: boolean) {
     "use strict";
     const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;
     const alignStyle = alignTextLeft ? "text-align:left;" : "";
@@ -45,7 +45,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
                 </span>
                 <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
                     <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                    ${ valueSegmentsTemplate(valueSegments,alwaysShowValues) }
+                    ${ valueSegmentsTemplate(valueSegments,showValueLabels) }
                     </span>
                 </span>
             </div>
@@ -56,7 +56,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
 /**
  * Template string for the given valueSegments
  */
-function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], alwaysShowValues: boolean) {
+function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLabels: boolean) {
     "use strict";
     return (valueSegments || []).map(s => {
         const { color, highlightWidth } = s;
@@ -80,7 +80,7 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], alwaysShowV
 
         const displayValue = s.displayValue || s.value || "0";
         const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;color:${fontColor}`;
-        const spanclass = alwaysShowValues ? "always-display value" : "value";
+        const spanclass = showValueLabels ? "always-display value" : "value";
         return `
             <span style="${style}" title="${displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }

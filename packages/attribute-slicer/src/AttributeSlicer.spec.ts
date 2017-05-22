@@ -746,8 +746,8 @@ describe("AttributeSlicer", () => {
 
         it ("setting should return the value of 'alwaysShowValues'", () => {
             const { instance } = createInstance();
-            instance.alwaysShowValues = true;
-            expect(instance.state.alwaysShowValues).to.be.equal(true);
+            instance.displayValueLabels = true;
+            expect(instance.state.displayValueLabels).to.be.equal(true);
         });
 
 /*

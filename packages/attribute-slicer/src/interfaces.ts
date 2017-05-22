@@ -192,5 +192,5 @@ export interface IAttributeSlicerState {
     /**
      * If we should always display values text
      */
-    alwaysShowValues?: boolean;
+    displayValueLabels?: boolean;
 }

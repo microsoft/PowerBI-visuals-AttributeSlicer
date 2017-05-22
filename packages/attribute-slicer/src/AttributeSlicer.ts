@@ -148,17 +148,17 @@ export class AttributeSlicer {
     /**
      * Whether or not to display values
      */
-    private _alwaysShowValues = false;
-    public get alwaysShowValues() {
-        return this._alwaysShowValues;
+    private _displayValueLables = false;
+    public get displayValueLabels() {
+        return this._displayValueLables;
     }
 
     /**
      * Sets wheter or not to display values
      */
-    public set alwaysShowValues(value: boolean){
-        if (value !== this._alwaysShowValues) {
-            this._alwaysShowValues = value;
+    public set displayValueLabels(value: boolean){
+        if (value !== this._displayValueLables) {
+            this._displayValueLables = value;
             if (this.virtualList) {
                 this.virtualList.rerender();
             }
@@ -195,7 +195,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.alwaysShowValues);
+                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.displayValueLabels);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -268,7 +268,7 @@ export class AttributeSlicer {
             showSearch: this.showSearchBox,
             showValues: this.showValues,
             scrollPosition: this.scrollPosition,
-            alwaysShowValues: this.alwaysShowValues,
+            displayValueLabels: this.displayValueLabels,
         };
     }
 
@@ -321,7 +321,7 @@ export class AttributeSlicer {
         s.valueWidthPercentage = state.valueColumnWidth;
         this.scrollPosition = state.scrollPosition;
         this.leftAlignText = state.leftAlignText;
-        this.alwaysShowValues = state.alwaysShowValues;
+        this.displayValueLabels = state.displayValueLabels;
 
         this.loadingState = false;
     }
