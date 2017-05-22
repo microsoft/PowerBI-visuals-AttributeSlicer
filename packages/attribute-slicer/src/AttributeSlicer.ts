@@ -144,6 +144,29 @@ export class AttributeSlicer {
         }
     }
 
+
+    /**
+     * Whether or not to display values
+     */
+    private _alwaysShowValues = false;
+    public get alwaysShowValues() {
+        return this._alwaysShowValues;
+    }
+
+    /**
+     * Sets wheter or not to display values
+     */
+    public set alwaysShowValues(value: boolean){
+        if (value !== this._alwaysShowValues) {
+            this._alwaysShowValues = value;
+            if (this.virtualList) {
+                this.virtualList.rerender();
+            }
+        }
+    }
+
+
+
     /**
      * Updates the list height
      */
@@ -172,7 +195,7 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText);
+                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.alwaysShowValues);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -297,6 +320,7 @@ export class AttributeSlicer {
         s.valueWidthPercentage = state.valueColumnWidth;
         this.scrollPosition = state.scrollPosition;
         this.leftAlignText = state.leftAlignText;
+        this.alwaysShowValues = state.alwaysShowValues;
 
         this.loadingState = false;
     }
