@@ -744,6 +744,11 @@ describe("AttributeSlicer", () => {
             expect(instance.state.selectedItems).to.be.deep.equal(TEST_SELECTED_ITEMS.slice(0));
         });
 
+        it ("setting should return the value of 'alwaysShowValues'", () => {
+            const { instance } = createInstance();
+            instance.displayValueLabels = true;
+            expect(instance.state.displayValueLabels).to.be.equal(true);
+        });
 
 /*
             selectedItems: [],

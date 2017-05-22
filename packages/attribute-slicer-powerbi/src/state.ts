@@ -223,6 +223,14 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     })
     public showSelections?: boolean;
 
+   @setting({
+        category: "Values",
+        displayName: "Display Values",
+        description: "Display value labels.",
+        defaultValue: DEFAULT_STATE.displayValueLabels,
+    })
+    public displayValueLabels?: boolean;
+
     /**
      * The set of settings for the colored objects
      */

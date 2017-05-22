@@ -188,4 +188,9 @@ export interface IAttributeSlicerState {
     showSelections?: boolean;
 
     scrollPosition?: [number, number];
+
+    /**
+     * If we should always display values text
+     */
+    displayValueLabels?: boolean;
 }
