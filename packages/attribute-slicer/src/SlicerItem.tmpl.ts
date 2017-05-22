@@ -45,7 +45,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
                 </span>
                 <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
                     <span style="display:inline-block;width:${renderedValue}%;height:100%">
-                    ${ valueSegmentsTemplate(valueSegments,showValueLabels) }
+                    ${ valueSegmentsTemplate(valueSegments, showValueLabels) }
                     </span>
                 </span>
             </div>
