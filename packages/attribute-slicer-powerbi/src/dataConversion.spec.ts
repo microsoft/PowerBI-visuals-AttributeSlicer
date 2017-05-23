@@ -162,7 +162,6 @@ describe("dataConversion", () => {
                 });
             });
         });
-
         describe("data with categories and values with series", () => {
             it("should convert the categories correctly", () => {
                 const { options, expected } = dataWithCategoriesAndValuesWithSeries();
@@ -259,6 +258,10 @@ describe("dataConversion", () => {
                     })).to.be.false;
                 });
             });
+        });
+
+        it ("should not crash if passed a dataView with no categorical information", () => {
+            convert(<any>{});
         });
     });
 });

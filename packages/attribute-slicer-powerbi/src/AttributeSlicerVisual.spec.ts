@@ -153,24 +153,26 @@ describe("AttributeSlicerVisual", function () {
     it("should init", function () {
         createInstance();
     });
+
     it("should load only categories if that is all that is passed in via PBI", function () {
         const { instance, attributeSlicer } = createInstance();
         let fakeCats = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // Make sure the data was passed correctly to attribute slicer
         expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
     });
+
     it("should clear the selection when the categories are changed", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
-        instance["_internalState"].selectedItems = <any>[{ match: "WHATEVER" }];
+        attributeSlicer.state.selectedItems = <any>[{ match: "WHATEVER" }];
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.onUpdate(anotherUpdate, UpdateType.Data);
+        instance.updateWithType(anotherUpdate, UpdateType.Data);
         // Make sure there is no more selected items
         expect(attributeSlicer.state.selectedItems).to.be.empty;
     });
@@ -178,14 +180,14 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.onUpdate(update, UpdateType.Data);
+        instance.updateWithType(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
-        // attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
-        instance["_internalState"].searchText = "SOME SEARCH STRING";
-        // instance["settings"].searchText = "SOME SEARCH STRING";
+        instance["state"].searchText = "SOME SEARCH STRING";
+        attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
+
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.onUpdate(anotherUpdate, UpdateType.Data);
+        instance.updateWithType(anotherUpdate, UpdateType.Data);
         // Make sure there is no more search string
         expect(attributeSlicer.state.searchText).to.be.empty;
     });
@@ -403,7 +405,8 @@ describe("AttributeSlicerVisual", function () {
     // ie. Search for Microsof then Microsoft, the service will return the same data
     it("should not get into an infinite loop if the data doesn't change");
 
-    it("should support searching numerical columns (when a numerical column is the category)");
+    // Re-add when PowerBI supports searching numerical columns
+    // it("should support searching numerical columns (when a numerical column is the category)");
     it("should NOT support searching date columns (when a date column is the category)");
     it("should clear the search when switching column types");
 
@@ -412,9 +415,25 @@ describe("AttributeSlicerVisual", function () {
     // selection was changed, and would clear the highlights on the slicer.
     it("should highlight correctly if highlighted from another visual");
 
+    it("should restore selection/filters correctly when loading a report");
+
+    it("should be able to be put on the same report as another attribute slicer, and have them filter each other");
+    it("should be able to be put on the same report as another attribute slicer, and have them drill down (one way) A -> B -> C");
+
     // Additional info, we were getting weird issues with infinite loops/selection when there were multiple slicers.
     // What was happening was, when one slicer received the update call from PBI, it would clear the selection manager
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
     // the selection manager which would force the update of the other slicer...so on.
     // it("should not clear the selection manager, when loading selection from the dataView");
+    describe("API Quirks", () => {
+        it("should not crash if the dataView does not contain a categorical instance", function () {
+            const { instance } = createInstance();
+            let update = createOptionsWithCategories(["CAT_1", "CAT_2"], "SOME_CATEGORY_NAME");
+
+            // Remove the categorical object
+            delete update.dataViews[0].categorical;
+
+            instance.updateWithType(update, UpdateType.Data);
+        });
+    });
 });

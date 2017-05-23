@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-import * as PBIBase from "@essex/pbi-base"; // tslint:disable-line
 import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
 import { ISerializedItem } from "@essex/attribute-slicer";
 import "powerbi-visuals/lib/powerbi-visuals";
@@ -42,32 +41,35 @@ export default function converter(
     settings?: IColorSettings): IAttributeSlicerVisualData {
     "use strict";
 
-    if (!valueFormatter) {
-        valueFormatter = createValueFormatter();
-    }
-    if (!categoryFormatter) {
-        categoryFormatter = createCategoryFormatter(dataView);
-    }
+    if (dataView && dataView.categorical) {
 
-    return convertItemsWithSegments(
-        dataView,
-        (segment: ISlicerValueSegment) => {
-            segment.displayValue = valueFormatter.format(segment.value);
-            return segment;
-        },
-        (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId) => {
-            const item =
-                createItem(
-                    buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
-                    total,
-                    id.getKey(),
-                    id.getSelector(),
-                    undefined,
-                    "#ccc");
-            return item;
+        if (!valueFormatter) {
+            valueFormatter = createValueFormatter();
+        }
+        if (!categoryFormatter) {
+            categoryFormatter = createCategoryFormatter(dataView);
+        }
 
-        // TOOD: This logic should move to pbi base
-    }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
+        return convertItemsWithSegments(
+            dataView,
+            (segment: ISlicerValueSegment) => {
+                segment.displayValue = valueFormatter.format(segment.value);
+                return segment;
+            },
+            (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId) => {
+                const item =
+                    createItem(
+                        buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
+                        total,
+                        id.getKey(),
+                        id.getSelector(),
+                        undefined,
+                        "#ccc");
+                return item;
+
+            // TOOD: This logic should move to pbi base
+        }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
+    }
 }
 
 /**
