@@ -270,6 +270,13 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
                     identity: n.identity,
                 }));
             }
+
+            // HACK: Temporary fix until we switch to selection manager
+            // Necessary, because in State -> JSON process, it changes objects with undefined properties to null properties
+            // to preserve them in a JSON.stringify call.
+            if (base.selectedItems) {
+                base.selectedItems.forEach(nullToUndefined);
+            }
         }
         return base;
     }
@@ -363,4 +370,27 @@ export function calcStateDifferences(newState: IAttributeSlicerState, oldState: 
         }
     });
     return differences;
+}
+
+/**
+ * Changes all nulls to undefined in an object graph
+ * * Temporary *
+ * @param obj The object to change null to undefined
+ */
+function nullToUndefined(obj: object) {
+    "use strict";
+    if (obj) {
+        Object.keys(obj).forEach(key => {
+            const val = obj[key];
+            // Array
+            if (val && val.forEach) {
+                val.forEach(nullToUndefined);
+            // pojo
+            } else if (val === null) { // tslint:disable-line
+                obj[key] = undefined;
+            } else if (typeof val === "object") {
+                nullToUndefined(val);
+            }
+        });
+    }
 }

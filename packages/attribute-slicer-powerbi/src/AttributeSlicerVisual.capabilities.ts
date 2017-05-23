@@ -73,13 +73,22 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
     sorting: {
         default: {},
     },
-    supportsHighlight: true,
+    // supportsHighlight: true,
     objects: $.extend(true, {}, VisualState.buildCapabilitiesObjects(), {
         general: {
             displayName: "General",
             properties: {
                 selfFilterEnabled: {
                     type: { operations: { searchEnabled: true } },
+                },
+                filter: {
+                    type: { filter: {} },
+                    rule: {
+                        output: {
+                            property: "selected",
+                            selector: ["Values"],
+                        },
+                    },
                 },
             },
         },
