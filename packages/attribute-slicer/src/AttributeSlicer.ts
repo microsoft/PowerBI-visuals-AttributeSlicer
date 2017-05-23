@@ -165,11 +165,17 @@ export class AttributeSlicer {
         }
     }
 
+    /**
+     * Font color used to display item text
+     */
     private _itemTextColor = "#000";
     public get itemTextColor() {
         return this._itemTextColor;
     }
 
+    /**
+     * Sets the font color used to display item text
+     */
     public set itemTextColor(color: string){
         if (color !== this._itemTextColor) {
             this._itemTextColor = color;

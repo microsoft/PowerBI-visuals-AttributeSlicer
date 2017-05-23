@@ -30,7 +30,7 @@ import * as d3 from "d3";
 /**
  * Returns an element for the given item
  */
-export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft: boolean,
+export default function (item: SlicerItem, sizes: { category: number; value: number }, alignTextLeft?: boolean,
         showValueLabels?: boolean, itemTextColor?: string) {
     "use strict";
     const { match, matchPrefix, matchSuffix, valueSegments, renderedValue } = item;

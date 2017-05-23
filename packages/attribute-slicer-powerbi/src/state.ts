@@ -147,6 +147,9 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     })
     public textSize?: number;
 
+   /**
+    * The font color used to display item text
+    */
    @color({
         displayName: "Text Color",
         description: "Item text color.",
