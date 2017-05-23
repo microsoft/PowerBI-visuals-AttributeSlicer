@@ -32,6 +32,7 @@ import {
     coloredObjectsSettings,
     deserializeObjectWithIdentity,
     serializeObjectWithIdentity,
+    colorSetting as color,
 } from "@essex/pbi-base";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
@@ -145,6 +146,16 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         compose: val => PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
     })
     public textSize?: number;
+
+   /**
+    * The font color used to display item text
+    */
+   @color({
+        displayName: "Text Color",
+        description: "Item text color.",
+        defaultValue: DEFAULT_STATE.itemTextColor,
+    })
+    public itemTextColor?: string;
 
     /**
      * If we should left align the text

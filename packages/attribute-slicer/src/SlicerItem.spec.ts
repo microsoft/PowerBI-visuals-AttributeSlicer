@@ -26,7 +26,8 @@ import template from "./SlicerItem.tmpl";
 import { SlicerItem, ISlicerValueSegment } from "./interfaces";
 import { expect } from "chai";
 describe("SlicerItem", () => {
-    const callTemplate = (match: string, matchPrefix?: string, matchSuffix?: string, valueSegments?: any) => {
+    const callTemplate = (match: string, matchPrefix?: string, matchSuffix?: string, valueSegments?: any,
+            alignTextLeft?: boolean, showValueLabels?: boolean, itemTextColor?: string) => {
         return template({
             id: match,
             match: match,
@@ -37,7 +38,9 @@ describe("SlicerItem", () => {
             category: 23,
             value: 77,
         },
-        false);
+        alignTextLeft,
+        showValueLabels,
+        itemTextColor);
     };
     const templateWithMatch = () => {
         return {
@@ -104,6 +107,19 @@ describe("SlicerItem", () => {
             segments,
         };
     };
+    const templateWithMatchAndFormatOptions = (leftAlign: boolean, showValues?: boolean, textColor?: string) => {
+        const segments = [{
+            value: 12,
+            displayValue: 54,
+            width: 30,
+            highlightWidth: 10,
+            color: "red",
+        }] as ISlicerValueSegment[];
+        return {
+            element: callTemplate("HELLO", "", "", segments, leftAlign, showValues, textColor),
+            match: "HELLO",
+        };
+    };
     it("should display the match on an item with a match", () => {
         const { element, match } = templateWithMatch();
         expect(element.find(".match").text().replace(/ /g, "")).to.be.equal(match);
@@ -161,5 +177,29 @@ describe("SlicerItem", () => {
 
         const highlightResult = element.find(".value-display-highlight").map((i, ele) => $(ele).css("backgroundColor")).toArray()[0];
         expect(highlightResult).to.be.deep.equal("red");
+    });
+    it("should not align items left when alignTextLeft is false", () => {
+        const { element } = templateWithMatchAndFormatOptions(false);
+        expect(element.find(".category-container").css("text-align")).to.be.equal("");
+    });
+    it("should align items left when alignTextLeft is true", () => {
+        const { element } = templateWithMatchAndFormatOptions(true);
+        expect(element.find(".category-container").css("text-align")).to.be.equal("left");
+    });
+    it("should not add always-display class to value labels when showValueLabels is false", () => {
+        const { element } = templateWithMatchAndFormatOptions(false, false);
+        expect(element.find(".value").hasClass("always-display")).to.be.equal(false);
+    });
+    it("should add always-display class to value labels when showValueLabels is true", () => {
+        const { element } = templateWithMatchAndFormatOptions(false, true);
+        expect(element.find(".value").hasClass("always-display")).to.be.equal(true);
+    });
+    it("should use the default font color if none is specified", () => {
+        const { element } = templateWithMatchAndFormatOptions(false, false);
+        expect(element.find(".category-container").css("color")).to.be.equal("rgb(0, 0, 0)");
+    });
+    it("should use the font color specified", () => {
+        const { element } = templateWithMatchAndFormatOptions(false, false, "#333");
+        expect(element.find(".category-container").css("color")).to.be.equal("rgb(51, 51, 51)");
     });
 });
