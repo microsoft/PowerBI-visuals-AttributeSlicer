@@ -316,12 +316,16 @@ export default class AttributeSlicer extends VisualBase {
                 // We've already loaded a dataset, and the user has changed the dataset to something else
                 if (this.currentCategory && !_.isEqual(this.currentCategory, columnNames))  {
                     // This will really be undefined behaviour for pbi-stateful because this indicates the user changed datasets
-                    log("Clearing Selection, Categories Changed");
                     if (!_.isEqual(pbiState.selectedItems, [])) {
+                        log("Clearing Selection, Categories Changed");
                         pbiState.selectedItems = [];
                         this._onSelectionChangedDebounced([]);
                     }
-                    pbiState.searchText = "";
+                    if (pbiState.searchText !== "") {
+                        log("Clearing Search, Categories Changed");
+                        pbiState.searchText = "";
+                        this.onSearchPerformed("");
+                    }
                 }
 
                 this.currentCategory = columnNames;
