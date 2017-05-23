@@ -153,6 +153,7 @@ describe("AttributeSlicerVisual", function () {
     it("should init", function () {
         createInstance();
     });
+
     it("should load only categories if that is all that is passed in via PBI", function () {
         const { instance, attributeSlicer } = createInstance();
         let fakeCats = ["CAT_1", "CAT_2"];
@@ -161,6 +162,7 @@ describe("AttributeSlicerVisual", function () {
         // Make sure the data was passed correctly to attribute slicer
         expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
     });
+
     it("should clear the selection when the categories are changed", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
@@ -423,4 +425,15 @@ describe("AttributeSlicerVisual", function () {
     // (which itself tells PBI that data has changed), which then triggered an update on the other slicer, which would then clear
     // the selection manager which would force the update of the other slicer...so on.
     // it("should not clear the selection manager, when loading selection from the dataView");
+    describe("API Quirks", () => {
+        it("should not crash if the dataView does not contain a categorical instance", function () {
+            const { instance } = createInstance();
+            let update = createOptionsWithCategories(["CAT_1", "CAT_2"], "SOME_CATEGORY_NAME");
+
+            // Remove the categorical object
+            delete update.dataViews[0].categorical;
+
+            instance.updateWithType(update, UpdateType.Data);
+        });
+    });
 });

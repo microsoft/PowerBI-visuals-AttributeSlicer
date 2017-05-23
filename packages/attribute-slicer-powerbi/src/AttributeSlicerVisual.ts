@@ -200,7 +200,9 @@ export default class AttributeSlicer extends VisualBase {
 
             // We should ALWAYS have a dataView, if we do not, PBI has not loaded yet
             const dv = this.dataView = options.dataViews && options.dataViews[0];
-            if (dv) {
+
+            // For some reason, there are situations in where you have a dataView, but it is missing data!
+            if (dv && dv.categorical) {
                 const newState = <VisualState>VisualState.createFromPBI(dv);
                 this.loadDataFromVisualUpdate(updateType, options.type, dv, newState);
 
