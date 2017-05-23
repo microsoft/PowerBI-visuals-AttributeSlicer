@@ -322,7 +322,7 @@ export default class AttributeSlicer extends VisualBase {
                         this._onSelectionChangedDebounced([]);
                     }
                     if (pbiState.searchText !== "") {
-                        log("Clearing Serach, Categories Changed");
+                        log("Clearing Search, Categories Changed");
                         pbiState.searchText = "";
                         this.onSearchPerformed("");
                     }
