@@ -125,6 +125,11 @@ export class AttributeSlicer {
     private searchDebounce = SEARCH_DEBOUNCE;
 
     /**
+     * Whether this component has been destroyed
+     */
+    private destroyed = false;
+
+    /**
      * Whether or not to left align item text
      */
     private _leftAlignText = false;
@@ -191,7 +196,7 @@ export class AttributeSlicer {
      * Updates the list height
      */
     private updateListHeight = _.debounce(() => {
-        if (this.dimensions) {
+        if (!this.destroyed && this.dimensions) {
             let height = (this.dimensions.height - (this.listEle.offset().top - this.element.offset().top)) - 2;
             let width: number|string = "100%";
             this.listEle.css({ width: width, height: height });
@@ -714,6 +719,7 @@ export class AttributeSlicer {
      * Destroys this attribute slicer
      */
     public destroy() {
+        this.destroyed = true;
         if (this.selectionManager) {
             this.selectionManager.destroy();
         }
