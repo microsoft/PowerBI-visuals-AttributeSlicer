@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
+import { ListItem, IAttributeSlicerVisualData } from "./interfaces";
 import { ISerializedItem } from "@essex/attribute-slicer";
 import "powerbi-visuals/lib/powerbi-visuals";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
@@ -52,10 +52,6 @@ export default function converter(
 
         return convertItemsWithSegments(
             dataView,
-            (segment: ISlicerValueSegment) => {
-                segment.displayValue = valueFormatter.format(segment.value);
-                return segment;
-            },
             (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId) => {
                 const item =
                     createItem(

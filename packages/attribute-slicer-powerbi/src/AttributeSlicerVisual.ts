@@ -294,6 +294,11 @@ export default class AttributeSlicer extends VisualBase {
                     // we only need to give it the new items
                     this.loadDeferred.resolve(filteredData.slice(this.mySlicer.data.length));
                     delete this.loadDeferred;
+
+                    // Recompute the rendered values, cause otherwise only half will have the updated values
+                    // because the min/max of all the columns change when new data is added.
+                    computeRenderedValues(this.mySlicer.data as ListItem[]);
+
                     this.mySlicer.refresh();
                 } else {
                     this.mySlicer.data = filteredData;
