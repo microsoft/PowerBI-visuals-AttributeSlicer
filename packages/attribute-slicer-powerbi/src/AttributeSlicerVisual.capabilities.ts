@@ -48,11 +48,11 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
     ],
     dataViewMappings: [{
         conditions: [
-            { "Category": { }, "Series": { max: 0 }},
-            { "Category": { }, "Series": { max: 0 }, "Values": { max: 1, min: 0 }},
-            { "Category": { }, "Series": { min: 1, max: 1 }, "Values": { max: 1, min: 1 }},
-            { "Category": { }, "Series": { max: 0 }, "Values": { min: 0 }},
-            { "Category": { }, "Series": { max: 1 }, "Values": { min: 0, max: 0 }},
+            { "Category": { max: 1 }, "Series": { max: 0 }},
+            { "Category": { max: 1 }, "Series": { max: 0 }, "Values": { max: 1, min: 0 }},
+            { "Category": { max: 1 }, "Series": { min: 1, max: 1 }, "Values": { max: 1, min: 1 }},
+            { "Category": { max: 1 }, "Series": { max: 0 }, "Values": { min: 0 }},
+            { "Category": { max: 1 }, "Series": { max: 1 }, "Values": { min: 0, max: 0 }},
         ],
         categorical: {
             categories: {
