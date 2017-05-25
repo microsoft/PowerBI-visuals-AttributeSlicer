@@ -578,113 +578,143 @@ export default function dataWithCategoriesAndValues() {
         values: [{
             raw: [0.33999999999999997, 2],
             total: 2.34,
-            renderedValue: 11.81773772013385,
-            segments: [{
-                width: 14.529914529914528,
-                color: "#01B8AA",
-            }, {
-                width: 85.47008547008548,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 24.328593996840436
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 0.8333333333333334
+                }
+            ]
         }, {
             raw: [0.47357142857142864, 14],
             total: 14.473571428571429,
-            renderedValue: 29.896139741160624,
-            segments: [{
-                width: 3.271973547845828,
-                color: "#01B8AA",
-            }, {
-                width: 96.72802645215417,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 39.09952606635071
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 10.833333333333334
+                }
+            ],
         }, {
             raw: [0.5294117647058824, 17],
             total: 17.529411764705884,
-            renderedValue: 34.44918584419186,
-            segments: [{
-                width: 3.0201342281879193,
-                color: "#01B8AA",
-            }, {
-                width: 96.97986577181207,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 45.27460273208809
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 13.333333333333334
+                }
+            ],
         }, {
             raw: [0.4709523809523809, 21],
             total: 21.47095238095238,
-            renderedValue: 40.32188015041389,
-            segments: [{
-                width: 2.193439641597729,
-                color: "#01B8AA",
-            }, {
-                width: 97.80656035840227,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 38.809899947340696
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 16.666666666666664
+                }
+            ],
         }, {
             raw: [0.41500000000000004, 4],
             total: 4.415,
-            renderedValue: 14.909381793312328,
-            segments: [{
-                width: 9.39977349943375,
-                color: "#01B8AA",
-            }, {
-                width: 90.60022650056625,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 32.62243285939969
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 2.5
+                }
+            ],
         }, {
             raw: [0.5247540983606557, 61],
             total: 61.52475409836065,
             renderedValue: 100,
-            segments: [{
-                width: 0.8529153932443557,
-                color: "#01B8AA",
-            }, {
-                width: 99.14708460675566,
-                color: "#FD625E",
-            }],
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 44.75953694351642
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 50
+                }
+            ],
         }, {
             raw: [0.2866666666666667, 6],
             total: 6.286666666666667,
-            renderedValue: 17.698069579801828,
-            segments: [{
-                width: 4.559915164369035,
-                color: "#01B8AA",
-            }, {
-                width: 95.44008483563096,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 18.43075302790943
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 4.166666666666666
+                }
+            ],
         }, {
             raw: [0.12, 1],
             total: 1.12,
-            renderedValue: 10,
-            segments: [{
-                width: 10.714285714285712,
-                color: "#01B8AA",
-            }, {
-                width: 89.28571428571428,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 0
+                }
+            ],
         }, {
             raw: [0.5721428571428572, 14],
             total: 14.572142857142858,
-            renderedValue: 30.043006137752236,
-            segments: [{
-                width: 3.9262781236213913,
-                color: "#01B8AA",
-            }, {
-                width: 96.0737218763786,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 50
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 10.833333333333334
+                }
+            ],
         }, {
             raw: [0.4315384615384615, 13],
             total: 13.431538461538462,
-            renderedValue: 28.343563815096022,
-            segments: [{
-                width: 3.212874405818681,
-                color: "#01B8AA",
-            }, {
-                width: 96.7871255941813,
-                color: "#FD625E",
-            }],
+            renderedValue: 100,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 34.451330659861455
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 10
+                }
+            ],
         }],
     };
 };

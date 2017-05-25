@@ -77,704 +77,794 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         expected: {
             "items": [
                 {
-                "id": 1,
-                "match": "CNY",
-                "color": "#ccc",
-                "value": 779,
-                "renderedValue": 100,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 68,
-                    "width": 8.729139922978177
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
+                    "id": 1,
+                    "match": "CNY",
+                    "color": "#ccc",
+                    "value": 779,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 68,
+                            "displayValue": 68,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 79,
+                            "displayValue": 79,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 66,
+                            "displayValue": 66,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 79,
+                            "displayValue": 79,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 79,
+                            "displayValue": 79,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 75,
+                            "displayValue": 75,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 77,
+                            "displayValue": 77,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 79,
+                            "displayValue": 79,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 92,
+                            "displayValue": 92,
+                            "width": 10
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 85,
+                            "displayValue": 85,
+                            "width": 10
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "EUR",
+                    "color": "#ccc",
+                    "value": 445,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 48,
+                            "displayValue": 48,
+                            "width": 6.825396825396826
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 46,
+                            "displayValue": 46,
+                            "width": 5.714285714285714
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 35,
+                            "displayValue": 35,
+                            "width": 4.918032786885246
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 43,
+                            "displayValue": 43,
+                            "width": 5.135135135135135
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 48,
+                            "displayValue": 48,
+                            "width": 5.694444444444445
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 35,
+                            "displayValue": 35,
+                            "width": 4.202898550724638
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 52,
+                            "displayValue": 52,
+                            "width": 6.3768115942028984
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 48,
+                            "displayValue": 48,
+                            "width": 5.633802816901409
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 40,
+                            "displayValue": 40,
+                            "width": 3.953488372093023
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 50,
+                            "displayValue": 50,
+                            "width": 5.625
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "IDR",
+                    "color": "#ccc",
+                    "value": 423,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 42,
+                            "displayValue": 42,
+                            "width": 5.873015873015873
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 38,
+                            "displayValue": 38,
+                            "width": 4.675324675324675
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 46,
+                            "displayValue": 46,
+                            "width": 6.721311475409836
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 57,
+                            "displayValue": 57,
+                            "width": 7.027027027027027
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 43,
+                            "displayValue": 43,
+                            "width": 5
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 44,
+                            "displayValue": 44,
+                            "width": 5.507246376811594
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 31,
+                            "displayValue": 31,
+                            "width": 3.3333333333333335
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 37,
+                            "displayValue": 37,
+                            "width": 4.084507042253521
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 41,
+                            "displayValue": 41,
+                            "width": 4.069767441860465
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 44,
+                            "displayValue": 44,
+                            "width": 4.875
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "RUB",
+                    "color": "#ccc",
+                    "value": 229,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 25,
+                            "displayValue": 25,
+                            "width": 3.1746031746031744
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 25,
+                            "displayValue": 25,
+                            "width": 2.987012987012987
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 26,
+                            "displayValue": 26,
+                            "width": 3.4426229508196724
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 25,
+                            "displayValue": 25,
+                            "width": 2.7027027027027026
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 20,
+                            "displayValue": 20,
+                            "width": 1.8055555555555554
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 24,
+                            "displayValue": 24,
+                            "width": 2.608695652173913
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 16,
+                            "displayValue": 16,
+                            "width": 1.1594202898550725
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 30,
+                            "displayValue": 30,
+                            "width": 3.0985915492957745
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 20,
+                            "displayValue": 20,
+                            "width": 1.627906976744186
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 18,
+                            "displayValue": 18,
+                            "width": 1.625
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "PHP",
+                    "color": "#ccc",
+                    "value": 221,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 14,
+                            "displayValue": 14,
+                            "width": 1.4285714285714286
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 24,
+                            "displayValue": 24,
+                            "width": 2.857142857142857
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 20,
+                            "displayValue": 20,
+                            "width": 2.459016393442623
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 26,
+                            "displayValue": 26,
+                            "width": 2.8378378378378377
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 25,
+                            "displayValue": 25,
+                            "width": 2.5
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 26,
+                            "displayValue": 26,
+                            "width": 2.898550724637681
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 21,
+                            "displayValue": 21,
+                            "width": 1.884057971014493
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 25,
+                            "displayValue": 25,
+                            "width": 2.3943661971830985
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 18,
+                            "displayValue": 18,
+                            "width": 1.3953488372093024
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 22,
+                            "displayValue": 22,
+                            "width": 2.125
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "BRL",
+                    "color": "#ccc",
+                    "value": 138,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 1.2698412698412698
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 21,
+                            "displayValue": 21,
+                            "width": 2.4675324675324677
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 12,
+                            "displayValue": 12,
+                            "width": 1.1475409836065573
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 1.0810810810810811
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 0.8333333333333334
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 12,
+                            "displayValue": 12,
+                            "width": 0.8695652173913043
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 8,
+                            "displayValue": 8,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 20,
+                            "displayValue": 20,
+                            "width": 1.6901408450704223
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 15,
+                            "displayValue": 15,
+                            "width": 1.0465116279069768
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.75
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "PLN",
+                    "color": "#ccc",
+                    "value": 131,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 1.2698412698412698
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 14,
+                            "displayValue": 14,
+                            "width": 1.5584415584415585
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 8,
+                            "displayValue": 8,
+                            "width": 0.4918032786885245
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 17,
+                            "displayValue": 17,
+                            "width": 1.6216216216216217
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 10,
+                            "displayValue": 10,
+                            "width": 0.4166666666666667
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 20,
+                            "displayValue": 20,
+                            "width": 2.028985507246377
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 10,
+                            "displayValue": 10,
+                            "width": 0.2898550724637681
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 0.7042253521126761
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 14,
+                            "displayValue": 14,
+                            "width": 0.9302325581395349
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 12,
+                            "displayValue": 12,
+                            "width": 0.8749999999999999
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "USD",
+                    "color": "#ccc",
+                    "value": 101,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 1.2698412698412698
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 9,
+                            "displayValue": 9,
+                            "width": 0.9090909090909091
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 5,
+                            "displayValue": 5,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.8108108108108109
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 10,
+                            "displayValue": 10,
+                            "width": 0.4166666666666667
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 9,
+                            "displayValue": 9,
+                            "width": 0.43478260869565216
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 9,
+                            "displayValue": 9,
+                            "width": 0.14492753623188406
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.42253521126760557
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 0.813953488372093
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.75
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "SEK",
+                    "color": "#ccc",
+                    "value": 86,
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 9,
+                            "displayValue": 9,
+                            "width": 0.6349206349206349
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 2,
+                            "displayValue": 2,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 1.3114754098360655
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 8,
+                            "displayValue": 8,
+                            "width": 0.40540540540540543
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 13,
+                            "displayValue": 13,
+                            "width": 0.8333333333333334
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 7,
+                            "displayValue": 7,
+                            "width": 0.14492753623188406
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 9,
+                            "displayValue": 9,
+                            "width": 0.14492753623188406
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 8,
+                            "displayValue": 8,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 6,
+                            "displayValue": 6,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.75
+                        }
+                    ]
+                },
+                {
+                    "id": 1,
+                    "match": "JPY",
+                    "color": "#ccc",
                     "value": 79,
-                    "width": 10.141206675224646
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 66,
-                    "width": 8.472400513478819
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 79,
-                    "width": 10.141206675224646
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 79,
-                    "width": 10.141206675224646
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 75,
-                    "width": 9.62772785622593
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 77,
-                    "width": 9.884467265725288
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 79,
-                    "width": 10.141206675224646
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 92,
-                    "width": 11.810012836970476
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 85,
-                    "width": 10.911424903722722
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "EUR",
-                "color": "#ccc",
-                "value": 445,
-                "renderedValue": 57.057142857142864,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 48,
-                    "width": 10.786516853932584
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 46,
-                    "width": 10.337078651685392
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 35,
-                    "width": 7.865168539325842
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 43,
-                    "width": 9.662921348314606
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 48,
-                    "width": 10.786516853932584
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 35,
-                    "width": 7.865168539325842
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 52,
-                    "width": 11.685393258426966
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 48,
-                    "width": 10.786516853932584
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 40,
-                    "width": 8.98876404494382
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 50,
-                    "width": 11.235955056179774
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "IDR",
-                "color": "#ccc",
-                "value": 423,
-                "renderedValue": 54.22857142857143,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 42,
-                    "width": 9.929078014184398
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 38,
-                    "width": 8.983451536643026
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 46,
-                    "width": 10.874704491725769
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 57,
-                    "width": 13.47517730496454
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 43,
-                    "width": 10.16548463356974
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 44,
-                    "width": 10.401891252955082
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 31,
-                    "width": 7.328605200945626
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 37,
-                    "width": 8.747044917257684
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 41,
-                    "width": 9.692671394799055
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 44,
-                    "width": 10.401891252955082
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "RUB",
-                "color": "#ccc",
-                "value": 229,
-                "renderedValue": 29.285714285714285,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 25,
-                    "width": 10.91703056768559
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 25,
-                    "width": 10.91703056768559
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 26,
-                    "width": 11.353711790393014
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 25,
-                    "width": 10.91703056768559
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 20,
-                    "width": 8.73362445414847
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 24,
-                    "width": 10.480349344978166
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 16,
-                    "width": 6.986899563318777
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 30,
-                    "width": 13.100436681222707
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 20,
-                    "width": 8.73362445414847
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 18,
-                    "width": 7.860262008733625
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "PHP",
-                "color": "#ccc",
-                "value": 221,
-                "renderedValue": 28.257142857142856,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 14,
-                    "width": 6.334841628959276
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 24,
-                    "width": 10.85972850678733
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 20,
-                    "width": 9.049773755656108
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 26,
-                    "width": 11.76470588235294
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 25,
-                    "width": 11.312217194570136
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 26,
-                    "width": 11.76470588235294
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 21,
-                    "width": 9.502262443438914
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 25,
-                    "width": 11.312217194570136
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 18,
-                    "width": 8.144796380090497
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 22,
-                    "width": 9.95475113122172
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "BRL",
-                "color": "#ccc",
-                "value": 138,
-                "renderedValue": 17.585714285714285,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 13,
-                    "width": 9.420289855072465
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 21,
-                    "width": 15.217391304347828
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 12,
-                    "width": 8.695652173913043
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 13,
-                    "width": 9.420289855072465
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 13,
-                    "width": 9.420289855072465
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 12,
-                    "width": 8.695652173913043
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 8,
-                    "width": 5.797101449275362
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 20,
-                    "width": 14.492753623188406
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 15,
-                    "width": 10.869565217391305
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 11,
-                    "width": 7.971014492753622
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "PLN",
-                "color": "#ccc",
-                "value": 131,
-                "renderedValue": 16.685714285714287,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 13,
-                    "width": 9.923664122137405
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 14,
-                    "width": 10.687022900763358
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 8,
-                    "width": 6.106870229007633
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 17,
-                    "width": 12.977099236641221
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 10,
-                    "width": 7.633587786259542
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 20,
-                    "width": 15.267175572519085
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 10,
-                    "width": 7.633587786259542
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 13,
-                    "width": 9.923664122137405
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 14,
-                    "width": 10.687022900763358
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 12,
-                    "width": 9.16030534351145
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "USD",
-                "color": "#ccc",
-                "value": 101,
-                "renderedValue": 12.82857142857143,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 13,
-                    "width": 12.871287128712872
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 9,
-                    "width": 8.91089108910891
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 5,
-                    "width": 4.9504950495049505
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 11,
-                    "width": 10.891089108910892
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 10,
-                    "width": 9.900990099009901
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 9,
-                    "width": 8.91089108910891
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 9,
-                    "width": 8.91089108910891
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 11,
-                    "width": 10.891089108910892
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 13,
-                    "width": 12.871287128712872
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 11,
-                    "width": 10.891089108910892
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "SEK",
-                "color": "#ccc",
-                "value": 86,
-                "renderedValue": 10.9,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 9,
-                    "width": 10.465116279069768
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 2,
-                    "width": 2.3255813953488373
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 13,
-                    "width": 15.11627906976744
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 8,
-                    "width": 9.30232558139535
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 13,
-                    "width": 15.11627906976744
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 7,
-                    "width": 8.13953488372093
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 9,
-                    "width": 10.465116279069768
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 8,
-                    "width": 9.30232558139535
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 6,
-                    "width": 6.976744186046512
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 11,
-                    "width": 12.790697674418606
-                    }
-                ]
-                },
-                {
-                "id": 1,
-                "match": "JPY",
-                "color": "#ccc",
-                "value": 79,
-                "renderedValue": 10,
-                "selector": 1,
-                "valueSegments": [
-                    {
-                    "name": "GROUPED_0",
-                    "color": "#5F6B6D",
-                    "value": 5,
-                    "width": 6.329113924050633
-                    },
-                    {
-                    "name": "GROUPED_1",
-                    "color": "#b9e5f3",
-                    "value": 11,
-                    "width": 13.924050632911392
-                    },
-                    {
-                    "name": "GROUPED_2",
-                    "color": "#A66999",
-                    "value": 5,
-                    "width": 6.329113924050633
-                    },
-                    {
-                    "name": "GROUPED_3",
-                    "color": "#33c6bb",
-                    "value": 5,
-                    "width": 6.329113924050633
-                    },
-                    {
-                    "name": "GROUPED_4",
-                    "color": "#b6960d",
-                    "value": 7,
-                    "width": 8.860759493670885
-                    },
-                    {
-                    "name": "GROUPED_5",
-                    "color": "#f7de70",
-                    "value": 6,
-                    "width": 7.59493670886076
-                    },
-                    {
-                    "name": "GROUPED_6",
-                    "color": "#8AD4EB",
-                    "value": 10,
-                    "width": 12.658227848101266
-                    },
-                    {
-                    "name": "GROUPED_7",
-                    "color": "#DFBFBF",
-                    "value": 11,
-                    "width": 13.924050632911392
-                    },
-                    {
-                    "name": "GROUPED_8",
-                    "color": "#4AC5BB",
-                    "value": 14,
-                    "width": 17.72151898734177
-                    },
-                    {
-                    "name": "GROUPED_9",
-                    "color": "#5F6B6D",
-                    "value": 5,
-                    "width": 6.329113924050633
-                    }
-                ]
+                    "renderedValue": 100,
+                    "valueSegments": [
+                        {
+                            "name": "GROUPED_0",
+                            "color": "#5F6B6D",
+                            "value": 5,
+                            "displayValue": 5,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_1",
+                            "color": "#b9e5f3",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 1.1688311688311688
+                        },
+                        {
+                            "name": "GROUPED_2",
+                            "color": "#A66999",
+                            "value": 5,
+                            "displayValue": 5,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_3",
+                            "color": "#33c6bb",
+                            "value": 5,
+                            "displayValue": 5,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_4",
+                            "color": "#b6960d",
+                            "value": 7,
+                            "displayValue": 7,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_5",
+                            "color": "#f7de70",
+                            "value": 6,
+                            "displayValue": 6,
+                            "width": 0
+                        },
+                        {
+                            "name": "GROUPED_6",
+                            "color": "#8AD4EB",
+                            "value": 10,
+                            "displayValue": 10,
+                            "width": 0.2898550724637681
+                        },
+                        {
+                            "name": "GROUPED_7",
+                            "color": "#DFBFBF",
+                            "value": 11,
+                            "displayValue": 11,
+                            "width": 0.42253521126760557
+                        },
+                        {
+                            "name": "GROUPED_8",
+                            "color": "#4AC5BB",
+                            "value": 14,
+                            "displayValue": 14,
+                            "width": 0.9302325581395349
+                        },
+                        {
+                            "name": "GROUPED_9",
+                            "color": "#5F6B6D",
+                            "value": 5,
+                            "displayValue": 5,
+                            "width": 0
+                        }
+                    ]
                 }
             ],
             "segmentInfo": [
