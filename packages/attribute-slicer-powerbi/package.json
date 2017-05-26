@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@essex/attribute-slicer": "file:../attribute-slicer",
-    "@essex/pbi-base": "^0.8.24",
+    "@essex/pbi-base": "^0.9.0",
     "@essex/pbi-stateful": "^0.12.0",
     "d3": "3.5.12",
     "dompurify": "^0.7.4",
