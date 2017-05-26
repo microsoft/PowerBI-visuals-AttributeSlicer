@@ -384,6 +384,10 @@ describe("AttributeSlicerVisual", function () {
 
     it("should not clear selection if search is changed");
 
+    // Problem is, if the user changes the precision via the formatting pane, it updates the display values.
+    // However, if the user then sorts the slicer, then the formatting is lost.
+    it("should format display values correctly using the correct precision & type after it has been sorted via powerbi.");
+
     it("should restore selection after a refresh");
     it("should restore selection after a page change");
     it("should clear selection when the category field is changed in PBI");

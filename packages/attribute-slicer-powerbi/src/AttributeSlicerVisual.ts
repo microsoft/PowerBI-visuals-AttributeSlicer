@@ -282,7 +282,12 @@ export default class AttributeSlicer extends VisualBase {
         // ie search for Microsof then Microsoft
         if (dv) {
             if (this.shouldLoadDataIntoSlicer(updateType, pbiState, pbiUpdateType)) {
-                const data = converter(dv, undefined, undefined, pbiState.colors);
+                const { labelDisplayUnits, labelPrecision } = pbiState;
+                let formatter: powerbi.visuals.IValueFormatter;
+                if (labelDisplayUnits || labelPrecision) {
+                    formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
+                }
+                const data = converter(dv, formatter, undefined, pbiState.colors);
 
                 log("Loading data from PBI");
 
