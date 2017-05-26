@@ -87,6 +87,7 @@ describe("dataConversion", () => {
             it("should convert the items values correctly", () => {
                 const { options, values } = dataWithCategoriesAndValues();
                 const converted = convert(options.dataViews[0]);
+
                 converted.items.forEach((n, i) => {
                     // The "value" property is the total of its child values
                     expect(n.value).to.be.closeTo(values[i].total, .2); // Something that is pretty darn close to the number

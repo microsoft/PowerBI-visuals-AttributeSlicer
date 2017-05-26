@@ -234,9 +234,12 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     })
     public showSelections?: boolean;
 
-   @setting({
-        category: "Values",
-        displayName: "Display Values",
+    /**
+     * If the value displays should be always shown
+     */
+    @setting({
+        category: "Display",
+        displayName: "Always On Values",
         description: "Display value labels.",
         defaultValue: DEFAULT_STATE.displayValueLabels,
     })

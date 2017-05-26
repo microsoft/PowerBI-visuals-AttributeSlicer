@@ -578,113 +578,447 @@ export default function dataWithCategoriesAndValues() {
         values: [{
             raw: [0.33999999999999997, 2],
             total: 2.34,
-            renderedValue: 11.81773772013385,
-            segments: [{
-                width: 14.529914529914528,
-                color: "#01B8AA",
-            }, {
-                width: 85.47008547008548,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.2786885245901639
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 1.639344262295082
+                }
+            ]
         }, {
             raw: [0.47357142857142864, 14],
             total: 14.473571428571429,
-            renderedValue: 29.896139741160624,
-            segments: [{
-                width: 3.271973547845828,
-                color: "#01B8AA",
-            }, {
-                width: 96.72802645215417,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.3881733021077284
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 11.475409836065573
+                }
+            ],
         }, {
             raw: [0.5294117647058824, 17],
             total: 17.529411764705884,
-            renderedValue: 34.44918584419186,
-            segments: [{
-                width: 3.0201342281879193,
-                color: "#01B8AA",
-            }, {
-                width: 96.97986577181207,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.43394406943105107
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 13.934426229508196
+                }
+            ],
         }, {
             raw: [0.4709523809523809, 21],
             total: 21.47095238095238,
-            renderedValue: 40.32188015041389,
-            segments: [{
-                width: 2.193439641597729,
-                color: "#01B8AA",
-            }, {
-                width: 97.80656035840227,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.38602654176424667
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 17.21311475409836
+                }
+            ],
         }, {
             raw: [0.41500000000000004, 4],
             total: 4.415,
-            renderedValue: 14.909381793312328,
-            segments: [{
-                width: 9.39977349943375,
-                color: "#01B8AA",
-            }, {
-                width: 90.60022650056625,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.34016393442622955
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 3.278688524590164
+                }
+            ],
         }, {
             raw: [0.5247540983606557, 61],
             total: 61.52475409836065,
-            renderedValue: 100,
-            segments: [{
-                width: 0.8529153932443557,
-                color: "#01B8AA",
-            }, {
-                width: 99.14708460675566,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.43012631013168495
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 50
+                }
+            ],
         }, {
             raw: [0.2866666666666667, 6],
             total: 6.286666666666667,
-            renderedValue: 17.698069579801828,
-            segments: [{
-                width: 4.559915164369035,
-                color: "#01B8AA",
-            }, {
-                width: 95.44008483563096,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.23497267759562843
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 4.918032786885246
+                }
+            ],
         }, {
             raw: [0.12, 1],
             total: 1.12,
-            renderedValue: 10,
-            segments: [{
-                width: 10.714285714285712,
-                color: "#01B8AA",
-            }, {
-                width: 89.28571428571428,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.09836065573770492
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 0.819672131147541
+                }
+            ],
         }, {
             raw: [0.5721428571428572, 14],
             total: 14.572142857142858,
-            renderedValue: 30.043006137752236,
-            segments: [{
-                width: 3.9262781236213913,
-                color: "#01B8AA",
-            }, {
-                width: 96.0737218763786,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.4689695550351289
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 11.475409836065573
+                }
+            ],
         }, {
             raw: [0.4315384615384615, 13],
             total: 13.431538461538462,
-            renderedValue: 28.343563815096022,
-            segments: [{
-                width: 3.212874405818681,
-                color: "#01B8AA",
-            }, {
-                width: 96.7871255941813,
-                color: "#FD625E",
-            }],
+            renderedValue: 198.29416921351128,
+            segments: [
+                {
+                    "color": "#01B8AA",
+                    "width": 0.3537200504413619
+                },
+                {
+                    "color": "#FD625E",
+                    "width": 10.655737704918032
+                }
+            ],
         }],
     };
 };
+
+
+// [
+//   {
+//     "id": 1,
+//     "match": "AED",
+//     "color": "#ccc",
+//     "value": 2.34,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.33999999999999997,
+//         "displayValue": 0.33999999999999997,
+//         "width": 0.2786885245901639
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 2,
+//         "displayValue": 2,
+//         "width": 1.639344262295082
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AFN",
+//     "color": "#ccc",
+//     "value": 14.473571428571429,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.47357142857142864,
+//         "displayValue": 0.47357142857142864,
+//         "width": 0.3881733021077284
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 14,
+//         "displayValue": 14,
+//         "width": 11.475409836065573
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "ALL",
+//     "color": "#ccc",
+//     "value": 17.529411764705884,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.5294117647058824,
+//         "displayValue": 0.5294117647058824,
+//         "width": 0.43394406943105107
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 17,
+//         "displayValue": 17,
+//         "width": 13.934426229508196
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AMD",
+//     "color": "#ccc",
+//     "value": 21.47095238095238,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.4709523809523809,
+//         "displayValue": 0.4709523809523809,
+//         "width": 0.38602654176424667
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 21,
+//         "displayValue": 21,
+//         "width": 17.21311475409836
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AOA",
+//     "color": "#ccc",
+//     "value": 4.415,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.41500000000000004,
+//         "displayValue": 0.41500000000000004,
+//         "width": 0.34016393442622955
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 4,
+//         "displayValue": 4,
+//         "width": 3.278688524590164
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "ARS",
+//     "color": "#ccc",
+//     "value": 61.52475409836065,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.5247540983606557,
+//         "displayValue": 0.5247540983606557,
+//         "width": 0.43012631013168495
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 61,
+//         "displayValue": 61,
+//         "width": 50
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AUD",
+//     "color": "#ccc",
+//     "value": 6.286666666666667,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.2866666666666667,
+//         "displayValue": 0.2866666666666667,
+//         "width": 0.23497267759562843
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 6,
+//         "displayValue": 6,
+//         "width": 4.918032786885246
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AWG",
+//     "color": "#ccc",
+//     "value": 1.12,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.12,
+//         "displayValue": 0.12,
+//         "width": 0.09836065573770492
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 1,
+//         "displayValue": 1,
+//         "width": 0.819672131147541
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "AZN",
+//     "color": "#ccc",
+//     "value": 14.572142857142858,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.5721428571428572,
+//         "displayValue": 0.5721428571428572,
+//         "width": 0.4689695550351289
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 14,
+//         "displayValue": 14,
+//         "width": 11.475409836065573
+//       }
+//     ]
+//   },
+//   {
+//     "id": 1,
+//     "match": "BAM",
+//     "color": "#ccc",
+//     "value": 13.431538461538462,
+//     "renderedValue": 198.29416921351128,
+//     "selector": {
+//       "data": [
+//         {
+//           "serializedExpr": "{}"
+//         }
+//       ]
+//     },
+//     "valueSegments": [
+//       {
+//         "name": "1",
+//         "color": "#01B8AA",
+//         "value": 0.4315384615384615,
+//         "displayValue": 0.4315384615384615,
+//         "width": 0.3537200504413619
+//       },
+//       {
+//         "name": "2",
+//         "color": "#FD625E",
+//         "value": 13,
+//         "displayValue": 13,
+//         "width": 10.655737704918032
+//       }
+//     ]
+//   }
+// ]

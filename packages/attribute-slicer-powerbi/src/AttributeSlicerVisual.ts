@@ -232,7 +232,7 @@ export default class AttributeSlicer extends VisualBase {
 
                     // The colors have changed, so we need to reload data
                     if (!oldState.colors.equals(newState.colors)) {
-                        this.data = converter(this.dataView, undefined, undefined, this.state.colors);
+                        this.data = this.convertData(dv, this.state);
                         this.mySlicer.data = this.data.items;
                         this.mySlicer.selectedItems = this.state.selectedItems.map(createItemFromSerializedItem);
                     }
@@ -282,8 +282,7 @@ export default class AttributeSlicer extends VisualBase {
         // ie search for Microsof then Microsoft
         if (dv) {
             if (this.shouldLoadDataIntoSlicer(updateType, pbiState, pbiUpdateType)) {
-                const data = converter(dv, undefined, undefined, pbiState.colors);
-
+                const data = this.convertData(dv, pbiState);
                 log("Loading data from PBI");
 
                 this.data = data || { items: [], segmentInfo: [] };
@@ -296,7 +295,9 @@ export default class AttributeSlicer extends VisualBase {
                     delete this.loadDeferred;
 
                     // Recompute the rendered values, cause otherwise only half will have the updated values
+                    // because the min/max of all the columns change when new data is added.
                     computeRenderedValues(this.mySlicer.data as ListItem[]);
+
                     this.mySlicer.refresh();
                 } else {
                     this.mySlicer.data = filteredData;
@@ -334,6 +335,20 @@ export default class AttributeSlicer extends VisualBase {
             this.mySlicer.data = [];
             pbiState.selectedItems = [];
         }
+    }
+
+    /**
+     * Converts the data from the dataview into a format that the slicer can consume
+     * @param dv The dataview to load the data from
+     * @param state The current state
+     */
+    private convertData(dv: powerbi.DataView, state: VisualState) {
+        const { labelDisplayUnits, labelPrecision } = state;
+        let formatter: powerbi.visuals.IValueFormatter;
+        if (labelDisplayUnits || labelPrecision) {
+            formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
+        }
+        return converter(dv, formatter, undefined, state.colors);
     }
 
     /* tslint:disable */

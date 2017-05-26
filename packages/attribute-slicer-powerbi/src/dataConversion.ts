@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-import { ListItem, IAttributeSlicerVisualData, ISlicerValueSegment } from "./interfaces";
+import { ListItem, IAttributeSlicerVisualData } from "./interfaces";
 import { ISerializedItem } from "@essex/attribute-slicer";
 import "powerbi-visuals/lib/powerbi-visuals";
 import IValueFormatter = powerbi.visuals.IValueFormatter;
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
-import { serializeSelectors, IColorSettings, convertItemsWithSegments } from "@essex/pbi-base";
+import { serializeSelectors, IColorSettings, convertItemsWithSegments, IValueSegment } from "@essex/pbi-base";
 const ldget = require("lodash/get"); //tslint:disable-line
 
 /**
@@ -50,13 +50,9 @@ export default function converter(
             categoryFormatter = createCategoryFormatter(dataView);
         }
 
-        return convertItemsWithSegments(
+        const converted = convertItemsWithSegments(
             dataView,
-            (segment: ISlicerValueSegment) => {
-                segment.displayValue = valueFormatter.format(segment.value);
-                return segment;
-            },
-            (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId) => {
+            (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId, valueSegments: IValueSegment[]) => {
                 const item =
                     createItem(
                         buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
@@ -65,10 +61,14 @@ export default function converter(
                         id.getSelector(),
                         undefined,
                         "#ccc");
+                (valueSegments || []).forEach(segment => {
+                    segment.displayValue = valueFormatter.format(segment.value);
+                });
                 return item;
 
             // TOOD: This logic should move to pbi base
         }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
+        return converted;
     }
 }
 

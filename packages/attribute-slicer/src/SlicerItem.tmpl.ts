@@ -78,6 +78,11 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLa
             const { r, g, b } = d3.rgb(color);
             backgroundColor = `background-color:rgba(${r}, ${g}, ${b}, .2)`;
             fontColor = "#333";
+        } else if (s.value && s.value < 0) {
+
+            // If it is a negative value, then barbershop pole it
+            const darker = d3.rgb(color).darker();
+            backgroundColor = `background:repeating-linear-gradient(45deg,${color},${color} 10px,${darker} 10px,${darker} 20px)`;
         }
 
         const displayValue = s.displayValue || s.value || "0";
@@ -86,7 +91,7 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLa
         return `
             <span style="${style}" title="${displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }
-                &nbsp;<span class="${spanclass}">${displayValue}</span> 
+                &nbsp;<span class="${spanclass}">${displayValue}</span>
             </span>
         `.trim().replace(/\n/g, "");
     }).join("");
