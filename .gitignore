@@ -3,8 +3,12 @@ node_modules/
 
 # Temp Files
 .DS_Store
-/.scripts
-/dump
+.scripts
+dump
+
+# Error Logs
+*debug.log
+*error.log
 
 # IDE / Editors
 *~
@@ -14,9 +18,9 @@ build/
 dist/
 docs/
 *.js
+!/packages/*/*.js
 !/*.js
+!/packages/*/src/lib/*.js
+/packages/*/src/lib/*.spec.js
 *.d.ts
-!/src/references.d.ts
-!/base/powerbi/powerbi.d.ts
-!/base/powerbi/references.d.ts
 build.out
