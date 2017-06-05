@@ -1,6 +1,6 @@
 {
   "name": "@essex/attribute-slicer",
-  "version": "0.13.0",
+  "version": "1.0.1",
   "description": "",
   "main": "src/index.js",
   "typings": "src/index.d.ts",
