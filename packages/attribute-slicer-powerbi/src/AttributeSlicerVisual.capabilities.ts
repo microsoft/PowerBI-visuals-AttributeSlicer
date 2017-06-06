@@ -63,7 +63,7 @@ const capabilities = $.extend(true, {}, VisualBase.capabilities, {
                 group: {
                     by: "Series",
                     select: [{ for: { in: "Values" }}],
-                    dataReductionAlgorithm:  { top: { count: 100 } },
+                    dataReductionAlgorithm: { top: { count: 60 } },
                 },
             },
             rowCount: { preferred: { min: 2 }, supported: { min: 0 } },
