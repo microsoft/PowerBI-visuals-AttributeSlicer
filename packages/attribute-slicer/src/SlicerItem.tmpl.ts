@@ -89,7 +89,7 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLa
         const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;color:${fontColor}`;
         const spanclass = showValueLabels ? "always-display value" : "value";
         return `
-            <span style="${style}" title="${displayValue}" class="value-display">
+            <span style="${style}" title="${(s["name"] ? s["name"] + " - " : "") + displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }
                 &nbsp;<span class="${spanclass}">${displayValue}</span>
             </span>
