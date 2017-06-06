@@ -60,7 +60,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
  */
 function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLabels: boolean) {
     "use strict";
-    return (valueSegments || []).map(s => {
+    return (valueSegments || []).filter(n => n.width > 0).map(s => {
         const { color, highlightWidth } = s;
         let backgroundColor = "";
         let fontColor = "#333";
