@@ -60,7 +60,7 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
  */
 function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLabels: boolean) {
     "use strict";
-    return (valueSegments || []).map(s => {
+    return (valueSegments || []).filter(n => n.width > 0).map(s => {
         const { color, highlightWidth } = s;
         let backgroundColor = "";
         let fontColor = "#333";
@@ -89,7 +89,7 @@ function valueSegmentsTemplate(valueSegments: ISlicerValueSegment[], showValueLa
         const style = `display:inline-block;width:${s.width}%;${backgroundColor};height:100%;position:relative;color:${fontColor}`;
         const spanclass = showValueLabels ? "always-display value" : "value";
         return `
-            <span style="${style}" title="${displayValue}" class="value-display">
+            <span style="${style}" title="${(s["name"] ? s["name"] + " - " : "") + displayValue}" class="value-display">
                 ${ highlightsTemplate(s) }
                 &nbsp;<span class="${spanclass}">${displayValue}</span>
             </span>

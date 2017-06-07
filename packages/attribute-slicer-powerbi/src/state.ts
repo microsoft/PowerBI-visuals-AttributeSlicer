@@ -24,6 +24,7 @@
 
 import {
     setting,
+    numberSetting as number,
     parseSelectionIds,
     HasSettings,
     getSetting,
@@ -36,7 +37,6 @@ import {
 } from "@essex/pbi-base";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
 import PixelConverter = jsCommon.PixelConverter;
-import StandardObjectProperties = powerbi.visuals.StandardObjectProperties;
 import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "@essex/attribute-slicer";
 import * as _ from "lodash";
@@ -185,19 +185,24 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Units",
         description: "The units to use when displaying values.",
         defaultValue: 0,
-        config: StandardObjectProperties.labelDisplayUnits,
+        config: {
+            type: {
+                formatting: {
+                    labelDisplayUnits: true,
+                },
+            },
+        },
     })
     public labelDisplayUnits?: number;
 
     /**
      * The precision of the numbers to render
      */
-    @setting({
+    @number({
         category: "Display",
         displayName: "Precision",
         description: "The precision to use when displaying values.",
         defaultValue: 0,
-        config: StandardObjectProperties.labelPrecision,
     })
     public labelPrecision?: number;
 
