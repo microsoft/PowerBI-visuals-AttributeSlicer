@@ -198,4 +198,9 @@ export interface IAttributeSlicerState {
      * If we should always display values text
      */
     displayValueLabels?: boolean;
+
+    /**
+     * If we should hide blank items
+     */
+    hideEmptyItems?: boolean;
 }

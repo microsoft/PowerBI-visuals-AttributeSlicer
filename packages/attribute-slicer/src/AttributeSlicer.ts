@@ -190,6 +190,24 @@ export class AttributeSlicer {
         }
     }
 
+    /**
+     * Whether or not to dispaly items with empty / missing values
+     */
+    private _hideEmptyItems = false;
+    public get hideEmptyItems(){
+        return this._hideEmptyItems;
+    }
+
+    /**
+     * Sets if blank items should be hidden.
+     */
+    public set hideEmptyItems(shouldHideItems: boolean){
+        if (shouldHideItems !== this._hideEmptyItems) {
+            this._hideEmptyItems = shouldHideItems;
+            this.syncItemVisiblity();
+        }
+    }
+
 
 
     /**
@@ -295,6 +313,7 @@ export class AttributeSlicer {
             scrollPosition: this.scrollPosition,
             displayValueLabels: this.displayValueLabels,
             itemTextColor: this.itemTextColor,
+            hideEmptyItems: this.hideEmptyItems,
         };
     }
 
@@ -349,6 +368,7 @@ export class AttributeSlicer {
         this.leftAlignText = state.leftAlignText;
         this.displayValueLabels = state.displayValueLabels;
         this.itemTextColor = state.itemTextColor;
+        this.hideEmptyItems = state.hideEmptyItems;
 
         this.loadingState = false;
     }
@@ -893,6 +913,11 @@ export class AttributeSlicer {
                 // update the search
                 if (isVisible && !this.serverSideSearch && this.searchString) {
                     isVisible = AttributeSlicer.isMatch(item, this.searchString, this.caseInsensitive);
+                }
+
+                // hide blank items
+                if (this.hideEmptyItems && item.match.trim().length === 0) {
+                    isVisible = false;
                 }
                 return isVisible;
             });
