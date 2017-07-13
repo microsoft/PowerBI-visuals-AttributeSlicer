@@ -230,12 +230,14 @@ export default class AttributeSlicer extends VisualBase {
                         this.mySlicer.refresh();
                     }
 
-                    // The colors have changed, so we need to reload data
-                    if (!oldState.colors.equals(newState.colors)) {
+                    // The colors or hide items setting have changed, so we need to reload data
+                    if (!oldState.colors.equals(newState.colors) || oldState.hideEmptyItems !== newState.hideEmptyItems) {
                         this.data = this.convertData(dv, this.state);
                         this.mySlicer.data = this.data.items;
                         this.mySlicer.selectedItems = this.state.selectedItems.map(createItemFromSerializedItem);
                     }
+
+
                     this.mySlicer.scrollPosition = newState.scrollPosition;
                 }
             }
@@ -348,7 +350,40 @@ export default class AttributeSlicer extends VisualBase {
         if (labelDisplayUnits || labelPrecision) {
             formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
         }
+        if (state.hideEmptyItems) {
+            this.filterEmptyItems(dv);
+        }
         return converter(dv, formatter, undefined, state.colors);
+    }
+
+
+    /**
+     * Remove empty Items (empty category name) from the data view
+     * Note: we have to do this before converting to data items
+     * so the calculated widths won't reflect removed categories.
+     * @param dv 
+     */
+    private filterEmptyItems(dv: powerbi.DataView) {
+        let categories = dv.categorical.categories[0].values;
+
+        // build a list of indices for empty items
+        let blankCatIndices = [];
+        for (let i in categories) {
+            if (!categories[i] || categories[i].toString().trim().length === 0) {
+                blankCatIndices.push(parseInt(i, 10));
+            }
+        }
+        blankCatIndices.reverse();
+
+        // for each empty item, remove the corresponding entry
+        // in the categories and values array
+        for (let index of blankCatIndices) {
+            categories.splice(index, 1);
+            for (let dataColumn of dv.categorical.values) {
+                dataColumn.values.splice(index, 1);
+            }
+        }
+
     }
 
     /* tslint:disable */
