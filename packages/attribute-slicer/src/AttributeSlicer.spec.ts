@@ -95,7 +95,6 @@ describe("AttributeSlicer", () => {
             renderedValue: n.match.charCodeAt(0),
         }, n);
     });
-    const SIMPLE_DATA_WITH_BLANKS = createData("A", "B", "", "C");
 
     it("should load", () => {
         createInstance();
@@ -326,19 +325,6 @@ describe("AttributeSlicer", () => {
 
             const actual = itemEle.find(".category-container").css("max-width");
             expect(actual).to.equal("12.34%");
-        });
-
-        it("should show blank items by default", () => {
-             const { instance, vlist } = createInstance();
-             instance.data = SIMPLE_DATA_WITH_BLANKS;
-             expect(vlist.items.length).to.equal(SIMPLE_DATA_WITH_BLANKS.length);
-        });
-
-        it("should hide blank items with option", () => {
-             const { instance, vlist } = createInstance();
-             instance.data = SIMPLE_DATA_WITH_BLANKS;
-             instance.hideEmptyItems = true;
-             expect(vlist.items.length).to.equal(SIMPLE_DATA_WITH_BLANKS.length - 1);
         });
     });
 
