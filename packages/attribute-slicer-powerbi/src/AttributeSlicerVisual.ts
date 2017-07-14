@@ -189,7 +189,6 @@ export default class AttributeSlicer extends VisualBase {
      */
     public updateWithType(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
         super.updateWithType(options, updateType);
-
         this.isHandlingUpdate = true;
         try {
             log("Update", options);
@@ -360,7 +359,7 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * Remove empty Items (empty category name) from the data view
      * Note: we have to do this before converting to data items
-     * so the calculated widths won't reflect removed categories.
+     * so the calculated width won't reflect removed categories.
      * @param dv 
      */
     private filterEmptyItems(dv: powerbi.DataView) {
@@ -373,17 +372,17 @@ export default class AttributeSlicer extends VisualBase {
                 blankCatIndices.push(parseInt(i, 10));
             }
         }
-        blankCatIndices.reverse();
+        blankCatIndices.reverse(); // reverse so we can splice without effecting the next index
 
-        // for each empty item, remove the corresponding entry
-        // in the categories and values array
+        // remove category and associated values
         for (let index of blankCatIndices) {
             categories.splice(index, 1);
             for (let dataColumn of dv.categorical.values) {
-                dataColumn.values.splice(index, 1);
+                if (dataColumn.values && dataColumn.values[index]) {
+                    dataColumn.values.splice(index, 1);
+                }
             }
         }
-
     }
 
     /* tslint:disable */
