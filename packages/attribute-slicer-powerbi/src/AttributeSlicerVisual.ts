@@ -363,13 +363,19 @@ export default class AttributeSlicer extends VisualBase {
 
 
     /**
-     * Note: we have to do this before converting to data items
-     * so the calculated width won't reflect removed categories.
+     * Zero out values for blank categories so they won't affect
+     * value bar width calculations.
      * @param dv 
      */
+    private zeroEmptyItems(dv: powerbi.DataView) {
         let categories = dv.categorical.categories[0].values;
         for (let i in categories) {
             if (!categories[i] || categories[i].toString().trim().length === 0) {
+
+                for (let dataColumn of dv.categorical.values) {
+                    if (dataColumn.values && dataColumn.values[i]) {
+                        dataColumn.values[i] = 0;
+                    }
                 }
             }
         }
