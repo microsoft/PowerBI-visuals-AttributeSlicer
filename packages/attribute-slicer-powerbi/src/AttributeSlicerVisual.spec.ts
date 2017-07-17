@@ -133,7 +133,7 @@ describe("AttributeSlicerVisual", function () {
                             Values: true,
                         },
                     }],
-                    objects: objects,
+                    objects,
                 },
                 categorical: {
                     categories: [{
@@ -390,7 +390,7 @@ describe("AttributeSlicerVisual", function () {
         let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
         instance.updateWithType(update, UpdateType.Data);
 
-        expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
+        expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
     });
 
     it("should filter out blank categories with option", () => {

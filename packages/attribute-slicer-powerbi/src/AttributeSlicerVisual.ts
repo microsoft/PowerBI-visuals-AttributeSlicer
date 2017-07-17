@@ -229,8 +229,7 @@ export default class AttributeSlicer extends VisualBase {
                         this.mySlicer.refresh();
                     }
 
-                    // The colors or hide items setting have changed, so we need to reload data
-                    if (!oldState.colors.equals(newState.colors) || oldState.hideEmptyItems !== newState.hideEmptyItems) {
+                    if (this.isReloadRequired(newState, oldState)) {
                         this.data = this.convertData(dv, this.state);
                         this.mySlicer.data = this.data.items;
                         this.mySlicer.selectedItems = this.state.selectedItems.map(createItemFromSerializedItem);
@@ -511,4 +510,12 @@ export default class AttributeSlicer extends VisualBase {
             this.propertyPersister.persist(selection, objects);
         }
     }
+
+     /**
+      * If reload is required based on state changes.
+      */
+    private isReloadRequired(newState: VisualState, oldState: VisualState) {
+        return !oldState.colors.equals(newState.colors) || oldState.hideEmptyItems !== newState.hideEmptyItems;
+    }
+
 }
