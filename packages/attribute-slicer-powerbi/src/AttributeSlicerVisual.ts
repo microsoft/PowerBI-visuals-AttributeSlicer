@@ -189,7 +189,6 @@ export default class AttributeSlicer extends VisualBase {
      */
     public updateWithType(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
         super.updateWithType(options, updateType);
-
         this.isHandlingUpdate = true;
         try {
             log("Update", options);
@@ -230,12 +229,13 @@ export default class AttributeSlicer extends VisualBase {
                         this.mySlicer.refresh();
                     }
 
-                    // The colors have changed, so we need to reload data
-                    if (!oldState.colors.equals(newState.colors)) {
+                    if (this.isReloadRequired(newState, oldState)) {
                         this.data = this.convertData(dv, this.state);
                         this.mySlicer.data = this.data.items;
                         this.mySlicer.selectedItems = this.state.selectedItems.map(createItemFromSerializedItem);
                     }
+
+
                     this.mySlicer.scrollPosition = newState.scrollPosition;
                 }
             }
@@ -348,7 +348,40 @@ export default class AttributeSlicer extends VisualBase {
         if (labelDisplayUnits || labelPrecision) {
             formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
         }
+        if (state.hideEmptyItems) {
+            this.filterEmptyItems(dv);
+        }
         return converter(dv, formatter, undefined, state.colors);
+    }
+
+
+    /**
+     * Remove empty Items (empty category name) from the data view
+     * Note: we have to do this before converting to data items
+     * so the calculated width won't reflect removed categories.
+     * @param dv 
+     */
+    private filterEmptyItems(dv: powerbi.DataView) {
+        let categories = dv.categorical.categories[0].values;
+
+        // build a list of indices for empty items
+        let blankCatIndices = [];
+        for (let i in categories) {
+            if (!categories[i] || categories[i].toString().trim().length === 0) {
+                blankCatIndices.push(parseInt(i, 10));
+            }
+        }
+        blankCatIndices.reverse(); // reverse so we can splice without effecting the next index
+
+        // remove category and associated values
+        for (let index of blankCatIndices) {
+            categories.splice(index, 1);
+            for (let dataColumn of dv.categorical.values) {
+                if (dataColumn.values && dataColumn.values[index]) {
+                    dataColumn.values.splice(index, 1);
+                }
+            }
+        }
     }
 
     /* tslint:disable */
@@ -477,4 +510,12 @@ export default class AttributeSlicer extends VisualBase {
             this.propertyPersister.persist(selection, objects);
         }
     }
+
+     /**
+      * If reload is required based on state changes.
+      */
+    private isReloadRequired(newState: VisualState, oldState: VisualState) {
+        return !oldState.colors.equals(newState.colors) || oldState.hideEmptyItems !== newState.hideEmptyItems;
+    }
+
 }

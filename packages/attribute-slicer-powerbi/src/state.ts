@@ -24,6 +24,7 @@
 
 import {
     setting,
+    boolSetting as bool,
     numberSetting as number,
     parseSelectionIds,
     HasSettings,
@@ -113,6 +114,18 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         defaultValue: DEFAULT_STATE.valueColumnWidth,
     })
     public valueColumnWidth?: number;
+
+
+    /**
+     * Hide Blank items
+     */
+    @bool({
+        category: "Display",
+        displayName: "Hide Empty Items",
+        description: "Hide empty / blank Items.",
+        defaultValue: false,
+    })
+    public hideEmptyItems?: boolean;
 
     /**
      * The list of selected items

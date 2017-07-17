@@ -328,6 +328,7 @@ describe("AttributeSlicer", () => {
         });
     });
 
+
     describe("calcColumnSizes", () => {
         it("should not show values if showValues is false", () => {
             const { instance } = createInstance();

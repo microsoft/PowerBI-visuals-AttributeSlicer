@@ -190,8 +190,6 @@ export class AttributeSlicer {
         }
     }
 
-
-
     /**
      * Updates the list height
      */
@@ -894,6 +892,7 @@ export class AttributeSlicer {
                 if (isVisible && !this.serverSideSearch && this.searchString) {
                     isVisible = AttributeSlicer.isMatch(item, this.searchString, this.caseInsensitive);
                 }
+
                 return isVisible;
             });
         }

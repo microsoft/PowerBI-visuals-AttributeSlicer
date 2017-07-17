@@ -101,14 +101,15 @@ describe("AttributeSlicerVisual", function () {
     /**
      * Creates update options with the given categories
      */
-    function createOptionsWithCategoriesAndValues(categories: any[], categoryName: string, values: any[][], valueName: string) {
+    function createOptionsWithCategoriesAndValues(categories: any[], categoryName: string, values: any[][], valueName: string,
+            objects = {}) {
         "use strict";
         const mappedValues = values.map(n => ({
             source: {
                 displayName: valueName,
                 type: {},
             },
-            values: n[0],
+            values: n,
         }));
         return <powerbi.VisualUpdateOptions><any>{
             viewport: {
@@ -132,6 +133,7 @@ describe("AttributeSlicerVisual", function () {
                             Values: true,
                         },
                     }],
+                    objects,
                 },
                 categorical: {
                     categories: [{
@@ -381,6 +383,27 @@ describe("AttributeSlicerVisual", function () {
         expect(attributeSlicer.state.horizontal).to.be.true;
         expect(attributeSlicer.state.selectedItems.length).to.be.greaterThan(0);
     });
+
+    it("should not filter out blank categories by default", () => {
+        const { instance, attributeSlicer } = createInstance();
+        let fakeCats = ["CAT_1", "CAT_2", "", " "];
+        let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
+        instance.updateWithType(update, UpdateType.Data);
+
+        expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
+    });
+
+    it("should filter out blank categories with option", () => {
+        const { instance, attributeSlicer } = createInstance();
+        const fakeCats = ["CAT_1", "CAT_2", "", " "];
+        const values = [[1, 2, 3], [2, 3, 3]]; // Values for each category
+        let objects = { display : { hideEmptyItems: true}};
+        const update = createOptionsWithCategoriesAndValues(fakeCats, "SOME_CATEGORY_NAME", values, "VALUE_NAME", objects);
+        instance.updateWithType(update, UpdateType.Data);
+
+        expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal( ["CAT_1", "CAT_2"]);
+    });
+
 
     it("should not clear selection if search is changed");
 
