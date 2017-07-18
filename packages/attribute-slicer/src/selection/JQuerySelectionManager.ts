@@ -188,6 +188,10 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
                 })
                 .on(`click${EVENTS_NS}`, function (e) {
                     e.stopPropagation();
+                    that.keyPressed({
+                        ctrl: e.ctrlKey,
+                        shift: e.shiftKey,
+                    });
                     that.itemClicked(that.eleItemGetter($(this)));
                 })
                 .each((idx, ele) => {
