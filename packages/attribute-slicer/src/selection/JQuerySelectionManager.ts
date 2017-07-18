@@ -39,25 +39,6 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
     private lastMouseDownY: number;
     private mouseDownEle: JQuery;
 
-    /**
-     * Constructor
-     */
-    constructor(onSelectionChanged?: (items: T[]) => any) {
-        super(onSelectionChanged);
-
-        const updateKeyState = (e: JQueryEventObject) => {
-            this.keyPressed({
-                ctrl: e.ctrlKey,
-                shift: e.shiftKey,
-            });
-        };
-
-        $(window)
-            .on(`keydown${EVENTS_NS}`, updateKeyState)
-            .on(`keyup${EVENTS_NS}`, updateKeyState)
-            .on(`focus${EVENTS_NS}`, updateKeyState)
-            .on(`blur${EVENTS_NS}`, updateKeyState);
-    }
 
     /**
      * Will bind event listeners to the given set of elements
