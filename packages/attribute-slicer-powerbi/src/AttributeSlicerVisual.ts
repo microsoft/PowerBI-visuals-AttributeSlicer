@@ -349,36 +349,33 @@ export default class AttributeSlicer extends VisualBase {
             formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
         }
         if (state.hideEmptyItems) {
-            this.filterEmptyItems(dv);
+            this.zeroEmptyItems(dv);
         }
-        return converter(dv, formatter, undefined, state.colors);
+
+        let listItems = converter(dv, formatter, undefined, state.colors);
+
+        if (state.hideEmptyItems) {
+            listItems.items = listItems.items.filter(item => item.match && item.match.trim() !== "");
+        }
+
+        return listItems;
     }
 
 
     /**
-     * Remove empty Items (empty category name) from the data view
-     * Note: we have to do this before converting to data items
-     * so the calculated width won't reflect removed categories.
+     * Zero out values for blank categories so they won't affect
+     * value bar width calculations.
      * @param dv 
      */
-    private filterEmptyItems(dv: powerbi.DataView) {
+    private zeroEmptyItems(dv: powerbi.DataView) {
         let categories = dv.categorical.categories[0].values;
-
-        // build a list of indices for empty items
-        let blankCatIndices = [];
         for (let i in categories) {
             if (!categories[i] || categories[i].toString().trim().length === 0) {
-                blankCatIndices.push(parseInt(i, 10));
-            }
-        }
-        blankCatIndices.reverse(); // reverse so we can splice without effecting the next index
 
-        // remove category and associated values
-        for (let index of blankCatIndices) {
-            categories.splice(index, 1);
-            for (let dataColumn of dv.categorical.values) {
-                if (dataColumn.values && dataColumn.values[index]) {
-                    dataColumn.values.splice(index, 1);
+                for (let dataColumn of dv.categorical.values) {
+                    if (dataColumn.values && dataColumn.values[i]) {
+                        dataColumn.values[i] = 0;
+                    }
                 }
             }
         }
