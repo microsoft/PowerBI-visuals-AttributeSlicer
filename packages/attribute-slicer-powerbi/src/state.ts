@@ -91,7 +91,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
             return doesDataSupportSearch(dv) && !isSelfFilterEnabled;
         },
     })
-    public showSearch?: boolean;
+    public searchEnabled?: boolean;
 
     /**
      * If we are being rendered horizontally
@@ -189,6 +189,16 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         defaultValue: DEFAULT_STATE.showOptions,
     })
     public showOptions?: boolean;
+
+    /**
+     * If we should show the search box
+     */
+    @setting({
+        displayName: "Show Search",
+        description: "Show the search box.",
+        defaultValue: DEFAULT_STATE.showSearch,
+    })
+    public showSearch?: boolean;
 
     /**
      * The display units to use when rendering values
