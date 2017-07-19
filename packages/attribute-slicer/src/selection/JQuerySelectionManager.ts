@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { default as SelectionManager, ISelectableItem } from "./SelectionManager";
+import { default as SelectionManager, ISelectableItem, BrushSelectionDelta } from "./SelectionManager";
 import * as $ from "jquery";
 const EVENTS_NS = ".selection-manager";
 export default class JQuerySelectionManager<T extends ISelectableItem<any>> extends SelectionManager<T> {
@@ -191,12 +191,16 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
      * Override of itemHovered
      */
     public itemHovered(item: T) {
-        super.itemHovered(item);
+        let delta: BrushSelectionDelta<T> = super.itemHovered(item);
         if (this.itemEleGetter) {
-            this._brushingSelection.forEach(n => {
+            delta.removed.forEach(n => {
+                $(this.itemEleGetter(n)).removeClass("selected-slicer-item");
+            });
+            delta.added.forEach(n => {
                 $(this.itemEleGetter(n)).addClass("selected-slicer-item");
             });
         }
+        return delta;
     }
 
     /**
