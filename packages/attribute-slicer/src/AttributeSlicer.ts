@@ -289,6 +289,7 @@ export class AttributeSlicer {
             leftAlignText: this.leftAlignText,
             showOptions: this.showOptions,
             showSearch: this.showSearchBox,
+            searchSupported: this.showSearchBox,
             showValues: this.showValues,
             scrollPosition: this.scrollPosition,
             displayValueLabels: this.displayValueLabels,
@@ -326,7 +327,7 @@ export class AttributeSlicer {
         s.brushSelectionMode = state.brushMode;
         s.showSelections = state.showSelections;
         s.showOptions = state.showOptions;
-        s.showSearchBox = state.showSearch;
+        s.showSearchBox = state.showSearch && state.searchSupported;
         s.showValues = state.showValues;
         const newSearchString = state.searchText;
         let searchString = false;

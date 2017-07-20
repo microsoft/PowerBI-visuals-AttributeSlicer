@@ -151,6 +151,11 @@ export interface IAttributeSlicerState {
     showSearch?: boolean;
 
     /**
+     * If search is supported for the data
+     */
+    searchSupported?: boolean;
+
+    /**
      * If we should show the values column
      */
     showValues?: boolean;
