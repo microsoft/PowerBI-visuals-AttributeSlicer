@@ -82,7 +82,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public showValues?: boolean;
 
     /**
-     * Whether or not the search box should be shown
+     * Whether or not data supports search
      */
     @setting({
         persist: false, // Don't persist this setting, it is dynamic based on the dataview
@@ -91,7 +91,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
             return doesDataSupportSearch(dv) && !isSelfFilterEnabled;
         },
     })
-    public searchEnabled?: boolean;
+    public searchSupported?: boolean;
 
     /**
      * If we are being rendered horizontally

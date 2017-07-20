@@ -56,7 +56,7 @@ export const DEFAULT_STATE: IAttributeSlicerState = {
     leftAlignText: false,
     showOptions: true,
     showSearch: true,
-    searchEnabled: true,
+    searchSupported: true,
     showValues: true,
     scrollPosition: [0, 0],
     displayValueLabels: false,
