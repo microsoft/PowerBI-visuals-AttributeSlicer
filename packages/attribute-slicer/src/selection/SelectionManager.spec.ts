@@ -215,7 +215,7 @@ describe("SelectionManager", () => {
                 all.instance.brushMode = true;
                 return all;
             };
-            it("should add to the selection if the CTRL modifier is used", () => {
+            it("should add to the selection if the CTRL modifier is used with click", () => {
                 const { instance } = createBrushingInstance();
                 const item = createItem("A");
                 const item2 = createItem("B");
@@ -231,6 +231,38 @@ describe("SelectionManager", () => {
                 click(instance, item3);
 
                 expect(instance.selection).to.be.deep.equal([item, item2, item3]);
+            });
+
+            it("should add to the selection if the CTRL modifier is used with brush", () => {
+                const { instance } = createBrushingInstance();
+                const item = createItem("A");
+                const item2 = createItem("B");
+                const item3 = createItem("C");
+
+                // user clicks item 3
+                click(instance, item);
+
+                // User presses ctrl key
+                pressCTRL(instance);
+
+                // Initial brush selects 1 & 2
+                brush(instance, item2, item3);
+                console.log(instance.selection);
+                expect(instance.selection).to.be.deep.equal([item2, item3, item]);
+            });
+
+            it("should reset the selection if the CTRL modifier is NOT used with brush", () => {
+                const { instance } = createBrushingInstance();
+                const item = createItem("A");
+                const item2 = createItem("B");
+                const item3 = createItem("C");
+
+                // user clicks item 3
+                click(instance, item);
+
+                // Initial brush selects 1 & 2
+                brush(instance, item2, item3);
+                expect(instance.selection).to.be.deep.equal([item2, item3]);
             });
 
             it("should reset the selection to the single item if the CTRL modifier is NOT used", () => {

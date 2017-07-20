@@ -58,6 +58,7 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         listEle.on(`mouseleave${EVENTS_NS}`, () => this.endDrag());
         listEle.on(`mousedown${EVENTS_NS}`, (e) => {
             e.stopPropagation();
+            this.keyPressed({ctrl: e.ctrlKey, shift: e.shiftKey});
             const button = e.which || e["buttons"];
             if (button === 1) { // Only let the left mouse button start it
                 let $target = $(e.target);
@@ -73,6 +74,7 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
         });
         listEle.on(`mouseup${EVENTS_NS}`, (e) => {
             e.stopPropagation();
+            this.keyPressed({ctrl: e.ctrlKey, shift: e.shiftKey});
             this.lastMouseDownX = undefined;
             this.lastMouseDownY = undefined;
             if (this._dragging) {
@@ -169,10 +171,7 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
                 })
                 .on(`click${EVENTS_NS}`, function (e) {
                     e.stopPropagation();
-                    that.keyPressed({
-                        ctrl: e.ctrlKey,
-                        shift: e.shiftKey,
-                    });
+                    that.keyPressed({ctrl: e.ctrlKey, shift: e.shiftKey});
                     that.itemClicked(that.eleItemGetter($(this)));
                 })
                 .each((idx, ele) => {

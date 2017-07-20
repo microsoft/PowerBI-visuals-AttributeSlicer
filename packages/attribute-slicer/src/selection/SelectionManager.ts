@@ -248,6 +248,9 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
         if (this._dragging) {
             this._dragging = false;
             if (this.brushMode) {
+                if (this.keyState.ctrl) {
+                    this._brushingSelection = [...this._brushingSelection, ...this.selection];
+                }
                 this.selection = this._brushingSelection.slice(0);
             }
             this._brushingSelection = [];
