@@ -68,6 +68,11 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
     private shiftPivot: T;
 
     /**
+     * The most recent item selected via brush selection
+     */
+    private _previousBrushedItem: T;
+
+    /**
      * Constructor
      */
     constructor(onSelectionChanged?: (items: T[]) => any) {
@@ -150,14 +155,26 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
 
     /**
      * Indicates that an item was hovered over
+     * Retruns BrushSelectionDelta
      */
     public itemHovered(item: T) {
-        if (this._dragging && this._brushMode && this.findIndex(item, this._brushingSelection) < 0) {
+        let delta: BrushSelectionDelta<T> = {"added": [], "removed": []};
+        if (this._dragging && this._brushMode) {
             if (this._brushingSelection.length >= 1 && this.items && this.items.length) {
                 let lowIndex: number;
                 let highIndex: number;
                 const newSel = this._brushingSelection.slice(0);
-                newSel.push(item);
+
+                if (this.findIndex(item, newSel) > -1) {
+                    // remove item if dragging back
+                    newSel.splice(newSel.indexOf(this._previousBrushedItem), 1);
+                    delta.removed.push(this._previousBrushedItem);
+                } else {
+                    // add the item to selection list
+                    newSel.push(item);
+                    delta.added.push(item);
+                }
+
                 newSel.forEach(n => {
                     const currIndex = this._items.indexOf(n);
                     if (typeof lowIndex === "undefined" || currIndex < lowIndex) {
@@ -169,10 +186,13 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
                 });
 
                 this._brushingSelection = this.items.slice(lowIndex, highIndex + 1);
-            } else {
+            } else if ( this.findIndex(item, this._brushingSelection) < 0) {
                 this._brushingSelection.push(item);
+                delta.added.push(item);
             }
+            this._previousBrushedItem = item;
         }
+        return delta;
     }
 
     /**
@@ -309,4 +329,16 @@ export interface IKeyState {
      * If shift is being pressed
      */
     shift?: boolean;
+}
+
+export interface BrushSelectionDelta<T> {
+    /**
+     * Items added to the brush selection
+     */
+    added: T[];
+
+    /**
+     * Items removed from the brush selection
+     */
+    removed: T[];
 }

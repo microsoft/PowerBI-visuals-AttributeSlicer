@@ -514,6 +514,14 @@ describe("SelectionManager", () => {
 
                 expect(instance.selection).to.be.deep.equal([]);
             });
+            it("should remove from selection when dragging back", () => {
+                const { instance } = createBrushingInstance();
+                const items = createItems("A", "B", "C");
+                instance.items = items;
+                brush(instance, items[0], items[1], items[2], items[1]);
+
+                expect(instance.selection).to.be.deep.equal(items.slice(0, 2));
+            });
         });
     });
 
