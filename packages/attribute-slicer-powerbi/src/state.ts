@@ -274,6 +274,17 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public displayValueLabels?: boolean;
 
     /**
+     * If the value text overflow should be visible 
+     */
+    @setting({
+        category: "Display",
+        displayName: "Overflow value text",
+        description: "Allow value text to overflow the bar.",
+        defaultValue: DEFAULT_STATE.overflowValueLabels,
+    })
+    public overflowValueLabels?: boolean;
+
+    /**
      * The set of settings for the colored objects
      */
     @coloredObjectsSettings({

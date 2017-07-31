@@ -271,6 +271,9 @@
   .value-display {
     overflow: hidden;
   }
+  .overflow {
+    overflow: visible !important;
+  }
 
   .value-display .always-display.value, .item:hover .value-display .value {
       display: inline-block;

@@ -171,6 +171,26 @@ export class AttributeSlicer {
     }
 
     /**
+     * Wheter or not to set value text overflow to visible
+     */
+    private _overflowValueLabels = false;
+    public get overflowValueLabels() {
+        return this._overflowValueLabels;
+    }
+
+    /**
+     * Sets wheter or not to use allow value text to overflow
+     */
+    public set overflowValueLabels(shouldOverflow: boolean) {
+        if (shouldOverflow !== this._overflowValueLabels) {
+            this._overflowValueLabels = shouldOverflow;
+            if (this.virtualList) {
+                this.virtualList.rerender();
+            }
+        }
+    }
+
+    /**
      * Font color used to display item text
      */
     private _itemTextColor = "#000";
@@ -218,7 +238,8 @@ export class AttributeSlicer {
             afterRender: () => this.selectionManager.refresh(),
             generatorFn: (i: number) => {
                 const item: SlicerItem = this.virtualList.items[i];
-                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText, this.displayValueLabels, this.itemTextColor);
+                const ele = itemTemplate(item, this.calcColumnSizes(), this.leftAlignText,
+                    this.displayValueLabels, this.itemTextColor, this.overflowValueLabels);
                 ele
                     .css({ height: `${this.virtualList.itemHeight - 4}px`, paddingBottom: "2.5px", paddingTop: "2px" })
                     .data("item", item);
@@ -294,6 +315,7 @@ export class AttributeSlicer {
             scrollPosition: this.scrollPosition,
             displayValueLabels: this.displayValueLabels,
             itemTextColor: this.itemTextColor,
+            overflowValueLabels: this.overflowValueLabels,
         };
     }
 
@@ -348,6 +370,7 @@ export class AttributeSlicer {
         this.leftAlignText = state.leftAlignText;
         this.displayValueLabels = state.displayValueLabels;
         this.itemTextColor = state.itemTextColor;
+        this.overflowValueLabels = state.overflowValueLabels;
 
         this.loadingState = false;
     }
