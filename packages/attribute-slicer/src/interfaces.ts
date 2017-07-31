@@ -203,4 +203,9 @@ export interface IAttributeSlicerState {
      * If we should always display values text
      */
     displayValueLabels?: boolean;
+
+    /**
+     * If we should allow value text to overflow and be visible
+     */
+    overflowValueLabels?: boolean;
 }
