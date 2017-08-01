@@ -22,5 +22,6 @@ docs/
 !/*.js
 !/packages/*/src/lib/*.js
 /packages/*/src/lib/*.spec.js
+!/packages/*/bin/*.js
 *.d.ts
 build.out

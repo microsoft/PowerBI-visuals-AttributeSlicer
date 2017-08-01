@@ -52,9 +52,9 @@
   version "2.2.34"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.34.tgz#398e8a265f1db1e5f8c6e520064a74cbef84cbdc"
 
-"@types/node@*", "@types/node@^6.0.45":
-  version "6.0.52"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.52.tgz#1ac3a99b42320f9e463482f25af4c2359473aaa6"
+"@types/node@*", "@types/node@^8.0.19":
+  version "8.0.19"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.19.tgz#e46e2b0243de7d03f15b26b45c59ebb84f657a4e"
 
 "@types/shelljs@^0.7.0":
   version "0.7.1"
@@ -4193,7 +4193,7 @@ typedoc@^0.7.0:
     typedoc-default-themes "^0.5.0"
     typescript "2.3.2"
 
-typescript@2.3.2, typescript@^2.3.2:
+typescript@2.3, typescript@2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.3.2.tgz#f0f045e196f69a72f06b25fd3bd39d01c3ce9984"
 

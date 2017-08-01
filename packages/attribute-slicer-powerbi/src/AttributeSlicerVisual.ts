@@ -68,9 +68,7 @@ const stringify = require("json-stringify-safe");
 // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
 
-@Visual(require("./build").output.PowerBI)
 @receiveDimensions
-@capabilities(capabilitiesData)
 @receiveUpdateType(<any>{
     checkHighlights: true,
     ignoreCategoryOrder: false,
@@ -130,9 +128,12 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * Constructor
      */
-    constructor(noCss = false) {
+    constructor(noCss = false, options: any) {
         super("Attribute Slicer", noCss);
         this.state = VisualState.create() as VisualState;
+
+        options.element = $(options.element); // make this a jquery object
+        this.init(options);
     }
 
     /**
@@ -147,10 +148,9 @@ export default class AttributeSlicer extends VisualBase {
      */
     public init(options: powerbi.VisualInitOptions): void {
         super.init(options);
+
         this.host = options.host;
-        this.selectionManager = new SelectionManager({
-            hostServices: this.host,
-        });
+        this.selectionManager = this.host["createSelectionManager"]();
         this.propertyPersister = createPropertyPersister(this.host, 100);
 
         const className = CUSTOM_CSS_MODULE && CUSTOM_CSS_MODULE.locals && CUSTOM_CSS_MODULE.locals.className;
@@ -365,7 +365,7 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * Zero out values for blank categories so they won't affect
      * value bar width calculations.
-     * @param dv 
+     * @param dv
      */
     private zeroEmptyItems(dv: powerbi.DataView) {
         let categories = dv.categorical.categories[0].values;

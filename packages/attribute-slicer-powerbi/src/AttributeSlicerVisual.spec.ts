@@ -46,20 +46,19 @@ describe("AttributeSlicerVisual", function () {
      * Creates an instance of AttributeSlicerVisual
      */
     function createInstance() {
-        let initOptions = {
+        let instance = new AttributeSlicerVisual(true, {
             element: parentEle,
             viewport: {
                 width: 500,
                 height: 500,
             },
-        } as any;
-        let instance = new AttributeSlicerVisual(true);
+        } as any);
         let attributeSlicer = {};
-        instance.init(initOptions);
+        // instance.init(initOptions);
         instance["mySlicer"] = <any>attributeSlicer;
         instance["throwErrors"] = true;
         return {
-            element: initOptions.element,
+            element: parentEle,
             instance: instance,
             attributeSlicer: <AttributeSlicer>attributeSlicer,
         };
