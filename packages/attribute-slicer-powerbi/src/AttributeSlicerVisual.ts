@@ -140,7 +140,7 @@ export default class AttributeSlicer extends VisualBase {
      * Gets the template associated with the visual
      */
     public get template() {
-        return "<div></div>";
+        return `<div></div>`;
     }
 
     /**
