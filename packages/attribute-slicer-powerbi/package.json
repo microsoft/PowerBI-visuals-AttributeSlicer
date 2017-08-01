@@ -37,7 +37,7 @@
     "powerbi-visuals": "^0.5.9",
     "serve-static": "1.11.1",
     "tar.gz": "1.0.5",
-    "ts-loader": "2.0.3"
+    "ts-loader": "^2.3.2"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
