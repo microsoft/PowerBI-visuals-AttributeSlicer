@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Microsoft/PowerBI-visuals-AttributeSlicer/tree/master.svg?style=svg)](https://circleci.com/gh/Microsoft/PowerBI-visuals-AttributeSlicer/tree/master)
+[![Build Status](https://travis-ci.org/Microsoft/PowerBI-visuals-AttributeSlicer.svg?branch=develop)](https://travis-ci.org/Microsoft/PowerBI-visuals-AttributeSlicer)
 
 # Attribute Slicer -- PowerBI
 
