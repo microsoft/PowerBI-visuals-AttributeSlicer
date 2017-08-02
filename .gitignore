@@ -5,6 +5,7 @@ node_modules/
 .DS_Store
 .scripts
 dump
+.tmp
 
 # Error Logs
 *debug.log

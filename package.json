@@ -2,7 +2,8 @@
   "scripts": {
     "postinstall": "lerna exec --concurrency=1 -- yarn && lerna exec --concurrency=99 -- linklocal --named @essex/attribute-slicer ../attribute-slicer",
     "test": "lerna --stream --scope @essex/attribute-slicer run test && lerna run test --stream --ignore @essex/attribute-slicer",
-    "test:powerbi": "lerna --stream --scope @essex/attribute-slicer run test && lerna run test --stream --scope @essex/attribute-slicer-powerbi"
+    "test:powerbi": "lerna --stream --scope @essex/attribute-slicer run test && lerna run test --stream --scope @essex/attribute-slicer-powerbi",
+    "start": "lerna --stream --scope @essex/attribute-slicer run test && lerna run start --stream --scope @essex/attribute-slicer-powerbi"
   },
   "devDependencies": {
     "lerna": "^2.0.0-beta.38",
