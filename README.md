@@ -15,3 +15,4 @@
 * Run `yarn test` which will lint, test, and compile the `attribute-slicer`, `attribute-slicer-react` and `attribute-slicer-powerbi` packages.
     * Compiling `attribute-slicer-powerbi` will also create a `.pbiviz` file in the `packages/attribute-slicer/powerbi/dist/powerbi` directory, which can be imported directly in [Power BI](https://app.powerbi.com/)
 * Alternatively run `yarn test:powerbi`, which will do the same as `yarn test` but will exclude `attribute-slicer-react`.
+* Run `yarn start`, which will load the powerbi visual into live reload mode.
