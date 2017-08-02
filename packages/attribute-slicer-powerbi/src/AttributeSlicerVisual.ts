@@ -41,7 +41,6 @@ import {
     computeRenderedValues,
     VisualBase,
 } from "@essex/pbi-base";
-import { publishReplace, publishChange } from "@essex/pbi-stateful/lib/stateful";
 import * as _ from "lodash";
 import * as $ from "jquery";
 const ldget = require("lodash.get");
