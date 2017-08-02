@@ -5,6 +5,7 @@ node_modules/
 .DS_Store
 .scripts
 dump
+.tmp
 
 # Error Logs
 *debug.log
@@ -22,5 +23,6 @@ docs/
 !/*.js
 !/packages/*/src/lib/*.js
 /packages/*/src/lib/*.spec.js
+!/packages/*/bin/*.js
 *.d.ts
 build.out

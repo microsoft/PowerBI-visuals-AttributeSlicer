@@ -25,16 +25,20 @@
 const path = require('path');
 const webpack = require('webpack');
 const fs = require("fs");
+const ENTRY = './src/AttributeSlicerVisual.ts';
+const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.');
 
 const config = {
+    entry: ENTRY,
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.json']
-    },
-    resolveLoader: {
-        fallback: [path.join(__dirname, 'node_modules')],
+        extensions: ['', '.ts', '.js', '.json']
     },
     module: {
         loaders: [
+            {
+                test: new RegExp(regex),
+                loader: path.join(__dirname, 'bin', 'pbiPluginLoader'),
+            },
             {
                 test: /\.scss$/,
                 loaders: ["style", "css", "sass"]
@@ -46,6 +50,10 @@ const config = {
             {
                 test: /\.html$/,
                 loader: 'raw-loader'
+            },
+            {
+                test: /\.ts$/,
+                loader: 'ts-loader',
             }
         ],
     },
