@@ -15,4 +15,4 @@ after_success:
   - export PATH=$PATH:~/.local/bin
   - PACKAGE_VERSION=$(node -p -e "require('./packages/attribute-slicer-powerbi/package.json').version")
   - FILE_NAME=attribute-slicer-$PACKAGE_VERSION.$TRAVIS_BUILD_NUMBER.pbiviz
-  - az storage blob upload --container-name $AZURE_CONTAINER --file ./packages/attribute-slicer-powerbi/dist/powerbi/@essex/attribute-slicer-powerbi.pbiviz --name $FILE_NAME
+  - az storage blob upload --container-name $AZURE_CONTAINER --file ./packages/attribute-slicer-powerbi/dist/AttributeSlicer.pbiviz --name $FILE_NAME
