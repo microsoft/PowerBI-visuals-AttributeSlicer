@@ -193,15 +193,7 @@
                 },
                 "filter": {
                     "type": {
-                        "filter": {}
-                    },
-                    "rule": {
-                        "output": {
-                            "property": "selected",
-                            "selector": [
-                                "Values"
-                            ]
-                        }
+                        "filter": true
                     }
                 }
             }

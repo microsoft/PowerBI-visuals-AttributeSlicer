@@ -22,14 +22,13 @@
  * SOFTWARE.
  */
 
-import { VisualBase } from "@essex/pbi-base";
 import { DATA_WINDOW_SIZE } from "./AttributeSlicerVisual.defaults";
 import VisualState from "./state";
 const log = require("debug")("AttributeSlicer::Capabilities"); // tslint:disable-line
 import * as $ from "jquery";
 import VisualDataRoleKind = powerbi.VisualDataRoleKind;
 
-const capabilities = $.extend(true, {}, VisualBase.capabilities, {
+const capabilities = $.extend(true, {}, {
     dataRoles: [
         {
             name: "Category",

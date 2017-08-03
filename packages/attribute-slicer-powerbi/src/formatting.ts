@@ -22,15 +22,14 @@
  * SOFTWARE.
  */
 
-import IValueFormatter = powerbi.visuals.IValueFormatter;
-import valueFormatterFactory = powerbi.visuals.valueFormatter.create;
+import { formatting } from "../powerbi-visuals-utils"
 
 /**
  * Creates a value formatter from the current set of options
  */
 export function createValueFormatter(displayUnits = 0, precision = 0) {
     "use strict";
-    return valueFormatterFactory({
+    return formatting.valueFormatter.create({
         value: displayUnits,
         format: "0",
         precision: precision,
@@ -42,7 +41,7 @@ export function createValueFormatter(displayUnits = 0, precision = 0) {
  */
 export function createCategoryFormatter(dataView: powerbi.DataView) {
     "use strict";
-    let formatter: IValueFormatter;
+    let formatter: formatting.IValueFormatter;
     let cats = dataView && dataView.categorical && dataView.categorical.categories;
     if (cats && cats.length && cats[0].source.type.dateTime) {
         let min: Date;
@@ -56,7 +55,7 @@ export function createCategoryFormatter(dataView: powerbi.DataView) {
             }
         });
         if (min && max) {
-            formatter = valueFormatterFactory({
+            formatter = formatting.valueFormatter.create({
                 value: min,
                 value2: max,
                 format: cats[0].source.format || "0",

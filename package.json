@@ -62,12 +62,23 @@
     "ts-node": "0.5.5",
     "tslint": "^3.15.1",
     "typedoc": "^0.7.0",
-    "typescript": "2.3",
+    "typescript": "2.3.4",
     "underscore": "1.8.3",
     "url-loader": "^0.5.7",
     "wallaby-webpack": "^0.0.26",
     "webpack": "^1.14.0",
     "webpack-strip": "^0.1.0",
     "yargs": "3.31.0"
+  },
+  "dependencies": {
+    "imports-loader": "^0.7.1",
+    "node-noop": "^1.0.0",
+    "powerbi-models": "^0.11.3",
+    "powerbi-visuals-tools": "^1.7.1",
+    "powerbi-visuals-utils-dataviewutils": "^1.2.0",
+    "powerbi-visuals-utils-formattingutils": "^2.1.0",
+    "powerbi-visuals-utils-svgutils": "^1.1.0",
+    "powerbi-visuals-utils-typeutils": "^1.1.0",
+    "script-loader": "^0.7.0"
   }
 }

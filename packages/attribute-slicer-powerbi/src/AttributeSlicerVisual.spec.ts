@@ -28,7 +28,7 @@ import { UpdateType } from "@essex/pbi-base";
 import * as $ from "jquery";
 import { expect } from "chai";
 import { AttributeSlicer } from "@essex/attribute-slicer";
-import VisualUpdateOptions = powerbi.VisualUpdateOptions;
+import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import AttributeSlicerVisual from "./AttributeSlicerVisual";
 
 describe("AttributeSlicerVisual", function () {
@@ -57,7 +57,7 @@ describe("AttributeSlicerVisual", function () {
                 height: 500,
             },
         } as any;
-        const instance = new AttributeSlicerVisual(true, options);
+        const instance = new AttributeSlicerVisual(options, true);
         const attributeSlicer = {};
         instance["mySlicer"] = <any>attributeSlicer;
         instance["throwErrors"] = true;
@@ -114,7 +114,7 @@ describe("AttributeSlicerVisual", function () {
             },
             values: n,
         }));
-        return <powerbi.VisualUpdateOptions><any>{
+        return <VisualUpdateOptions><any>{
             viewport: {
                 width: 100,
                 height: 100,
@@ -163,7 +163,7 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let fakeCats = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
-        instance.updateWithType(update, UpdateType.Data);
+        instance.update(update, UpdateType.Data);
         // Make sure the data was passed correctly to attribute slicer
         expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal(fakeCats);
     });
@@ -172,12 +172,12 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.updateWithType(update, UpdateType.Data);
+        instance.update(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
         attributeSlicer.state.selectedItems = <any>[{ match: "WHATEVER" }];
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.updateWithType(anotherUpdate, UpdateType.Data);
+        instance.update(anotherUpdate, UpdateType.Data);
         // Make sure there is no more selected items
         expect(attributeSlicer.state.selectedItems).to.be.empty;
     });
@@ -185,14 +185,14 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let categories = ["CAT_1", "CAT_2"];
         let update = createOptionsWithCategories(categories, "SOME_CATEGORY_NAME");
-        instance.updateWithType(update, UpdateType.Data);
+        instance.update(update, UpdateType.Data);
         // delete instance["_state"];
         // Set our fake selected items
         instance["state"].searchText = "SOME SEARCH STRING";
         attributeSlicer.state = <any>{ searchText: "SOME SEARCH STRING" };
 
         let anotherUpdate = createOptionsWithCategories(categories, "SOME_OTHER_CATEGORY");
-        instance.updateWithType(anotherUpdate, UpdateType.Data);
+        instance.update(anotherUpdate, UpdateType.Data);
         // Make sure there is no more search string
         expect(attributeSlicer.state.searchText).to.be.empty;
     });
@@ -391,7 +391,7 @@ describe("AttributeSlicerVisual", function () {
         const { instance, attributeSlicer } = createInstance();
         let fakeCats = ["CAT_1", "CAT_2", "", " "];
         let update = createOptionsWithCategories(fakeCats, "SOME_CATEGORY_NAME");
-        instance.updateWithType(update, UpdateType.Data);
+        instance.update(update, UpdateType.Data);
 
         expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
     });
@@ -402,7 +402,7 @@ describe("AttributeSlicerVisual", function () {
         const values = [[1, 2, 3], [2, 3, 3]]; // Values for each category
         let objects = { display : { hideEmptyItems: true}};
         const update = createOptionsWithCategoriesAndValues(fakeCats, "SOME_CATEGORY_NAME", values, "VALUE_NAME", objects);
-        instance.updateWithType(update, UpdateType.Data);
+        instance.update(update, UpdateType.Data);
 
         expect(attributeSlicer.data.map(function (n) { return n.match; })).to.be.deep.equal( ["CAT_1", "CAT_2"]);
     });
@@ -467,7 +467,7 @@ describe("AttributeSlicerVisual", function () {
             // Remove the categorical object
             delete update.dataViews[0].categorical;
 
-            instance.updateWithType(update, UpdateType.Data);
+            instance.update(update, UpdateType.Data);
         });
     });
 });

@@ -26,18 +26,18 @@ import {
     setting,
     boolSetting as bool,
     numberSetting as number,
-    parseSelectionIds,
+    // parseSelectionIds,
     HasSettings,
     getSetting,
     buildContainsFilter,
     ColoredObjectsSettings,
     coloredObjectsSettings,
-    deserializeObjectWithIdentity,
-    serializeObjectWithIdentity,
+    // deserializeObjectWithIdentity,
+    // serializeObjectWithIdentity,
     colorSetting as color,
 } from "@essex/pbi-base";
+import { type } from "../powerbi-visuals-utils";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
-import PixelConverter = jsCommon.PixelConverter;
 import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "@essex/attribute-slicer";
 import * as _ from "lodash";
@@ -145,7 +145,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         match: any;
         value: any;
         renderedValue?: any;
-        selector: any;
     }[];
 
     /**
@@ -155,8 +154,8 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Text Size",
         description: "The size of the text",
         defaultValue: DEFAULT_STATE.textSize,
-        parse: val => val ? PixelConverter.fromPointToPixel(parseFloat(val)) : DEFAULT_STATE.textSize,
-        compose: val => PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
+        parse: val => val ? type.PixelConverter.fromPointToPixel(parseFloat(val)) : DEFAULT_STATE.textSize,
+        compose: val => type.PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
     })
     public textSize?: number;
 
@@ -274,7 +273,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public displayValueLabels?: boolean;
 
     /**
-     * If the value text overflow should be visible 
+     * If the value text overflow should be visible
      */
     @setting({
         category: "Display",
@@ -305,13 +304,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public receive(newProps?: any) {
         const base = super.receive(newProps);
         if (base) {
-            if (base.colors && base.colors.instanceColors) {
-                base.colors.instanceColors = base.colors.instanceColors.map((n: any) => deserializeObjectWithIdentity({
-                    color: n.color,
-                    name: n.name,
-                    identity: n.identity,
-                }));
-            }
 
             // HACK: Temporary fix until we switch to selection manager
             // Necessary, because in State -> JSON process, it changes objects with undefined properties to null properties
@@ -321,21 +313,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
             }
         }
         return base;
-    }
-
-    /**
-     * Creates a JSON object version of this state, suitable for storage
-     */
-    public toJSONObject() {
-        const jsonObj = super.toJSONObject() as AttributeSlicerVisualState;
-        if (this.colors && this.colors.instanceColors) {
-            jsonObj.colors.instanceColors = this.colors.instanceColors.map(n => serializeObjectWithIdentity({
-                color: n.color,
-                name: n.name,
-                identity: n.identity,
-            }));
-        }
-        return jsonObj;
     }
 }
 
@@ -360,18 +337,8 @@ function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
     "use strict";
     const objects = ldget(dataView, "metadata.objects");
     if (objects) {
-        // HACK: Extra special code to restore selection
-        const selectedIds = parseSelectionIds(objects);
-        if (selectedIds && selectedIds.length) {
-            const serializedSelectedItems: ListItem[] = JSON.parse(ldget(objects, "general.selection"));
-            return selectedIds.map((n: powerbi.visuals.SelectionId, i: number) => {
-                const { match, value, renderedValue } = serializedSelectedItems[i];
-                const id = (n.getKey ? n.getKey() : n["key"]);
-                const item = createItem(match, value, id, n.getSelector(), renderedValue);
-                return item;
-            });
-        }
-        return [];
+        const selectedItems = ldget(objects, "general.selection");
+        return selectedItems ? JSON.parse(selectedItems) : [];
     } else if (dataView) { // If we have a dataview, but we don't have any selection, then clear it
         return [];
     }
@@ -387,7 +354,6 @@ function convertSelectionToPBI(value: ListItem[]) {
             id: n.id,
             match: n.match,
             value: n.value,
-            selector: n.selector,
             renderedValue: n.renderedValue,
         })));
     }
