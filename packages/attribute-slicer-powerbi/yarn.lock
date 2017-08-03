@@ -10,6 +10,7 @@
     jquery "^2.2.0"
     lodash "4.0.0"
     ts-loader "^2.3.2"
+    xss "^0.3.3"
 
 "@essex/pbi-base@^0.9.0":
   version "0.9.0"
@@ -1374,6 +1375,10 @@ cssesc@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-0.1.0.tgz#c814903e45623371a0477b40109aaafbeeaddbb4"
 
+cssfilter@0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/cssfilter/-/cssfilter-0.0.9.tgz#8f5ceb3aabd768db539da4582b2152d63ef7715e"
+
 "cssnano@>=2.6.1 <4":
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-3.9.1.tgz#41422bb5390d85a94ad4db03cc1a188bf68744fe"
@@ -1766,11 +1771,11 @@ escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
 
-escape-string-regexp@1.0.2:
+escape-string-regexp@1.0.2, escape-string-regexp@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.2.tgz#4dbc2fe674e71949caf3fb2695ce7f2dc1d9a8d1"
 
-escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.3, escape-string-regexp@^1.0.5:
+escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.3, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
@@ -5960,6 +5965,13 @@ ws@1.0.1:
 xmlhttprequest-ssl@1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/xmlhttprequest-ssl/-/xmlhttprequest-ssl-1.5.1.tgz#3b7741fea4a86675976e908d296d4445961faa67"
+
+xss@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/xss/-/xss-0.3.3.tgz#a014360dee10317331f9e74258141f7ed03fc784"
+  dependencies:
+    commander "^2.9.0"
+    cssfilter "0.0.9"
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"

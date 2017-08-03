@@ -37,6 +37,7 @@ const naturalSort = require("javascript-natural-sort");
 const VirtualList = require("./lib/VirtualList");
 const log = require("debug")("essex.widget.AttributeSlicer");
 const ldget = require("lodash/get");
+const htmlencode = require("htmlencode");
 /* tslint:enable */
 
 /**
@@ -594,6 +595,11 @@ export class AttributeSlicer {
      * Sets the slicer data
      */
     public set data(newData: SlicerItem[]) {
+
+        // escape values to prevent possible XSS
+        newData.forEach( (item) => {
+            item.match = htmlencode.htmlEncode(item.match);
+        });
 
         // If the user is straight up just setting new data, then clear the selected item
         // Otherwise, we are appending from a search/page action, it doesn't make sense to clear it.

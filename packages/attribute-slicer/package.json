@@ -20,7 +20,8 @@
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^2.2.0",
     "lodash": "4.0.0",
-    "ts-loader": "^2.3.2"
+    "ts-loader": "^2.3.2",
+    "htmlencode": "^0.0.4"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
