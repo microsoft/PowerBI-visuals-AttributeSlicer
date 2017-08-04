@@ -383,7 +383,22 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         if (isSearch) {
             // Set the search filter on PBI
             const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
-            this.host["applyJsonFilter"](filter, "general", "selfFilter");
+            this.state.searchText = this.mySlicer.searchString;
+
+            let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
+            if (filter && filter.conditions.length > 0) {
+                this.host["applyJsonFilter"](filter, "general", "selfFilter");
+            } else {
+                const remove = objects.remove = objects.remove || [];
+                remove.push({
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        selfFilter: undefined,
+                    },
+                })
+            }
+            this.host.persistProperties(objects);
 
             // Set up the load deferred, and load more data
             this.loadDeferred = $.Deferred();
@@ -400,10 +415,8 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             this.loadDeferred = $.Deferred();
             item.result = this.loadDeferred.promise();
             if (!alreadyLoading) {
-                // TODO: FIX
                 log("Loading more data");
-                // this.host.loadMoreData();
-                throw new Error("Load More data");
+                this.host["loadMoreData"]();
             }
         }
     }
@@ -440,19 +453,29 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 column: categories.source.displayName
             };
 
-            this.host.persistProperties(objects);
+            if (selItems.length > 0) {
+                const filter = new models.AdvancedFilter(
+                    target,
+                    selItems.length < 2 ? "And" : "Or",
+                    selItems.map(n =>({
+                        operator: <models.AdvancedFilterConditionOperators>"Is",
+                        value: n.match
+                    }))
+                )
+                this.host.applyJsonFilter(filter, "general", "filter");
+            } else {
+                // TODO: Is this the best way??
+                const remove = objects.remove = objects.remove || [];
+                remove.push({
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        filter: undefined,
+                    },
+                })
+            }
 
-            // if (selItems.length > 0) {
-            const filter = new models.AdvancedFilter(
-                target,
-                selItems.length < 2 ? "And" : "Or",
-                selItems.map(n =>({
-                    operator: <models.AdvancedFilterConditionOperators>"Is",
-                    value: n.match
-                }))
-            )
-            this.host["applyJsonFilter"](filter, "general", "filter");
-            // };
+            this.host.persistProperties(objects);
         }
     }
 }

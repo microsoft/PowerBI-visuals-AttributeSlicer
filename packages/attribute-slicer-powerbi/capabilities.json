@@ -139,6 +139,12 @@
                         }
                     }
                 },
+                "searchText": {
+                    "displayName": "Search Text",
+                    "type": {
+                        "text": {}
+                    }
+                },
                 "selection": {
                     "displayName": "Selection",
                     "type": {

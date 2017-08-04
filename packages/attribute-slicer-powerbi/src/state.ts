@@ -54,20 +54,20 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      */
     @setting({
         // persist: false, // Don't persist this setting, it is dynamic based on the dataview
-        name: "selfFilter",
+        name: "searchText",
         hidden: true,
-        config: {
-            type: { filter: { selfFilter: true } },
-        },
         parse(value, desc, dv) {
-            const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
-            if (selfFilter) {
-                const right = ldget(selfFilter.where(), "[0].condition.right");
-                return (right && right.value) || "";
+            const searchText: any = ldget(dv, "metadata.objects.general.searchText");
+            if (!searchText) {
+                // TODO: Remove this after a few release cycles, this is purely for legacy support
+                const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
+                if (selfFilter) {
+                    const right = ldget(selfFilter.where(), "[0].condition.right");
+                    return (right && right.value) || "";
+                }
             }
-            return "";
+            return searchText || "";
         },
-        compose: (val, c, d) => val ? buildContainsFilter(ldget(d, "categorical.categories[0].source"), val) : val,
     })
     public searchText?: string;
 
