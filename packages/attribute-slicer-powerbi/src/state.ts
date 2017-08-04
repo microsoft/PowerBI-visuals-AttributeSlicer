@@ -360,27 +360,6 @@ function convertSelectionToPBI(value: ListItem[]) {
 }
 
 /**
- * Calculates the properties that have changed between the two states
- */
-export function calcStateDifferences(newState: IAttributeSlicerState, oldState: IAttributeSlicerState) {
-    "use strict";
-    const differences: string[] = [];
-    newState = newState || <any>{};
-    oldState = oldState || <any>{};
-    Object.keys(newState || {}).forEach(prop => {
-        const oldValue = newState[prop];
-        const newValue = oldState[prop];
-        if (!_.isEqual(oldValue, newValue)) {
-            const descriptor = getSetting(AttributeSlicerVisualState, prop);
-            if (descriptor) {
-                differences.push(descriptor.displayName || prop);
-            }
-        }
-    });
-    return differences;
-}
-
-/**
  * Changes all nulls to undefined in an object graph
  * * Temporary *
  * @param obj The object to change null to undefined

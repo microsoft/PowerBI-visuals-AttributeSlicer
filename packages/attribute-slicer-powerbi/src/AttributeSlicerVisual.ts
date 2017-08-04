@@ -22,47 +22,32 @@
  * SOFTWARE.
  */
 import "powerbi-visuals-tools/templates/visuals/.api/v1.7.0/PowerBI-Visuals";
-
-// /* tslint:disable */
 import {
     createPersistObjectBuilder,
-//     buildContainsFilter,
     logger,
-//     capabilities,
     PropertyPersister,
     createPropertyPersister,
-//     Visual,
     UpdateType,
-//     receiveUpdateType,
-//     IDimensions,
     receiveDimensions,
     calcUpdateType,
-//     IReceiveDimensions,
-//     getSelectionIdsFromSelectors,
-//     getSetting,
     computeRenderedValues,
     buildContainsFilter,
-//     VisualBase,
 } from "@essex/pbi-base";
 import * as _ from "lodash";
-
 import * as $ from "jquery";
-const ldget = require("lodash.get");
-// import VisualObjectInstance = powerbi.VisualObjectInstance;
-// import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-
 import { isStateEqual, IAttributeSlicerState, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
 import { default as converter, createItemFromSerializedItem } from "./dataConversion";
-// import capabilitiesData from "./AttributeSlicerVisual.capabilities";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
 import { default as VisualState, calcStateDifferences } from "./state";
+import * as models from "powerbi-models";
+
+/* tslint:disable */
+const ldget = require("lodash.get");
 const log = logger("essex.widget.AttributeSlicerVisual");
 const CUSTOM_CSS_MODULE = require("!css-loader!sass-loader!./css/AttributeSlicerVisual.scss");
 const stringify = require("json-stringify-safe");
-import * as models from "powerbi-models";
-
-// /* tslint:enable */
+/* tslint:enable */
 
 // // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
@@ -454,13 +439,10 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             };
 
             if (selItems.length > 0) {
-                const filter = new models.AdvancedFilter(
+                const filter = new models.BasicFilter(
                     target,
-                    selItems.length < 2 ? "And" : "Or",
-                    selItems.map(n =>({
-                        operator: <models.AdvancedFilterConditionOperators>"Is",
-                        value: n.match
-                    }))
+                    "In",
+                    selItems.map(n => n.match)
                 )
                 this.host.applyJsonFilter(filter, "general", "filter");
             } else {
