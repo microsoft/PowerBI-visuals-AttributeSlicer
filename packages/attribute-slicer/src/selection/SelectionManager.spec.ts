@@ -247,7 +247,6 @@ describe("SelectionManager", () => {
 
                 // Initial brush selects 1 & 2
                 brush(instance, item2, item3);
-                console.log(instance.selection);
                 expect(instance.selection).to.be.deep.equal([item2, item3, item]);
             });
 

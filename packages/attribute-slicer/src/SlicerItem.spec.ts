@@ -120,6 +120,12 @@ describe("SlicerItem", () => {
             match: "HELLO",
         };
     };
+    const templateWithMatchScriptTag = () => {
+        return {
+            element: callTemplate("<script>Hello</script>"),
+            html: "&lt;script&gt;Hello&lt;/script&gt;",
+        };
+    };
     it("should display the match on an item with a match", () => {
         const { element, match } = templateWithMatch();
         expect(element.find(".match").text().replace(/ /g, "")).to.be.equal(match);
@@ -201,5 +207,9 @@ describe("SlicerItem", () => {
     it("should use the font color specified", () => {
         const { element } = templateWithMatchAndFormatOptions(false, false, "#333");
         expect(element.find(".category-container").css("color")).to.be.equal("rgb(51, 51, 51)");
+    });
+    it("should html decode match text", () => {
+        const { element, html } = templateWithMatchScriptTag();
+        expect(element.find(".match").html()).to.be.equal(html);
     });
 });

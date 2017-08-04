@@ -95,7 +95,6 @@ describe("AttributeSlicer", () => {
             renderedValue: n.match.charCodeAt(0),
         }, n);
     });
-    const HTML_ENCODE_DATA = createData("<h1>Im a heading</h1>", "<script>alert(1);</script>");
 
     it("should load", () => {
         createInstance();
@@ -800,18 +799,6 @@ describe("AttributeSlicer", () => {
                     .val("TEST_SEARCH")
                     .trigger("input");
             });
-        });
-        it("should encode html", () => {
-            let { instance } = createInstance();
-            instance.data = HTML_ENCODE_DATA;
-
-            let encodedData = instance.data.map((data) => {
-                return data.match;
-            });
-            expect(encodedData).to.be.deep.equal([
-                "&lt;h1&gt;Im a heading&lt;/h1&gt;",
-                "&lt;script&gt;alert(1);&lt;/script&gt;",
-            ]);
         });
     });
 
