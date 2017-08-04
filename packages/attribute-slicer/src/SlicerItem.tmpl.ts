@@ -37,12 +37,12 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
     const alignStyle = alignTextLeft ? "text-align:left;" : "";
     const itemFontColor = itemTextColor ? itemTextColor : "#000";
     const categoryStyle = `display:inline-block;overflow:hidden;max-width:${sizes.category}%;${alignStyle};color:${itemFontColor}`;
-    return $(`
+    const itemUi =  $(`
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
             <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
-                <span style="${categoryStyle}" title="${pretty(match)}" class="category-container">
+                <span style="${categoryStyle}" title="" class="category-container">
                     <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                    <span class="match">${pretty(match)}</span>
+                    <span class="match"></span>
                     <span class="matchSuffix">${pretty(matchSuffix)}</span>
                 </span>
                 <span style="display:inline-block;max-width:${sizes.value}%;height:100%" class="value-container">
@@ -53,6 +53,13 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
             </div>
         </div>
     `.trim().replace(/\n/g, ""));
+
+    // use jquery to html the match text to prevent xss
+    itemUi.find(".match").text(pretty(match));
+    const matchText = itemUi.find(".match").text();
+    itemUi.find(".category-container").attr("title", matchText);
+
+    return itemUi;
 }
 
 /**
