@@ -371,18 +371,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             this.state.searchText = this.mySlicer.searchString;
 
             let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
-            if (filter && filter.conditions.length > 0) {
-                this.host["applyJsonFilter"](filter, "general", "selfFilter");
-            } else {
-                const remove = objects.remove = objects.remove || [];
-                remove.push({
-                    objectName: "general",
-                    selector: undefined,
-                    properties: {
-                        selfFilter: undefined,
-                    },
-                })
-            }
+            this.host["applyJsonFilter"](filter && filter.conditions.length > 0 ? filter : null, "general", "selfFilter");
             this.host.persistProperties(objects);
 
             // Set up the load deferred, and load more data
@@ -438,24 +427,12 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 column: categories.source.displayName
             };
 
-            if (selItems.length > 0) {
-                const filter = new models.BasicFilter(
-                    target,
-                    "In",
-                    selItems.map(n => n.match)
-                )
-                this.host.applyJsonFilter(filter, "general", "filter");
-            } else {
-                // TODO: Is this the best way??
-                const remove = objects.remove = objects.remove || [];
-                remove.push({
-                    objectName: "general",
-                    selector: undefined,
-                    properties: {
-                        filter: undefined,
-                    },
-                })
-            }
+            const filter = new models.BasicFilter(
+                target,
+                "In",
+                selItems.map(n => n.match)
+            )
+            this.host.applyJsonFilter(selItems.length > 0 ? filter : null, "general", "filter");
 
             this.host.persistProperties(objects);
         }
