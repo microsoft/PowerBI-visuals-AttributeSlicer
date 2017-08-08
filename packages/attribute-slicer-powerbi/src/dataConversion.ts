@@ -58,7 +58,7 @@ export default function converter(
                     createItem(
                         buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
                         total,
-                        id.getKey(),
+                        id.getKey ? id.getKey() : <any>id,
                         undefined,
                         "#ccc");
                 (valueSegments || []).forEach(segment => {

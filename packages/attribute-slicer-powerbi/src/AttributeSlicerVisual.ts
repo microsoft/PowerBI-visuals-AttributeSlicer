@@ -39,7 +39,7 @@ import { isStateEqual, IAttributeSlicerState, AttributeSlicer as AttributeSlicer
 import { default as converter, createItemFromSerializedItem } from "./dataConversion";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
-import { default as VisualState, calcStateDifferences } from "./state";
+import { default as VisualState } from "./state";
 import * as models from "powerbi-models";
 
 /* tslint:disable */
@@ -319,7 +319,32 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         if (labelDisplayUnits || labelPrecision) {
             formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
         }
-        return converter(dv, formatter, undefined, state.colors, this.host.createSelectionIdBuilder);
+        if (state.hideEmptyItems) {
+            this.zeroEmptyItems(dv);
+        }
+        let listItems = converter(dv, formatter, undefined, state.colors);
+        if (state.hideEmptyItems) {
+            listItems.items = listItems.items.filter(item => item.match && item.match.trim() !== "");
+        }
+        return listItems;
+    }
+
+    /**
+     * Zero out values for blank categories so they won't affect
+     * value bar width calculations.
+     * @param dv
+     */
+    private zeroEmptyItems(dv: powerbi.DataView) {
+        let categories = dv.categorical.categories[0].values;
+        for (let i in categories) {
+            if (!categories[i] || categories[i].toString().trim().length === 0) {
+                for (let dataColumn of dv.categorical.values) {
+                    if (dataColumn.values && dataColumn.values[i]) {
+                        dataColumn.values[i] = 0;
+                    }
+                }
+            }
+        }
     }
 
     /* tslint:disable */

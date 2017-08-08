@@ -47,7 +47,7 @@ describe("AttributeSlicerVisual", function () {
      */
     function createInstance() {
         const options = {
-            element: parentEle,
+            element: parentEle[0],
             host: {
                 persistProperties: () => true,
                 createSelectionManager: () => {}
