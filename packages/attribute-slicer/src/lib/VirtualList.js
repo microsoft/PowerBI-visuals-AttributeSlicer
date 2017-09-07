@@ -117,7 +117,7 @@ VirtualList.prototype.setDir = function (horiz) {
       overflowY: "auto"
     }).scrollLeft(0);
   }
-  
+
   var screenItemsLen = this.screenItemsLen = Math.ceil((this.horiz ? width : height) / this.itemHeight);
   // Cache 4 times the number of items that fit in the container viewport
   this.cachedItemsLen = screenItemsLen * 3;
@@ -135,7 +135,7 @@ VirtualList.prototype.setHeight = function (height) {
     // Cache 4 times the number of items that fit in the container viewport
     this.cachedItemsLen = screenItemsLen * 3;
     this.maxBuffer = screenItemsLen * this.itemHeight;
-    
+
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
@@ -152,7 +152,8 @@ VirtualList.prototype.setItemHeight = function (itemHeight) {
     var sizeObj = {  };
     sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
     this.scroller.css(sizeObj);
-    
+
+    this.lastScrolled = 0;
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
@@ -184,7 +185,7 @@ VirtualList.prototype.createRow = function(i) {
       item = this.items[i];
     }
   }
-  
+
   if (item) {
     item.classList.add('vrow');
     item.style.position = 'absolute';
@@ -223,7 +224,7 @@ VirtualList.prototype._renderChunk = function(node, from) {
   }
 
   // Hide and mark obsolete nodes for deletion.
-  for (var j = 1, l = node[0].childNodes.length; j < l; j++) {
+  for (var j = 0, l = node[0].childNodes.length; j < l; j++) {
     node[0].childNodes[j].style.display = 'none';
     node[0].childNodes[j].setAttribute('data-rm', '1');
   }
@@ -243,12 +244,12 @@ VirtualList.createContainer = function(w, h) {
         overflowY: "auto",
         position: 'relative',
         padding: 0
-    }); 
+    });
     return ele;
 };
 
 VirtualList.createScroller = function(h) {
-    var ele = $('<div>');   
+    var ele = $('<div>');
     ele.addClass("vlist-scroller");
     ele.css({
         opacity: 0,
