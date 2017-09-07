@@ -77,6 +77,11 @@ function VirtualList(config) {
   }.bind(this);
 
   this.container.on('scroll', onScroll.bind(this));
+
+  /**
+   * This is here, because otherwise, the function gets placed on the prototype, so multiple attribute slicers interfere with each other if they are on the same page.
+   */
+  this._renderChunkDebounced = _.debounce(VirtualList.prototype._renderChunk, 50);
 }
 
 VirtualList.prototype.setDir = function (horiz) {
@@ -125,7 +130,7 @@ VirtualList.prototype.setDir = function (horiz) {
   this.lastRepaintPos = undefined;
   if (this.items) {
     var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-    this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+    this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
   }
 };
 
@@ -139,7 +144,7 @@ VirtualList.prototype.setHeight = function (height) {
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+        this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
     }
 };
 
@@ -156,7 +161,7 @@ VirtualList.prototype.setItemHeight = function (itemHeight) {
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+        this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
     }
 };
 
@@ -168,7 +173,7 @@ VirtualList.prototype.setItems = function (items) {
     this.scroller.css(sizeObj);
     this.lastRepaintPos = undefined;
     this.lastScrolled = 0;
-    this._renderChunk(this.listContainer, 0);
+    this._renderChunkDebounced(this.listContainer, 0);
 };
 
 VirtualList.prototype.createRow = function(i) {
