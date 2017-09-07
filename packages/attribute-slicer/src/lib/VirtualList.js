@@ -77,6 +77,11 @@ function VirtualList(config) {
   }.bind(this);
 
   this.container.on('scroll', onScroll.bind(this));
+
+  /**
+   * This is here, because otherwise, the function gets placed on the prototype, so multiple attribute slicers interfere with each other if they are on the same page.
+   */
+  this._renderChunkDebounced = _.debounce(VirtualList.prototype._renderChunk, 50);
 }
 
 VirtualList.prototype.setDir = function (horiz) {
@@ -117,7 +122,7 @@ VirtualList.prototype.setDir = function (horiz) {
       overflowY: "auto"
     }).scrollLeft(0);
   }
-  
+
   var screenItemsLen = this.screenItemsLen = Math.ceil((this.horiz ? width : height) / this.itemHeight);
   // Cache 4 times the number of items that fit in the container viewport
   this.cachedItemsLen = screenItemsLen * 3;
@@ -125,7 +130,7 @@ VirtualList.prototype.setDir = function (horiz) {
   this.lastRepaintPos = undefined;
   if (this.items) {
     var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-    this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+    this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
   }
 };
 
@@ -135,11 +140,11 @@ VirtualList.prototype.setHeight = function (height) {
     // Cache 4 times the number of items that fit in the container viewport
     this.cachedItemsLen = screenItemsLen * 3;
     this.maxBuffer = screenItemsLen * this.itemHeight;
-    
+
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+        this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
     }
 };
 
@@ -152,11 +157,11 @@ VirtualList.prototype.setItemHeight = function (itemHeight) {
     var sizeObj = {  };
     sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
     this.scroller.css(sizeObj);
-    
+
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
-        this._renderChunk(this.listContainer, first < 0 ? 0 : first);
+        this._renderChunkDebounced(this.listContainer, first < 0 ? 0 : first);
     }
 };
 
@@ -167,7 +172,8 @@ VirtualList.prototype.setItems = function (items) {
     sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
     this.scroller.css(sizeObj);
     this.lastRepaintPos = undefined;
-    this._renderChunk(this.listContainer, 0);
+    this.lastScrolled = 0;
+    this._renderChunkDebounced(this.listContainer, 0);
 };
 
 VirtualList.prototype.createRow = function(i) {
@@ -184,7 +190,7 @@ VirtualList.prototype.createRow = function(i) {
       item = this.items[i];
     }
   }
-  
+
   if (item) {
     item.classList.add('vrow');
     item.style.position = 'absolute';
@@ -223,7 +229,7 @@ VirtualList.prototype._renderChunk = function(node, from) {
   }
 
   // Hide and mark obsolete nodes for deletion.
-  for (var j = 1, l = node[0].childNodes.length; j < l; j++) {
+  for (var j = 0, l = node[0].childNodes.length; j < l; j++) {
     node[0].childNodes[j].style.display = 'none';
     node[0].childNodes[j].setAttribute('data-rm', '1');
   }
@@ -243,12 +249,12 @@ VirtualList.createContainer = function(w, h) {
         overflowY: "auto",
         position: 'relative',
         padding: 0
-    }); 
+    });
     return ele;
 };
 
 VirtualList.createScroller = function(h) {
-    var ele = $('<div>');   
+    var ele = $('<div>');
     ele.addClass("vlist-scroller");
     ele.css({
         opacity: 0,
