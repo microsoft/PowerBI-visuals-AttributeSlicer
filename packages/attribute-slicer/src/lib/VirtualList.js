@@ -153,7 +153,6 @@ VirtualList.prototype.setItemHeight = function (itemHeight) {
     sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
     this.scroller.css(sizeObj);
 
-    this.lastScrolled = 0;
     this.lastRepaintPos = undefined;
     if (this.items) {
         var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
@@ -168,6 +167,7 @@ VirtualList.prototype.setItems = function (items) {
     sizeObj[this.horiz ? "width" : "height"] = (this.itemHeight * this.totalRows) + "px";
     this.scroller.css(sizeObj);
     this.lastRepaintPos = undefined;
+    this.lastScrolled = 0;
     this._renderChunk(this.listContainer, 0);
 };
 
