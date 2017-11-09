@@ -30,6 +30,8 @@ import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
 import { serializeSelectors, IColorSettings, convertItemsWithSegments, IValueSegment } from "@essex/pbi-base";
 const ldget = require("lodash/get"); //tslint:disable-line
+const HEX_COLOR_REGEX = /#[0-9A-F]{3,6}/;
+const RGB_COLOR_REGEX = /rgba?\s*\(\s*[\d\.]+\s*,\s*[\d\.]+\s*,\s*[\d\.]+\s*(,\s*[\d\.]+\s*)?\)/;
 
 /**
  * Converts the given dataview into a list of listitems
@@ -50,9 +52,15 @@ export default function converter(
             categoryFormatter = createCategoryFormatter(dataView);
         }
 
+        const segmentColors = calculateSegmentColorsFromData(dataView);
+
         const converted = convertItemsWithSegments(
             dataView,
-            (dvCats: any, catIdx: number, total: number, id: powerbi.visuals.SelectionId, valueSegments: IValueSegment[]) => {
+            (dvCats: powerbi.DataViewCategoryColumn[],
+             catIdx: number,
+             total: number,
+             id: powerbi.visuals.SelectionId,
+             valueSegments: IValueSegment[]) => {
                 const item =
                     createItem(
                         buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
@@ -61,7 +69,9 @@ export default function converter(
                         id.getSelector(),
                         undefined,
                         "#ccc");
-                (valueSegments || []).forEach(segment => {
+                (valueSegments || []).forEach((segment, i) => {
+                    // Update the segments color to the ones pulled from the data, if it exists
+                    segment.color = segmentColors[i] || segment.color;
                     segment.displayValue = valueFormatter.format(segment.value);
                 });
                 return item;
@@ -70,6 +80,30 @@ export default function converter(
         }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
         return converted;
     }
+}
+
+/**
+ * Gets a map of segment indexes to colors, maps the "colored by" segments to colors
+ * @param dataView The dataView to get the colors from
+ */
+export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
+    "use strict";
+    const values = dataView.categorical.values;
+
+    // Sometimes the segments have RGB names, use them as colors
+    const groups = values && values.grouped();
+    const segmentColors = {};
+
+    // If the segment by is a color segment
+    if (dataView.metadata.columns.filter(n => n.roles["Color"]).length >= 0 && groups) {
+        groups.forEach((n, i) => {
+            const name = (n.name || "") + "";
+            if (name && (HEX_COLOR_REGEX.test(name) || RGB_COLOR_REGEX.test(name))) {
+                segmentColors[i] = name;
+            }
+        });
+    }
+    return segmentColors;
 }
 
 /**
