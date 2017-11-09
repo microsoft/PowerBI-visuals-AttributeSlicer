@@ -52,21 +52,7 @@ export default function converter(
             categoryFormatter = createCategoryFormatter(dataView);
         }
 
-        const values = dataView.categorical.values;
-
-        // Sometimes the segments have RGB names, use them as colors
-        const groups = values && values.grouped();
-        const segmentColors = {};
-
-        // If the segment by is a color segment
-        if (dataView.metadata.columns.filter(n => n.roles["Color"]).length >= 0 && groups) {
-            groups.forEach((n, i) => {
-                const name = (n.name || "") + "";
-                if (name && (HEX_COLOR_REGEX.test(name) || RGB_COLOR_REGEX.test(name))) {
-                    segmentColors[i] = name;
-                }
-            });
-        }
+        const segmentColors = calculateSegmentColorsFromData(dataView);
 
         const converted = convertItemsWithSegments(
             dataView,
@@ -94,6 +80,30 @@ export default function converter(
         }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
         return converted;
     }
+}
+
+/**
+ * Gets a map of segment indexes to colors, maps the "colored by" segments to colors
+ * @param dataView The dataView to get the colors from
+ */
+export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
+    "use strict";
+    const values = dataView.categorical.values;
+
+    // Sometimes the segments have RGB names, use them as colors
+    const groups = values && values.grouped();
+    const segmentColors = {};
+
+    // If the segment by is a color segment
+    if (dataView.metadata.columns.filter(n => n.roles["Color"]).length >= 0 && groups) {
+        groups.forEach((n, i) => {
+            const name = (n.name || "") + "";
+            if (name && (HEX_COLOR_REGEX.test(name) || RGB_COLOR_REGEX.test(name))) {
+                segmentColors[i] = name;
+            }
+        });
+    }
+    return segmentColors;
 }
 
 /**
