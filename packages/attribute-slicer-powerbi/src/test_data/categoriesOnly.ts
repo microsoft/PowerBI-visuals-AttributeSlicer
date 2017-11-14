@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+import "powerbi-visuals-tools/templates/visuals/.api/v1.7.0/PowerBI-Visuals";
+
 /* tslint:disable */
 const data = {
     "viewport": {
