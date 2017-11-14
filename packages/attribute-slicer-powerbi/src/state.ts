@@ -297,18 +297,8 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Receives the new properties
      * @param newProps The properties to merge into state
      */
-    public receive(newProps?: any) {
-        const base = super.receive(newProps);
-        if (base) {
-
-            // HACK: Temporary fix until we switch to selection manager
-            // Necessary, because in State -> JSON process, it changes objects with undefined properties to null properties
-            // to preserve them in a JSON.stringify call.
-            if (base.selectedItems) {
-                base.selectedItems.forEach(nullToUndefined);
-            }
-        }
-        return base;
+    public receive(newProps?: any): this {
+        throw new Error("Not Implemented");
     }
 }
 

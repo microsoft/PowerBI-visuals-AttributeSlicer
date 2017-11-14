@@ -397,7 +397,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             this.state.searchText = this.mySlicer.searchString;
 
             let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
-            this.host["applyJsonFilter"](filter && filter.conditions.length > 0 ? filter : null, "general", "selfFilter");
+            this.host.applyJsonFilter(filter && filter.conditions.length > 0 ? filter : null, "general", "selfFilter");
             this.host.persistProperties(objects);
 
             // Set up the load deferred, and load more data
@@ -438,14 +438,13 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      */
     private writeStateToPBI(text: string) {
         const scrollPosition = this.mySlicer.scrollPosition;
-        this.state = this.state.receive({ scrollPosition });
+        this.state.scrollPosition = scrollPosition;
 
         const state = this.state;
         log("AttributeSlicer loading state into PBI", state);
         if (state && this.host) {
             // Restoring selection into PBI
             let objects: powerbi.VisualObjectInstancesToPersist = state.buildPersistObjects(this.dataView, true);
-            let selection = true;
             const selItems = state.selectedItems || [];
             const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
             const target: models.IFilterColumnTarget = {
@@ -458,8 +457,8 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 "In",
                 selItems.map(n => n.match)
             )
-            this.host.applyJsonFilter(selItems.length > 0 ? filter : null, "general", "filter");
 
+            this.host.applyJsonFilter(selItems.length > 0 ? filter : null, "general", "filter");
             this.host.persistProperties(objects);
         }
     }

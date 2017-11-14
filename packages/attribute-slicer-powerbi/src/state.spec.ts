@@ -56,24 +56,24 @@ describe("state", () => {
             // });
 
             describe("API Quirks", () => {
-                it("should ensure that selected items have no null values", () => {
-                    const { instance } = createInstance();
-                    const testItem = <any>{
-                        id: "DOESNT_MATTER",
-                        selector: {
-                            data: [{
-                                someExpr: null, // tslint:disable-line
-                            }],
-                        },
-                    };
+                // xit("should ensure that selected items have no null values", () => {
+                //     const { instance } = createInstance();
+                //     const testItem = <any>{
+                //         id: "DOESNT_MATTER",
+                //         selector: {
+                //             data: [{
+                //                 someExpr: null, // tslint:disable-line
+                //             }],
+                //         },
+                //     };
 
-                    instance.selectedItems = [testItem];
+                //     instance.selectedItems = [testItem];
 
-                    const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
-                    const parentObj = newInstance.selectedItems[0]["selector"].data[0];
-                    expect(parentObj.hasOwnProperty("someExpr")); // Make sure the key IS defined but the value is undefined
-                    expect(parentObj.someExpr).to.be.undefined;
-                });
+                //     const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
+                //     const parentObj = newInstance.selectedItems[0]["selector"].data[0];
+                //     expect(parentObj.hasOwnProperty("someExpr")); // Make sure the key IS defined but the value is undefined
+                //     expect(parentObj.someExpr).to.be.undefined;
+                // });
             });
         });
         describe("toJSONObject", () => {
