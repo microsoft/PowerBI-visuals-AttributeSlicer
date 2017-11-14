@@ -22,6 +22,11 @@
             "name": "Series",
             "kind": 0,
             "displayName": "Segmented By"
+        },
+        {
+            "name": "Color",
+            "kind": 0,
+            "displayName": "Colored By"
         }
     ],
     "dataViewMappings": [
@@ -32,6 +37,9 @@
                         "max": 1
                     },
                     "Series": {
+                        "max": 0
+                    },
+                    "Color": {
                         "max": 0
                     }
                 },
@@ -45,6 +53,9 @@
                     "Values": {
                         "max": 1,
                         "min": 0
+                    },
+                    "Color": {
+                        "max": 0
                     }
                 },
                 {
@@ -58,6 +69,9 @@
                     "Values": {
                         "max": 1,
                         "min": 1
+                    },
+                    "Color": {
+                        "max": 0
                     }
                 },
                 {
@@ -69,6 +83,9 @@
                     },
                     "Values": {
                         "min": 0
+                    },
+                    "Color": {
+                        "max": 0
                     }
                 },
                 {
@@ -80,6 +97,9 @@
                     },
                     "Values": {
                         "min": 0,
+                        "max": 0
+                    },
+                    "Color": {
                         "max": 0
                     }
                 }
@@ -98,6 +118,64 @@
                 "values": {
                     "group": {
                         "by": "Series",
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Values"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 60
+                            }
+                        }
+                    }
+                },
+                "rowCount": {
+                    "preferred": {
+                        "min": 2
+                    },
+                    "supported": {
+                        "min": 0
+                    }
+                }
+            }
+        },
+
+        {
+            "conditions": [
+                {
+                    "Category": {
+                        "max": 1
+                    },
+                    "Color": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "Values": {
+                        "max": 1,
+                        "min": 0
+                    },
+                    "Series": {
+                        "max": 0
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "Category"
+                    },
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 500
+                        }
+                    }
+                },
+                "values": {
+                    "group": {
+                        "by": "Color",
                         "select": [
                             {
                                 "for": {

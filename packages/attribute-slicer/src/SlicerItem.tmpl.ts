@@ -55,9 +55,8 @@ export default function (item: SlicerItem, sizes: { category: number; value: num
     `.trim().replace(/\n/g, ""));
 
     // use jquery to html the match text to prevent xss
-    itemUi.find(".match").text(pretty(match));
-    const matchText = itemUi.find(".match").text();
-    itemUi.find(".category-container").attr("title", matchText);
+    itemUi[0].querySelector(".match").textContent = pretty(match);
+    itemUi[0].querySelector(".category-container").setAttribute("title", pretty(match));
 
     return itemUi;
 }

@@ -608,9 +608,10 @@ export class AttributeSlicer {
         this._data = newData;
         this.selectionManager.items = newData;
 
-        this.virtualList.setItems(newData);
+        // Not necessary as performed in syncItemVisibility
+        // this.virtualList.setItems(newData);
 
-        this.syncItemVisiblity();
+        this.syncItemVisiblity(true);
         this.updateSelectAllButtonState();
 
         // If this is just setting data, we are not currently in a load cycle
@@ -904,7 +905,7 @@ export class AttributeSlicer {
     /**
      * Syncs the item elements state with the current set of selected items and the search
      */
-    private syncItemVisiblity() {
+    private syncItemVisiblity(forceLoad = false) {
         let filteredData: SlicerItem[] = [];
         if (this.data &&  this.data.length) {
             filteredData = this.data.filter((n, i) => {
@@ -920,9 +921,9 @@ export class AttributeSlicer {
                 return isVisible;
             });
         }
-        if (this.virtualList) {
+        if (this.virtualList && (forceLoad || filteredData.length !== (this.virtualList.items || []).length)) {
             this.virtualList.setItems(filteredData);
-            this.virtualList.rerender();
+            // this.virtualList.rerender();
         }
     }
 
@@ -972,8 +973,9 @@ export class AttributeSlicer {
             .on("click", () => {
                 newEle.remove();
                 let item = this.selectedItems.filter(n => n.equals(v))[0];
-                this.selectedItems.splice(this.selectedItems.indexOf(item), 1);
-                this.selectedItems = this.selectedItems.slice(0);
+                const newSel = this.selectedItems.slice(0);
+                newSel.splice(newSel.indexOf(item), 1);
+                this.selectedItems = newSel;
             })
             .text(text);
         return newEle;

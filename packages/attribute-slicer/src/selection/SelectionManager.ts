@@ -226,7 +226,7 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
                         idx < lastIdx ? idx : lastIdx,
                         (idx < lastIdx ? lastIdx : idx) + 1);
             } else if (this._brushMode) {
-                // If the user is in "brush" mode, but just single clicks an item, then just deselect it, otherwise 
+                // If the user is in "brush" mode, but just single clicks an item, then just deselect it, otherwise
                 // set the item
                 this.selection = this.selection.length === 1 && this.selection[0].equals(item) ? [] : [item];
             } else {
@@ -304,11 +304,24 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
             value = [value[value.length - 1]];
         }
 
-        this._selectionDontUseDirectly = value;
+        const oldSelection = this.selection || [];
+        const newSelection = value;
 
-        if (this.selectionListener) {
-            this.selectionListener(value);
+        // Are there any selected items which do not appear in the new selection
+        let hasChanged = oldSelection.filter(n => newSelection.filter(m => n.equals(m)).length === 0).length > 0;
+
+        // Are there any selected items which do not appear in the old selection
+        hasChanged = hasChanged || newSelection.filter(n => oldSelection.filter(m => n.equals(m)).length === 0).length > 0;
+
+        if (hasChanged) {
+            this._selectionDontUseDirectly = value;
+            if (this.selectionListener) {
+                this.selectionListener(value);
+            }
+            return true;
         }
+
+        return false;
     }
 }
 

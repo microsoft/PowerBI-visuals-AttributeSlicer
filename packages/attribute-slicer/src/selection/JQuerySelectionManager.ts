@@ -207,7 +207,10 @@ export default class JQuerySelectionManager<T extends ISelectableItem<any>> exte
      * Internal method for setting the selection
      */
     protected setSelection(value: T[]) {
-        super.setSelection(value);
-        this.refresh();
+        const changed = super.setSelection(value);
+        if (changed) {
+            this.refresh();
+        }
+        return changed;
     }
 }
