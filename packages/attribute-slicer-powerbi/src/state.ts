@@ -97,6 +97,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Horizontal",
         description: "Display the attributes horizontally, rather than vertically",
         defaultValue: DEFAULT_STATE.horizontal,
+        persist: false,
     })
     public horizontal?: boolean;
 
@@ -108,6 +109,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Value Width %",
         description: "The percentage of the width that the value column should take up.",
         defaultValue: DEFAULT_STATE.valueColumnWidth,
+        persist: false,
     })
     public valueColumnWidth?: number;
 
@@ -120,6 +122,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Hide Empty Items",
         description: "Hide empty / blank Items.",
         defaultValue: false,
+        persist: false,
     })
     public hideEmptyItems?: boolean;
 
@@ -152,6 +155,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         defaultValue: DEFAULT_STATE.textSize,
         parse: val => val ? type.PixelConverter.fromPointToPixel(parseFloat(val)) : DEFAULT_STATE.textSize,
         compose: val => type.PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
+        persist: false,
     })
     public textSize?: number;
 
@@ -162,6 +166,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Text Color",
         description: "Item text color.",
         defaultValue: DEFAULT_STATE.itemTextColor,
+        persist: false,
     })
     public itemTextColor?: string;
 
@@ -172,6 +177,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Text Align Left",
         description: "On to left align item text.",
         defaultValue: DEFAULT_STATE.leftAlignText,
+        persist: false,
     })
     public leftAlignText?: boolean;
 
@@ -182,6 +188,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Show options",
         description: "Should the search box and other options be shown.",
         defaultValue: DEFAULT_STATE.showOptions,
+        persist: false,
     })
     public showOptions?: boolean;
 
@@ -192,6 +199,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Show Search",
         description: "Show the search box.",
         defaultValue: DEFAULT_STATE.showSearch,
+        persist: false,
     })
     public showSearch?: boolean;
 
@@ -203,6 +211,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Units",
         description: "The units to use when displaying values.",
         defaultValue: 0,
+        persist: false,
         config: {
             type: {
                 formatting: {
@@ -221,6 +230,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Precision",
         description: "The precision to use when displaying values.",
         defaultValue: 0,
+        persist: false,
     })
     public labelPrecision?: number;
 
@@ -232,6 +242,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Single Select",
         description: "Only allow for one item to be selected at a time",
         defaultValue: DEFAULT_STATE.singleSelect,
+        persist: false,
     })
     public singleSelect?: boolean;
 
@@ -243,6 +254,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Brush Mode",
         description: "Allow for the drag selecting of attributes",
         defaultValue: DEFAULT_STATE.brushMode,
+        persist: false,
     })
     public brushMode?: boolean;
 
@@ -254,6 +266,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Use Tokens",
         description: "Will show the selected attributes as tokens",
         defaultValue: DEFAULT_STATE.showSelections,
+        persist: false,
     })
     public showSelections?: boolean;
 
@@ -265,6 +278,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Always On Values",
         description: "Display value labels.",
         defaultValue: DEFAULT_STATE.displayValueLabels,
+        persist: false,
     })
     public displayValueLabels?: boolean;
 
@@ -276,6 +290,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         displayName: "Overflow value text",
         description: "Allow value text to overflow the bar.",
         defaultValue: DEFAULT_STATE.overflowValueLabels,
+        persist: false,
     })
     public overflowValueLabels?: boolean;
 
@@ -285,6 +300,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     @coloredObjectsSettings({
         category: "Data Point",
         enumerable: (s, dv) => dataSupportsColorizedInstances(dv),
+        persist: false,
     })
     public colors: ColoredObjectsSettings;
 

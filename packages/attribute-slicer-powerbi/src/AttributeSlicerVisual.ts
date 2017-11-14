@@ -391,6 +391,17 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * Listener for when loading more data
      */
     private onLoadMoreData(item: any, isSearch: boolean) {
+        const loadMoreData = () => {
+            if (this.host["loadMoreData"]) {
+                this.host["loadMoreData"]();
+            } else {
+                const selManagerHost = this.selectionManager && this.selectionManager["hostServices"];
+                if (selManagerHost && selManagerHost.loadMoreData) {
+                    selManagerHost.loadMoreData();
+                }
+            }
+        };
+
         if (isSearch) {
             // Set the search filter on PBI
             const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
@@ -416,7 +427,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             item.result = this.loadDeferred.promise();
             if (!alreadyLoading) {
                 log("Loading more data");
-                this.host["loadMoreData"]();
+                loadMoreData();
             }
         }
     }
