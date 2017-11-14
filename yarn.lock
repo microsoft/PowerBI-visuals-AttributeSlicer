@@ -1524,10 +1524,6 @@ custom-event@~1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/custom-event/-/custom-event-1.0.1.tgz#5d02a46850adf1b4a317946a3928fccb5bfd0425"
 
-d3@3.5.5:
-  version "3.5.5"
-  resolved "https://registry.yarnpkg.com/d3/-/d3-3.5.5.tgz#be1aba6a84fb6653283b3ebebb7f570e3bda187e"
-
 d@1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/d/-/d-1.0.0.tgz#754bb5bfe55451da69a58b94d45f4c5b0462d58f"
@@ -2748,10 +2744,6 @@ global@^4.3.2:
   dependencies:
     min-document "^2.19.0"
     process "~0.5.1"
-
-globalize@0.1.0-a2:
-  version "0.1.0-a2"
-  resolved "https://registry.yarnpkg.com/globalize/-/globalize-0.1.0a2.tgz#7f28b382ebefd9ba0cb3d803635fbba64a87f294"
 
 globals@^8.11.0:
   version "8.18.0"
@@ -5475,30 +5467,9 @@ powerbi-visuals-tools@^1.7.1:
     uglify-js "^2.6.2"
     uuid "^3.0.0"
 
-powerbi-visuals-utils-dataviewutils@1.2.0, powerbi-visuals-utils-dataviewutils@^1.2.0:
+powerbi-visuals-utils-dataviewutils@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/powerbi-visuals-utils-dataviewutils/-/powerbi-visuals-utils-dataviewutils-1.2.0.tgz#59a1c983355c958a23d9901894f65f1575193213"
-
-powerbi-visuals-utils-formattingutils@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/powerbi-visuals-utils-formattingutils/-/powerbi-visuals-utils-formattingutils-2.1.0.tgz#9979af0d711a80f0f6a9ee8d2bc4c1735fe9e18b"
-  dependencies:
-    d3 "3.5.5"
-    globalize "0.1.0-a2"
-    powerbi-visuals-utils-dataviewutils "1.2.0"
-    powerbi-visuals-utils-svgutils "1.1.0"
-    powerbi-visuals-utils-typeutils "1.1.0"
-
-powerbi-visuals-utils-svgutils@1.1.0, powerbi-visuals-utils-svgutils@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/powerbi-visuals-utils-svgutils/-/powerbi-visuals-utils-svgutils-1.1.0.tgz#8ba22c6ef5662a402709b477753a4519342257e7"
-  dependencies:
-    d3 "3.5.5"
-    powerbi-visuals-utils-typeutils "1.1.0"
-
-powerbi-visuals-utils-typeutils@1.1.0, powerbi-visuals-utils-typeutils@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/powerbi-visuals-utils-typeutils/-/powerbi-visuals-utils-typeutils-1.1.0.tgz#347942e581873700da55efff5136a693a76df9b2"
 
 prelude-ls@~1.1.0, prelude-ls@~1.1.1, prelude-ls@~1.1.2:
   version "1.1.2"

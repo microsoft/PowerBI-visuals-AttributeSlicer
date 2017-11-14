@@ -26,16 +26,12 @@ import {
     setting,
     boolSetting as bool,
     numberSetting as number,
-    // parseSelectionIds,
     HasSettings,
     getSetting,
-    buildContainsFilter,
     ColoredObjectsSettings,
     coloredObjectsSettings,
-    // deserializeObjectWithIdentity,
-    // serializeObjectWithIdentity,
     colorSetting as color,
-} from "@essex/pbi-base";
+} from "@essex/visual-settings";
 import { type } from "../powerbi-visuals-utils";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
 import { createItem, dataSupportsColorizedInstances } from "./dataConversion";

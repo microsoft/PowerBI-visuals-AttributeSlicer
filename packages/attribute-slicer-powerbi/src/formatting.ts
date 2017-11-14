@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { formatting } from "../powerbi-visuals-utils"
+import { formatting } from "../powerbi-visuals-utils";
 
 /**
  * Creates a value formatter from the current set of options

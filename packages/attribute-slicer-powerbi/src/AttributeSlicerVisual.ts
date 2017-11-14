@@ -23,7 +23,6 @@
  */
 import "powerbi-visuals-tools/templates/visuals/.api/v1.7.0/PowerBI-Visuals";
 import {
-    createPersistObjectBuilder,
     logger,
     PropertyPersister,
     createPropertyPersister,
@@ -32,10 +31,10 @@ import {
     calcUpdateType,
     computeRenderedValues,
     buildContainsFilter,
-} from "@essex/pbi-base";
+} from "@essex/visual-utils";
 import * as _ from "lodash";
 import * as $ from "jquery";
-import { isStateEqual, IAttributeSlicerState, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
+import { isStateEqual, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
 import { default as converter, createItemFromSerializedItem } from "./dataConversion";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
@@ -322,7 +321,9 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         if (state.hideEmptyItems) {
             this.zeroEmptyItems(dv);
         }
-        let listItems = converter(dv, formatter, undefined, state.colors);
+
+        const createSelectionIdBuilder = this.host.createSelectionIdBuilder ? () => this.host.createSelectionIdBuilder() : undefined;
+        const listItems = converter(dv, formatter, undefined, state.colors, createSelectionIdBuilder);
         if (state.hideEmptyItems) {
             listItems.items = listItems.items.filter(item => item.match && item.match.trim() !== "");
         }

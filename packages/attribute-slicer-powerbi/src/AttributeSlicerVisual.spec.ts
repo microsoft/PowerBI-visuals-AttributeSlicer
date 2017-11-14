@@ -23,8 +23,8 @@
  */
 
 "use strict";
-import '@essex/pbi-base/dist/spec/visualHelpers'; // tslint:disable-line
-import { UpdateType } from "@essex/pbi-base";
+import '@essex/visual-testing-tools/lib/visualHelpers'; // tslint:disable-line
+import { UpdateType } from "@essex/visual-utils";
 import * as $ from "jquery";
 import { expect } from "chai";
 import { AttributeSlicer } from "@essex/attribute-slicer";
