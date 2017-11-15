@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import "powerbi-visuals-tools/templates/visuals/.api/v1.7.0/PowerBI-Visuals";
 
 /* tslint:disable */
 const data = {
