@@ -53,7 +53,7 @@ describe("AttributeSlicerVisual", function () {
             element: parentEle[0],
             host: {
                 persistProperties: () => true,
-                createSelectionManager: () => {}
+                createSelectionManager: () => {},
             },
             viewport: {
                 width: 500,

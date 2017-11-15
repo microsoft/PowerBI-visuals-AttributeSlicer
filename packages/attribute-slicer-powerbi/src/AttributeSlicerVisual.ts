@@ -405,10 +405,16 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         if (isSearch) {
             // Set the search filter on PBI
             const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
+            const hasFilter = filter && filter.conditions.length > 0;
             this.state.searchText = this.mySlicer.searchString;
 
             let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
-            this.host.applyJsonFilter(filter && filter.conditions.length > 0 ? filter : null, "general", "selfFilter");
+            this.host.applyJsonFilter(
+                hasFilter ? filter : null, // tslint:disable-line
+                "general",
+                "selfFilter",
+                hasFilter ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
+
             this.host.persistProperties(objects);
 
             // Set up the load deferred, and load more data
@@ -460,7 +466,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
             const target: models.IFilterColumnTarget = {
                 table: categories.source.queryName.substr(0, categories.source.queryName.indexOf('.')),
-                column: categories.source.displayName
+                column: categories.source.displayName,
             };
 
             const filter = new models.BasicFilter(
@@ -469,7 +475,11 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 selItems.map(n => n.match)
             )
 
-            this.host.applyJsonFilter(selItems.length > 0 ? filter : null, "general", "filter");
+            this.host.applyJsonFilter(
+                selItems.length > 0 ? filter : null, // tslint:disable-line
+                "general",
+                "filter",
+                selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
             this.host.persistProperties(objects);
         }
     }
