@@ -134,7 +134,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The list of selected items
      */
     @setting({
-        persist: false,
         name: "selection",
         displayName: "Selection",
         hidden: true,
@@ -319,40 +318,8 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Receives the new properties
      * @param newProps The properties to merge into state
      */
-    public receive(newProps?: any) {
-        const base = super.receive(newProps);
-        if (base) {
-            if (base.colors && base.colors.instanceColors) {
-                base.colors.instanceColors = base.colors.instanceColors.map((n: any) => deserializeObjectWithIdentity({
-                    color: n.color,
-                    name: n.name,
-                    identity: n.identity,
-                }));
-            }
-
-            // HACK: Temporary fix until we switch to selection manager
-            // Necessary, because in State -> JSON process, it changes objects with undefined properties to null properties
-            // to preserve them in a JSON.stringify call.
-            if (base.selectedItems) {
-                base.selectedItems.forEach(nullToUndefined);
-            }
-        }
-        return base;
-    }
-
-    /**
-     * Creates a JSON object version of this state, suitable for storage
-     */
-    public toJSONObject() {
-        const jsonObj = super.toJSONObject() as AttributeSlicerVisualState;
-        if (this.colors && this.colors.instanceColors) {
-            jsonObj.colors.instanceColors = this.colors.instanceColors.map(n => serializeObjectWithIdentity({
-                color: n.color,
-                name: n.name,
-                identity: n.identity,
-            }));
-        }
-        return jsonObj;
+    public receive(newProps?: any): this {
+        throw new Error("Not implemented");
     }
 }
 

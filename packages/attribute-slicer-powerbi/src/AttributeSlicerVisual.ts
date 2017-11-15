@@ -468,8 +468,7 @@ export default class AttributeSlicer extends VisualBase {
      * Writes our current state back to powerbi.
      */
     private writeStateToPBI(text: string) {
-        const scrollPosition = this.mySlicer.scrollPosition;
-        this.state = this.state.receive({ scrollPosition });
+        this.state.scrollPosition = this.mySlicer.scrollPosition;
 
         const state = this.state;
         log("AttributeSlicer loading state into PBI", state);

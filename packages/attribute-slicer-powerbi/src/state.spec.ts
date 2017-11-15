@@ -28,79 +28,79 @@ import { expect } from "chai";
 
 describe("state", () => {
     describe("integration", () => {
-        describe("receive", () => {
-            const createInstance = () => {
-                return {
-                    instance: state.create() as state,
-                };
-            };
-            it("should deserialize colored instances correctly", () => {
-                const { instance } = createInstance();
-                const testSerializedIdentity = serializeIdentity(<any>{ "expr": {} });
-                const testdeSerializedIdentity = deserializeIdentity(testSerializedIdentity);
-                instance.colors.instanceColors = [{
-                    name: "SOME_MATCH",
-                    color: "#F0E0D0",
-                    identity: <any>testSerializedIdentity,
-                }];
-                const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
+        // describe("receive", () => {
+        //     const createInstance = () => {
+        //         return {
+        //             instance: state.create() as state,
+        //         };
+        //     };
+        //     it("should deserialize colored instances correctly", () => {
+        //         const { instance } = createInstance();
+        //         const testSerializedIdentity = serializeIdentity(<any>{ "expr": {} });
+        //         const testdeSerializedIdentity = deserializeIdentity(testSerializedIdentity);
+        //         instance.colors.instanceColors = [{
+        //             name: "SOME_MATCH",
+        //             color: "#F0E0D0",
+        //             identity: <any>testSerializedIdentity,
+        //         }];
+        //         const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
 
-                // Make sure the new instance's colors are deserialized
-                const colors = newInstance.colors.instanceColors;
-                expect(colors).to.be.ok;
-                expect(colors.length).to.be.equal(1);
+        //         // Make sure the new instance's colors are deserialized
+        //         const colors = newInstance.colors.instanceColors;
+        //         expect(colors).to.be.ok;
+        //         expect(colors.length).to.be.equal(1);
 
-                // Go through all the new colors and directly compare the identities to the deserialized one
-                colors.forEach(n => {
-                    expect(n.identity).to.be.deep.equal(testdeSerializedIdentity);
-                });
-            });
+        //         // Go through all the new colors and directly compare the identities to the deserialized one
+        //         colors.forEach(n => {
+        //             expect(n.identity).to.be.deep.equal(testdeSerializedIdentity);
+        //         });
+        //     });
 
-            describe("API Quirks", () => {
-                it("should ensure that selected items have no null values", () => {
-                    const { instance } = createInstance();
-                    const testItem = <any>{
-                        id: "DOESNT_MATTER",
-                        selector: {
-                            data: [{
-                                someExpr: null, // tslint:disable-line
-                            }],
-                        },
-                    };
+        //     describe("API Quirks", () => {
+        //         it("should ensure that selected items have no null values", () => {
+        //             const { instance } = createInstance();
+        //             const testItem = <any>{
+        //                 id: "DOESNT_MATTER",
+        //                 selector: {
+        //                     data: [{
+        //                         someExpr: null, // tslint:disable-line
+        //                     }],
+        //                 },
+        //             };
 
-                    instance.selectedItems = [testItem];
+        //             instance.selectedItems = [testItem];
 
-                    const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
-                    const parentObj = newInstance.selectedItems[0].selector.data[0];
-                    expect(parentObj.hasOwnProperty("someExpr")); // Make sure the key IS defined but the value is undefined
-                    expect(parentObj.someExpr).to.be.undefined;
-                });
-            });
-        });
-        describe("toJSONObject", () => {
-            const createInstance = () => {
-                return {
-                    instance: state.create() as state,
-                };
-            };
-            it("should serialize colored instances correctly", () => {
-                const { instance } = createInstance();
-                const testSerializedIdentity = serializeIdentity(<any>{ "expr": {} });
-                const testdeSerializedIdentity = deserializeIdentity(testSerializedIdentity);
-                instance.colors.instanceColors = [{
-                    name: "SOME_MATCH",
-                    color: "#F0E0D0",
-                    identity: <any>testdeSerializedIdentity,
-                }];
-                const colors = instance.toJSONObject().colors.instanceColors;
-                expect(colors).to.be.ok;
-                expect(colors.length).to.be.equal(1);
+        //             const newInstance = instance.receive({ whatever: "DOESNT_MATTER" });
+        //             const parentObj = newInstance.selectedItems[0].selector.data[0];
+        //             expect(parentObj.hasOwnProperty("someExpr")); // Make sure the key IS defined but the value is undefined
+        //             expect(parentObj.someExpr).to.be.undefined;
+        //         });
+        //     });
+        // });
+        // describe("toJSONObject", () => {
+        //     const createInstance = () => {
+        //         return {
+        //             instance: state.create() as state,
+        //         };
+        //     };
+        //     it("should serialize colored instances correctly", () => {
+        //         const { instance } = createInstance();
+        //         const testSerializedIdentity = serializeIdentity(<any>{ "expr": {} });
+        //         const testdeSerializedIdentity = deserializeIdentity(testSerializedIdentity);
+        //         instance.colors.instanceColors = [{
+        //             name: "SOME_MATCH",
+        //             color: "#F0E0D0",
+        //             identity: <any>testdeSerializedIdentity,
+        //         }];
+        //         const colors = instance.toJSONObject().colors.instanceColors;
+        //         expect(colors).to.be.ok;
+        //         expect(colors.length).to.be.equal(1);
 
-                // Make sure all the items are serialized properly
-                colors.forEach(n => {
-                    expect(n.identity).to.be.deep.equal(testSerializedIdentity);
-                });
-            });
-        });
+        //         // Make sure all the items are serialized properly
+        //         colors.forEach(n => {
+        //             expect(n.identity).to.be.deep.equal(testSerializedIdentity);
+        //         });
+        //     });
+        // });
     });
 });
