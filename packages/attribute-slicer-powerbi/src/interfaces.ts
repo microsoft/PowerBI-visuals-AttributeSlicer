@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "@essex/attribute-slicer";
 
 /**

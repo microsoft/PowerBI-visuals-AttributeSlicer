@@ -23,11 +23,14 @@
  */
 
 "use strict";
-import '@essex/visual-testing-tools/lib/visualHelpers'; // tslint:disable-line
+import "@essex/visual-testing-tools/lib/visualHelpers"; // tslint:disable-line
 import { UpdateType } from "@essex/visual-utils";
 import * as $ from "jquery";
 import { expect } from "chai";
 import { AttributeSlicer } from "@essex/attribute-slicer";
+
+import "./powerbi";
+
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import AttributeSlicerVisual from "./AttributeSlicerVisual";
 

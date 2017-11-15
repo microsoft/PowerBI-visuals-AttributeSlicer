@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import { ListItem, IAttributeSlicerVisualData } from "./interfaces";
 import { ISerializedItem } from "@essex/attribute-slicer";
 
@@ -29,6 +30,7 @@ import { formatting } from "../powerbi-visuals-utils";
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
 import { IColorSettings, convertItemsWithSegments, IValueSegment } from "@essex/visual-utils";
+
 const ldget = require("lodash/get"); //tslint:disable-line
 const HEX_COLOR_REGEX = /#[0-9A-F]{3,6}/;
 const RGB_COLOR_REGEX = /rgba?\s*\(\s*[\d\.]+\s*,\s*[\d\.]+\s*,\s*[\d\.]+\s*(,\s*[\d\.]+\s*)?\)/;

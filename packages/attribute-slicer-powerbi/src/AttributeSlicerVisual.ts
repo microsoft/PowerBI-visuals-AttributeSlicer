@@ -31,6 +31,7 @@ import {
     computeRenderedValues,
     buildContainsFilter,
 } from "@essex/visual-utils";
+import "./powerbi";
 import * as _ from "lodash";
 import * as $ from "jquery";
 import { isStateEqual, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";

@@ -22,21 +22,20 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import {
     setting,
     boolSetting as bool,
     numberSetting as number,
     HasSettings,
-    getSetting,
     ColoredObjectsSettings,
     coloredObjectsSettings,
     colorSetting as color,
 } from "@essex/visual-settings";
 import { type } from "../powerbi-visuals-utils";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
-import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
+import { dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "@essex/attribute-slicer";
-import * as _ from "lodash";
 
 const ldget = require("lodash/get"); // tslint:disable-line
 

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import { formatting } from "../powerbi-visuals-utils";
 
 /**
