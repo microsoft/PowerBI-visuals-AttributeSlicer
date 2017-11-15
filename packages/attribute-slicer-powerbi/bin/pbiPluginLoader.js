@@ -164,7 +164,6 @@ function pbivizPluginTemplate (pbiviz) {
                                         persistProperties: options.host.persistProperties.bind(options.host),
                                         loadMoreData: options.host.loadMoreData.bind(options.host)
                                     },
-                                    },
                                     element: options.element.get(0),
                                     viewport: {width: 500, height: 500}
                                 };
