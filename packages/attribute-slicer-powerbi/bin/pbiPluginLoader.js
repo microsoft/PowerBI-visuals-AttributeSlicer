@@ -161,7 +161,9 @@ function pbivizPluginTemplate (pbiviz) {
                                         },
                                         onSelect:  options.host.onSelect.bind(options.host),
                                         colors: options.style.colorPalette.dataColors.getAllColors(),
-                                        persistProperties: options.host.persistProperties.bind(options.host)
+                                        persistProperties: options.host.persistProperties.bind(options.host),
+                                        loadMoreData: options.host.loadMoreData.bind(options.host)
+                                    },
                                     },
                                     element: options.element.get(0),
                                     viewport: {width: 500, height: 500}

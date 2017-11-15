@@ -97,6 +97,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we are being rendered horizontally
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Horizontal",
         description: "Display the attributes horizontally, rather than vertically",
@@ -108,6 +109,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The percentage based width of the value column 0 = hidden, 100 = whole screen
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Value Width %",
         description: "The percentage of the width that the value column should take up.",
@@ -120,6 +122,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Hide Blank items
      */
     @bool({
+        persist: false,
         category: "Display",
         displayName: "Hide Empty Items",
         description: "Hide empty / blank Items.",
@@ -131,6 +134,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The list of selected items
      */
     @setting({
+        persist: false,
         name: "selection",
         displayName: "Selection",
         hidden: true,
@@ -152,6 +156,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The text size in pt
      */
     @setting({
+        persist: false,
         displayName: "Text Size",
         description: "The size of the text",
         defaultValue: DEFAULT_STATE.textSize,
@@ -164,6 +169,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     * The font color used to display item text
     */
    @color({
+        persist: false,
         displayName: "Text Color",
         description: "Item text color.",
         defaultValue: DEFAULT_STATE.itemTextColor,
@@ -174,6 +180,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should left align the text
      */
      @setting({
+        persist: false,
         displayName: "Text Align Left",
         description: "On to left align item text.",
         defaultValue: DEFAULT_STATE.leftAlignText,
@@ -184,6 +191,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the options area
      */
     @setting({
+        persist: false,
         displayName: "Show options",
         description: "Should the search box and other options be shown.",
         defaultValue: DEFAULT_STATE.showOptions,
@@ -194,6 +202,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the search box
      */
     @setting({
+        persist: false,
         displayName: "Show Search",
         description: "Show the search box.",
         defaultValue: DEFAULT_STATE.showSearch,
@@ -204,6 +213,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The display units to use when rendering values
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Units",
         description: "The units to use when displaying values.",
@@ -222,6 +232,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The precision of the numbers to render
      */
     @number({
+        persist: false,
         category: "Display",
         displayName: "Precision",
         description: "The precision to use when displaying values.",
@@ -233,6 +244,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should single select
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Single Select",
         description: "Only allow for one item to be selected at a time",
@@ -244,6 +256,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If brushMode is enabled
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Brush Mode",
         description: "Allow for the drag selecting of attributes",
@@ -255,6 +268,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the tokens
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Use Tokens",
         description: "Will show the selected attributes as tokens",
@@ -266,6 +280,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If the value displays should be always shown
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Always On Values",
         description: "Display value labels.",
@@ -274,9 +289,10 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public displayValueLabels?: boolean;
 
     /**
-     * If the value text overflow should be visible 
+     * If the value text overflow should be visible
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Overflow value text",
         description: "Allow value text to overflow the bar.",
@@ -288,6 +304,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The set of settings for the colored objects
      */
     @coloredObjectsSettings({
+        persist: false,
         category: "Data Point",
         enumerable: (s, dv) => dataSupportsColorizedInstances(dv),
     })
