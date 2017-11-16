@@ -64,11 +64,6 @@ export default function converter(
              total: number,
              id: powerbi.visuals.ISelectionId,
              valueSegments: IValueSegment[]) => {
-                id = powerbi.visuals.SelectionIdBuilder ?
-                    new powerbi.visuals.SelectionIdBuilder()
-                        .withCategory(dvCats[0], catIdx)
-                        .createSelectionId() :
-                    id;
                 const item =
                     createItem(
                         buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
