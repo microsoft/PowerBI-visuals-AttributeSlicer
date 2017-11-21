@@ -503,6 +503,37 @@ export default class AttributeSlicer extends VisualBase {
                 });
             }
 
+            // TODO: Remove this once PBI base has been updated with a functioning persist:false flag
+            // Right now it means, don't save at all, rather than, don't generate persistProperties
+            const keysToKeep = ["selfFilter", "filter", "selection"];
+            if (objects) {
+                const applyFilter = (n: powerbi.VisualObjectInstance) => {
+                    const newProps = {};
+                    keysToKeep.forEach(propName => {
+                        if (n.properties.hasOwnProperty(propName)) {
+                            newProps[propName] = n.properties[propName];
+                        }
+                    });
+                    if (!n.selector) {
+                        n.selector = undefined;
+                    }
+                    n.properties = newProps;
+                    return Object.keys(newProps).length > 0;
+                };
+
+                if (objects.merge) {
+                    objects.merge = objects.merge.filter(applyFilter);
+                }
+
+                if (objects.remove) {
+                    objects.remove = objects.remove.filter(applyFilter);
+                }
+
+                if (objects.replace) {
+                    objects.replace = objects.replace.filter(applyFilter);
+                }
+            }
+
             this.propertyPersister.persist(selection, objects);
         }
     }
