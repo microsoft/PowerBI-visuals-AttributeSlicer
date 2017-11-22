@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "typings": "src/index.d.ts",
+  "private": true,
   "scripts": {
     "lint": "tslint \"src/**/*[!.d].{ts,tsx}\"",
     "docs": "typedoc --out docs --ignoreCompilerErrors ./ --externalPattern **/node_modules/**/*.* --exclude **/src/**/*.spec.ts",

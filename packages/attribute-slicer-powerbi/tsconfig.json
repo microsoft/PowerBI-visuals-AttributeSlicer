@@ -10,9 +10,6 @@
     "skipLibCheck": true
   },
   "compileOnSave": false,
-  "include": [
-      "src/**/*.ts"
-  ],
   "exclude": [
     "power-bi",
     "node_modules",

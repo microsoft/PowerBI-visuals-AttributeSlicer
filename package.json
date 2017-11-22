@@ -1,10 +1,13 @@
 {
   "scripts": {
-    "postinstall": "lerna exec --concurrency=1 -- yarn && lerna exec --concurrency=99 -- linklocal --named @essex/attribute-slicer ../attribute-slicer",
-    "test": "lerna --stream --scope @essex/attribute-slicer run test && lerna run test --stream --ignore @essex/attribute-slicer",
-    "test:powerbi": "lerna --stream --scope @essex/attribute-slicer run test && lerna run test --stream --scope @essex/attribute-slicer-powerbi",
+    "test": "lerna run test --stream",
+    "test:powerbi": "lerna run test --stream --scope @essex/attribute-slicer-powerbi",
     "start": "lerna --stream --scope @essex/attribute-slicer run test && lerna run start --stream --scope @essex/attribute-slicer-powerbi"
   },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/d3": "^3.5.36",
@@ -37,7 +40,7 @@
     "karma-sinon-chai": "^1.2.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
-    "lerna": "^2.0.0-beta.38",
+    "lerna": "2.0.0",
     "linklocal": "^2.8.0",
     "lolex": "^1.4.0",
     "mocha": "2.3.4",
@@ -59,7 +62,6 @@
     "tar.gz": "1.0.5",
     "to-string-loader": "^1.1.5",
     "ts-loader": "^2.3.2",
-    "ts-node": "0.5.5",
     "tslint": "^3.15.1",
     "typedoc": "^0.7.0",
     "typescript": "2.3.4",

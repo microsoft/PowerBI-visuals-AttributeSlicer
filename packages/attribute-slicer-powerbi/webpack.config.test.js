@@ -26,7 +26,7 @@ const webpack = require("webpack");
 const config = {
     devTool: "eval",
     resolve: {
-        extensions: ['', '.ts', '.js', '.json']
+        extensions: ['', '.js', '.ts', '.json']
     },
     module: {
         loaders: [

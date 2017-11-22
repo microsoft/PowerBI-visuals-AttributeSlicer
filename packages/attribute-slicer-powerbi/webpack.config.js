@@ -31,7 +31,7 @@ const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.')
 const config = {
     entry: ENTRY,
     resolve: {
-        extensions: ['', '.ts', '.js', '.json']
+        extensions: ['', '.js', '.ts', '.json']
     },
     module: {
         loaders: [
