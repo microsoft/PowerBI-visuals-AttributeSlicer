@@ -464,7 +464,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             const selItems = state.selectedItems || [];
             const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
             const target: models.IFilterColumnTarget = {
-                table: categories.source.queryName.substr(0, categories.source.queryName.indexOf('.')),
+                table: categories.source.queryName.substr(0, categories.source.queryName.indexOf(".")),
                 column: categories.source.displayName,
             };
 
@@ -472,14 +472,14 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 target,
                 "In",
                 selItems.map(n => n.match)
-            )
+            );
 
+            this.host.persistProperties(objects);
             this.host.applyJsonFilter(
                 selItems.length > 0 ? filter : null, // tslint:disable-line
                 "general",
                 "filter",
                 selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
-            this.host.persistProperties(objects);
         }
     }
 }
