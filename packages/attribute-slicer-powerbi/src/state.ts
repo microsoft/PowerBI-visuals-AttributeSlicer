@@ -27,6 +27,7 @@ import {
     setting,
     boolSetting as bool,
     numberSetting as number,
+    textSetting as text,
     HasSettings,
     ColoredObjectsSettings,
     coloredObjectsSettings,
@@ -39,6 +40,9 @@ import { DEFAULT_STATE } from "@essex/attribute-slicer";
 
 const ldget = require("lodash/get"); // tslint:disable-line
 
+// Webpack defines this
+declare var BUILD_VERSION: string;
+
 /**
  * The set of settings loaded from powerbi
  */
@@ -48,9 +52,8 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The currently selected search text
      */
     @setting({
-        // persist: false, // Don't persist this setting, it is dynamic based on the dataview
         name: "searchText",
-        hidden: true,
+        enumerable: false,
         parse(value, desc, dv) {
             const searchText: any = ldget(dv, "metadata.objects.general.searchText");
             if (!searchText) {
@@ -67,10 +70,30 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public searchText?: string;
 
     /**
+     * The list of selected items
+     */
+    @setting({
+        name: "selection",
+        displayName: "Selection",
+        enumerable: false,
+        config: {
+            type: { text: {} },
+        },
+        parse: (v, d, dv) => parseSelectionFromPBI(dv),
+        compose: (value, d) => convertSelectionToPBI(value),
+    })
+    public selectedItems?: {
+        id: any;
+        match: any;
+        value: any;
+        renderedValue?: any;
+    }[];
+
+    /**
      * Whether or not the slicer should show the values column
      */
     @setting({
-        persist: false, // Don't persist this setting, it is dynamic based on the dataview
+        readOnly: true,
         parse: (v, d, dv) => ldget(dv, "categorical.values", []).length > 0,
         defaultValue: DEFAULT_STATE.showValues,
     })
@@ -80,7 +103,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Whether or not data supports search
      */
     @setting({
-        persist: false, // Don't persist this setting, it is dynamic based on the dataview
+        readOnly: true,
         parse(v, d, dv) {
             const isSelfFilterEnabled = ldget(dv, "metadata.objects.general.selfFilterEnabled", false);
             return doesDataSupportSearch(dv) && !isSelfFilterEnabled;
@@ -124,26 +147,6 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         defaultValue: false,
     })
     public hideEmptyItems?: boolean;
-
-    /**
-     * The list of selected items
-     */
-    @setting({
-        name: "selection",
-        displayName: "Selection",
-        hidden: true,
-        config: {
-            type: { text: {} },
-        },
-        parse: (v, d, dv) => parseSelectionFromPBI(dv),
-        compose: (value, d) => convertSelectionToPBI(value),
-    })
-    public selectedItems?: {
-        id: any;
-        match: any;
-        value: any;
-        renderedValue?: any;
-    }[];
 
     /**
      * The text size in pt
@@ -302,6 +305,18 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         enumerable: (s, dv) => dataSupportsColorizedInstances(dv),
     })
     public colors: ColoredObjectsSettings;
+
+    /**
+     * If we are being rendered horizontally
+     */
+    @text({
+        persist: false,
+        category: "General",
+        displayName: "Version",
+        description: "The version of Attribute Slicer",
+        compose: () => BUILD_VERSION,
+    })
+    public version?: string;
 
     /**
      * The scroll position of the visual

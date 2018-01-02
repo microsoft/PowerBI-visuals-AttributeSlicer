@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@essex/attribute-slicer": "*",
-    "@essex/visual-settings": "^1.1.1",
+    "@essex/visual-settings": "2.0.0",
     "@essex/visual-styling": "^1.0.0",
     "@essex/visual-utils": "^1.1.3",
     "d3": "3.5.12",

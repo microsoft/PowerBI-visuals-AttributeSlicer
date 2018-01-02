@@ -279,6 +279,13 @@
                     "type": {
                         "filter": true
                     }
+                },
+                "version": {
+                    "displayName": "Version",
+                    "description": "The version of Attribute Slicer",
+                    "type": {
+                        "text": {}
+                    }
                 }
             }
         },
