@@ -7,7 +7,6 @@ const tsc = spawn("node", [baseExec]);
 let hasErrors = false;
 function checkAndLog(data) {
     data = (data || "") + "";
-    // console.log(data);
     if (data.match(/\w/g) && data.indexOf("node_modules") < 0) {
         console.log(data);
         hasErrors = true;
