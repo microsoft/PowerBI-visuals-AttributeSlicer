@@ -363,7 +363,7 @@ function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
 /**
  * Converts the given items into a format for PBI
  */
-function convertSelectionToPBI(value: ListItem[]) {
+export function convertSelectionToPBI(value: ListItem[]) {
     "use strict";
     if (value) {
         return JSON.stringify((value || []).map((n) => ({

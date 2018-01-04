@@ -60,6 +60,11 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     protected mySlicer: AttributeSlicerImpl;
 
     /**
+     * A callback after an update has happened
+     */
+    private onNextUpdate: () => any;
+
+    /**
      * The current dataView
      */
     private dataView: powerbi.DataView;
@@ -166,6 +171,11 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * @param type The optional update type being passed to update
      */
     public update(options: powerbi.extensibility.visual.VisualUpdateOptions, type?: UpdateType) {
+        const nextUpdate = this.onNextUpdate;
+        if (nextUpdate) {
+            nextUpdate();
+        }
+
         this.isHandlingUpdate = true;
         const updateType = type !== undefined ? type : calcUpdateType(this.prevUpdateOptions, options);
         this.prevUpdateOptions = options;
@@ -474,12 +484,28 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 selItems.map(n => n.match)
             );
 
-            this.host.persistProperties(objects);
-            this.host.applyJsonFilter(
-                selItems.length > 0 ? filter : null, // tslint:disable-line
-                "general",
-                "filter",
-                selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
+            // The *only* reason this is necessary is because for some reason when
+            // we do persistProperties & applyJsonFilter back to back, it was causing
+            // the data within attribute slicer to switch out with data that is later in the data set
+            // kind of like if a loadMoreData was called after the applyJsonFilter
+            new Promise((resolve) => {
+                // Persist those properties, which should initiate an update call
+                this.onNextUpdate = resolve;
+                this.host.persistProperties(objects);
+
+                // Add a fallback if it never gets called
+                setTimeout(() => {
+                    const nextUpdate = this.onNextUpdate;
+                    if (nextUpdate) {
+                        nextUpdate();
+                    }
+                }, 200);
+            }).then(() => {
+                // Apply the filter after the next update (or if the fallback occurs)
+                delete this.onNextUpdate;
+                const action = selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
+                this.host.applyJsonFilter(filter, "general", "filter", action);
+            })
         }
     }
 }
