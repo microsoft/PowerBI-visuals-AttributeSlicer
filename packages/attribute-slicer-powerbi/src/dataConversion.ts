@@ -22,13 +22,15 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import { ListItem, IAttributeSlicerVisualData } from "./interfaces";
 import { ISerializedItem } from "@essex/attribute-slicer";
-import "powerbi-visuals/lib/powerbi-visuals";
-import IValueFormatter = powerbi.visuals.IValueFormatter;
+
+import { formatting } from "../powerbi-visuals-utils";
 import DataView = powerbi.DataView;
 import { createValueFormatter, createCategoryFormatter } from "./formatting";
-import { serializeSelectors, IColorSettings, convertItemsWithSegments, IValueSegment } from "@essex/pbi-base";
+import { IColorSettings, convertItemsWithSegments, IValueSegment } from "@essex/visual-utils";
+
 const ldget = require("lodash/get"); //tslint:disable-line
 const HEX_COLOR_REGEX = /#[0-9A-F]{3,6}/;
 const RGB_COLOR_REGEX = /rgba?\s*\(\s*[\d\.]+\s*,\s*[\d\.]+\s*,\s*[\d\.]+\s*(,\s*[\d\.]+\s*)?\)/;
@@ -38,9 +40,10 @@ const RGB_COLOR_REGEX = /rgba?\s*\(\s*[\d\.]+\s*,\s*[\d\.]+\s*,\s*[\d\.]+\s*(,\s
  */
 export default function converter(
     dataView: DataView,
-    valueFormatter?: IValueFormatter,
-    categoryFormatter?: IValueFormatter,
-    settings?: IColorSettings): IAttributeSlicerVisualData {
+    valueFormatter?: formatting.IValueFormatter,
+    categoryFormatter?: formatting.IValueFormatter,
+    settings?: IColorSettings,
+    createIdBuilder?: () => powerbi.visuals.ISelectionIdBuilder): IAttributeSlicerVisualData {
     "use strict";
 
     if (dataView && dataView.categorical) {
@@ -59,19 +62,13 @@ export default function converter(
             (dvCats: powerbi.DataViewCategoryColumn[],
              catIdx: number,
              total: number,
-             id: powerbi.visuals.SelectionId,
+             id: powerbi.visuals.ISelectionId,
              valueSegments: IValueSegment[]) => {
-                id = powerbi.visuals.SelectionIdBuilder ?
-                    new powerbi.visuals.SelectionIdBuilder()
-                        .withCategory(dvCats[0], catIdx)
-                        .createSelectionId() :
-                    id;
                 const item =
                     createItem(
                         buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
                         total,
-                        id.getKey(),
-                        id.getSelector(),
+                        id.getKey ? id.getKey() : <any>id,
                         undefined,
                         "#ccc");
                 (valueSegments || []).forEach((segment, i) => {
@@ -82,7 +79,7 @@ export default function converter(
                 return item;
 
             // TOOD: This logic should move to pbi base
-        }, dataSupportsColorizedInstances(dataView) ? settings : undefined) as IAttributeSlicerVisualData;
+        }, dataSupportsColorizedInstances(dataView) ? settings : undefined, createIdBuilder) as IAttributeSlicerVisualData;
         return converted;
     }
 }
@@ -114,7 +111,7 @@ export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
 /**
  * Builds the display string for the given category
  */
-export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], catIdx: number, categoryFormatter?: IValueFormatter): string {
+export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], catIdx: number, categoryFormatter?: formatting.IValueFormatter): string {
     "use strict";
     return (cats || []).map(n => {
         const category = n.values[catIdx];
@@ -128,7 +125,7 @@ export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], cat
 export function createItemFromSerializedItem(item: ISerializedItem) {
     "use strict";
     if (item) {
-        return createItem(item.match, item.value, item.id, item.selector, item.renderedValue, undefined, true);
+        return createItem(item.match, item.value, item.id, item.renderedValue, undefined);
     }
 }
 
@@ -139,10 +136,8 @@ export function createItem(
     category: string,
     value: any,
     id: string,
-    selector: powerbi.data.Selector,
     renderedValue?: any,
-    color = "",
-    noSerialize = false): ListItem {
+    color = ""): ListItem {
     "use strict";
     return {
         id: id,
@@ -150,7 +145,6 @@ export function createItem(
         color: color,
         value: value || 0,
         renderedValue: renderedValue,
-        selector: noSerialize ? selector : serializeSelectors([selector])[0],
         equals: (b: ListItem) => id === b.id,
     };
 }

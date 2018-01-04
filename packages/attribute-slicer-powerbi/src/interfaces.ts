@@ -22,17 +22,14 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "@essex/attribute-slicer";
-import TooltipEnabledDataPoint = powerbi.visuals.TooltipEnabledDataPoint;
 
 /**
  * Represents a list item
  */
 /* tslint:disable */
-export interface ListItem extends SlicerItem, TooltipEnabledDataPoint {
-    // The unique selector for this item
-    selector: powerbi.data.Selector;
-}
+export interface ListItem extends SlicerItem { }
 
 /**
  * Represents attribute slicer visual data

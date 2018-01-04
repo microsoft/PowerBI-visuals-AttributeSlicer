@@ -22,27 +22,26 @@
  * SOFTWARE.
  */
 
+import "./powerbi";
 import {
     setting,
     boolSetting as bool,
     numberSetting as number,
-    parseSelectionIds,
+    textSetting as text,
     HasSettings,
-    getSetting,
-    buildContainsFilter,
     ColoredObjectsSettings,
     coloredObjectsSettings,
-    deserializeObjectWithIdentity,
-    serializeObjectWithIdentity,
     colorSetting as color,
-} from "@essex/pbi-base";
+} from "@essex/visual-settings";
+import { type } from "../powerbi-visuals-utils";
 import { IAttributeSlicerState, ListItem } from "./interfaces";
-import PixelConverter = jsCommon.PixelConverter;
-import { createItem, dataSupportsColorizedInstances } from "./dataConversion";
+import { dataSupportsColorizedInstances } from "./dataConversion";
 import { DEFAULT_STATE } from "@essex/attribute-slicer";
-import * as _ from "lodash";
 
 const ldget = require("lodash/get"); // tslint:disable-line
+
+// Webpack defines this
+declare var BUILD_VERSION: string;
 
 /**
  * The set of settings loaded from powerbi
@@ -53,29 +52,48 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The currently selected search text
      */
     @setting({
-        // persist: false, // Don't persist this setting, it is dynamic based on the dataview
-        name: "selfFilter",
-        hidden: true,
-        config: {
-            type: { filter: { selfFilter: true } },
-        },
+        name: "searchText",
+        enumerable: false,
         parse(value, desc, dv) {
-            const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
-            if (selfFilter) {
-                const right = ldget(selfFilter.where(), "[0].condition.right");
-                return (right && right.value) || "";
+            const searchText: any = ldget(dv, "metadata.objects.general.searchText");
+            if (!searchText) {
+                // TODO: Remove this after a few release cycles, this is purely for legacy support
+                const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
+                if (selfFilter) {
+                    const right = ldget(selfFilter.where(), "[0].condition.right");
+                    return (right && right.value) || "";
+                }
             }
-            return "";
+            return searchText || "";
         },
-        compose: (val, c, d) => val ? buildContainsFilter(ldget(d, "categorical.categories[0].source"), val) : val,
     })
     public searchText?: string;
+
+    /**
+     * The list of selected items
+     */
+    @setting({
+        name: "selection",
+        displayName: "Selection",
+        enumerable: false,
+        config: {
+            type: { text: {} },
+        },
+        parse: (v, d, dv) => parseSelectionFromPBI(dv),
+        compose: (value, d) => convertSelectionToPBI(value),
+    })
+    public selectedItems?: {
+        id: any;
+        match: any;
+        value: any;
+        renderedValue?: any;
+    }[];
 
     /**
      * Whether or not the slicer should show the values column
      */
     @setting({
-        persist: false, // Don't persist this setting, it is dynamic based on the dataview
+        readOnly: true,
         parse: (v, d, dv) => ldget(dv, "categorical.values", []).length > 0,
         defaultValue: DEFAULT_STATE.showValues,
     })
@@ -85,7 +103,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Whether or not data supports search
      */
     @setting({
-        persist: false, // Don't persist this setting, it is dynamic based on the dataview
+        readOnly: true,
         parse(v, d, dv) {
             const isSelfFilterEnabled = ldget(dv, "metadata.objects.general.selfFilterEnabled", false);
             return doesDataSupportSearch(dv) && !isSelfFilterEnabled;
@@ -97,6 +115,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we are being rendered horizontally
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Horizontal",
         description: "Display the attributes horizontally, rather than vertically",
@@ -108,6 +127,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The percentage based width of the value column 0 = hidden, 100 = whole screen
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Value Width %",
         description: "The percentage of the width that the value column should take up.",
@@ -120,6 +140,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * Hide Blank items
      */
     @bool({
+        persist: false,
         category: "Display",
         displayName: "Hide Empty Items",
         description: "Hide empty / blank Items.",
@@ -128,35 +149,15 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     public hideEmptyItems?: boolean;
 
     /**
-     * The list of selected items
-     */
-    @setting({
-        name: "selection",
-        displayName: "Selection",
-        hidden: true,
-        config: {
-            type: { text: {} },
-        },
-        parse: (v, d, dv) => parseSelectionFromPBI(dv),
-        compose: (value, d) => convertSelectionToPBI(value),
-    })
-    public selectedItems?: {
-        id: any;
-        match: any;
-        value: any;
-        renderedValue?: any;
-        selector: any;
-    }[];
-
-    /**
      * The text size in pt
      */
     @setting({
+        persist: false,
         displayName: "Text Size",
         description: "The size of the text",
         defaultValue: DEFAULT_STATE.textSize,
-        parse: val => val ? PixelConverter.fromPointToPixel(parseFloat(val)) : DEFAULT_STATE.textSize,
-        compose: val => PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
+        parse: val => val ? type.PixelConverter.fromPointToPixel(parseFloat(val)) : DEFAULT_STATE.textSize,
+        compose: val => type.PixelConverter.toPoint(val ? val : DEFAULT_STATE.textSize),
     })
     public textSize?: number;
 
@@ -164,6 +165,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
     * The font color used to display item text
     */
    @color({
+        persist: false,
         displayName: "Text Color",
         description: "Item text color.",
         defaultValue: DEFAULT_STATE.itemTextColor,
@@ -174,6 +176,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should left align the text
      */
      @setting({
+        persist: false,
         displayName: "Text Align Left",
         description: "On to left align item text.",
         defaultValue: DEFAULT_STATE.leftAlignText,
@@ -184,6 +187,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the options area
      */
     @setting({
+        persist: false,
         displayName: "Show options",
         description: "Should the search box and other options be shown.",
         defaultValue: DEFAULT_STATE.showOptions,
@@ -194,6 +198,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the search box
      */
     @setting({
+        persist: false,
         displayName: "Show Search",
         description: "Show the search box.",
         defaultValue: DEFAULT_STATE.showSearch,
@@ -204,6 +209,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The display units to use when rendering values
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Units",
         description: "The units to use when displaying values.",
@@ -222,6 +228,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The precision of the numbers to render
      */
     @number({
+        persist: false,
         category: "Display",
         displayName: "Precision",
         description: "The precision to use when displaying values.",
@@ -233,6 +240,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should single select
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Single Select",
         description: "Only allow for one item to be selected at a time",
@@ -244,6 +252,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If brushMode is enabled
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Brush Mode",
         description: "Allow for the drag selecting of attributes",
@@ -255,6 +264,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If we should show the tokens
      */
     @setting({
+        persist: false,
         category: "Selection",
         displayName: "Use Tokens",
         description: "Will show the selected attributes as tokens",
@@ -266,6 +276,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If the value displays should be always shown
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Always On Values",
         description: "Display value labels.",
@@ -277,6 +288,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * If the value text overflow should be visible
      */
     @setting({
+        persist: false,
         category: "Display",
         displayName: "Overflow value text",
         description: "Allow value text to overflow the bar.",
@@ -288,10 +300,23 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
      * The set of settings for the colored objects
      */
     @coloredObjectsSettings({
+        persist: false,
         category: "Data Point",
         enumerable: (s, dv) => dataSupportsColorizedInstances(dv),
     })
     public colors: ColoredObjectsSettings;
+
+    /**
+     * If we are being rendered horizontally
+     */
+    @text({
+        persist: false,
+        category: "General",
+        displayName: "Version",
+        description: "The version of Attribute Slicer",
+        compose: () => BUILD_VERSION,
+    })
+    public version?: string;
 
     /**
      * The scroll position of the visual
@@ -328,18 +353,8 @@ function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
     "use strict";
     const objects = ldget(dataView, "metadata.objects");
     if (objects) {
-        // HACK: Extra special code to restore selection
-        const selectedIds = parseSelectionIds(objects);
-        if (selectedIds && selectedIds.length) {
-            const serializedSelectedItems: ListItem[] = JSON.parse(ldget(objects, "general.selection"));
-            return selectedIds.map((n: powerbi.visuals.SelectionId, i: number) => {
-                const { match, value, renderedValue } = serializedSelectedItems[i];
-                const id = (n.getKey ? n.getKey() : n["key"]);
-                const item = createItem(match, value, id, n.getSelector(), renderedValue);
-                return item;
-            });
-        }
-        return [];
+        const selectedItems = ldget(objects, "general.selection");
+        return selectedItems ? JSON.parse(selectedItems) : [];
     } else if (dataView) { // If we have a dataview, but we don't have any selection, then clear it
         return [];
     }
@@ -355,31 +370,9 @@ function convertSelectionToPBI(value: ListItem[]) {
             id: n.id,
             match: n.match,
             value: n.value,
-            selector: n.selector,
             renderedValue: n.renderedValue,
         })));
     }
-}
-
-/**
- * Calculates the properties that have changed between the two states
- */
-export function calcStateDifferences(newState: IAttributeSlicerState, oldState: IAttributeSlicerState) {
-    "use strict";
-    const differences: string[] = [];
-    newState = newState || <any>{};
-    oldState = oldState || <any>{};
-    Object.keys(newState || {}).forEach(prop => {
-        const oldValue = newState[prop];
-        const newValue = oldState[prop];
-        if (!_.isEqual(oldValue, newValue)) {
-            const descriptor = getSetting(AttributeSlicerVisualState, prop);
-            if (descriptor) {
-                differences.push(descriptor.displayName || prop);
-            }
-        }
-    });
-    return differences;
 }
 
 /**

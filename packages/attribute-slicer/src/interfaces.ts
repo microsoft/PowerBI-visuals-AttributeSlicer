@@ -108,7 +108,6 @@ export interface ISerializedItem {
     match: any;
     value: any;
     renderedValue?: any;
-    selector: any;
 }
 
 /**
@@ -131,7 +130,7 @@ export interface IAttributeSlicerState {
     textSize?: number;
 
     /**
-     * The text color 
+     * The text color
      */
     itemTextColor?: string;
 

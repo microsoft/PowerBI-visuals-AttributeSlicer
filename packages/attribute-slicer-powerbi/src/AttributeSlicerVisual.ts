@@ -21,59 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/* tslint:disable */
 import {
-    createPersistObjectBuilder,
-    buildContainsFilter,
     logger,
-    capabilities,
     PropertyPersister,
     createPropertyPersister,
-    Visual,
     UpdateType,
-    receiveUpdateType,
-    IDimensions,
     receiveDimensions,
-    IReceiveDimensions,
-    getSelectionIdsFromSelectors,
-    getSetting,
+    calcUpdateType,
     computeRenderedValues,
-    VisualBase,
-} from "@essex/pbi-base";
-import { publishReplace, publishChange } from "@essex/pbi-stateful/lib/stateful";
+    buildContainsFilter,
+} from "@essex/visual-utils";
+import "./powerbi";
 import * as _ from "lodash";
 import * as $ from "jquery";
-const ldget = require("lodash.get");
-import IVisualHostServices = powerbi.IVisualHostServices;
-import DataView = powerbi.DataView;
-import data = powerbi.data;
-import VisualObjectInstance = powerbi.VisualObjectInstance;
-import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-import PixelConverter = jsCommon.PixelConverter;
-
-import { isStateEqual, IAttributeSlicerState, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
+import { isStateEqual, AttributeSlicer as AttributeSlicerImpl } from "@essex/attribute-slicer";
 import { default as converter, createItemFromSerializedItem } from "./dataConversion";
-import capabilitiesData from "./AttributeSlicerVisual.capabilities";
 import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
-import { default as VisualState, calcStateDifferences } from "./state";
-import SelectionManager = powerbi.visuals.utility.SelectionManager;
-const log = logger("essex.widget.AttributeSlicerVisual");
-const CUSTOM_CSS_MODULE = require("!css!sass!./css/AttributeSlicerVisual.scss");
-const stringify = require("json-stringify-safe");
+import { default as VisualState } from "./state";
+import * as models from "powerbi-models";
 
+/* tslint:disable */
+const ldget = require("lodash.get");
+const log = logger("essex.widget.AttributeSlicerVisual");
+const CUSTOM_CSS_MODULE = require("!css-loader!sass-loader!./css/AttributeSlicerVisual.scss");
+const stringify = require("json-stringify-safe");
 /* tslint:enable */
 
-// PBI Swallows these
+// // PBI Swallows these
 const EVENTS_TO_IGNORE = "mousedown mouseup click focus blur input pointerdown pointerup touchstart touchmove touchdown";
 
 @receiveDimensions
-@receiveUpdateType(<any>{
-    checkHighlights: true,
-    ignoreCategoryOrder: false,
-})
-export default class AttributeSlicer extends VisualBase {
+export default class AttributeSlicer implements powerbi.extensibility.visual.IVisual {
 
     /**
      * My AttributeSlicer
@@ -83,12 +62,17 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * The current dataView
      */
-    private dataView: DataView;
+    private dataView: powerbi.DataView;
 
     /**
      * The host of the visual
      */
-    private host: IVisualHostServices;
+    private host: powerbi.extensibility.visual.IVisualHost;
+
+    /**
+     * The visuals element
+     */
+    private element: JQuery;
 
     /**
      * The deferred used for loading additional data into attribute slicer
@@ -113,7 +97,7 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * The selection manager for PBI
      */
-    private selectionManager: SelectionManager;
+    private selectionManager: powerbi.extensibility.ISelectionManager;
 
     /**
      * The current state of this visual
@@ -126,35 +110,27 @@ export default class AttributeSlicer extends VisualBase {
     private isHandlingUpdate: boolean;
 
     /**
+     * The previous update options
+     */
+    private prevUpdateOptions: powerbi.extensibility.visual.VisualUpdateOptions;
+
+    /**
      * Constructor
      */
-    constructor(noCss = false, options: any) {
-        super("Attribute Slicer", noCss);
+    constructor(options: powerbi.extensibility.visual.VisualConstructorOptions, noCss = false) {
         this.state = VisualState.create() as VisualState;
-
-        options.element = $(options.element); // make this a jquery object
-        this.init(options);
-    }
-
-    /**
-     * Gets the template associated with the visual
-     */
-    public get template() {
-        return `<div></div>`;
-    }
-
-    /**
-     * Called when the visual is being initialized
-     */
-    public init(options: powerbi.VisualInitOptions): void {
-        super.init(options);
-
         this.host = options.host;
-        this.selectionManager = this.host["createSelectionManager"]();
+        this.element = $("<div></div>");
+
+        // Add to the container
+        options.element.appendChild(this.element[0]);
+
+        this.selectionManager = this.host.createSelectionManager();
         this.propertyPersister = createPropertyPersister(this.host, 100);
 
         const className = CUSTOM_CSS_MODULE && CUSTOM_CSS_MODULE.locals && CUSTOM_CSS_MODULE.locals.className;
         if (className) {
+            $(options.element).append($("<st" + "yle>" + CUSTOM_CSS_MODULE + "</st" + "yle>"));
             this.element.addClass(className);
         }
 
@@ -185,11 +161,14 @@ export default class AttributeSlicer extends VisualBase {
     }
 
     /**
-     * Called when the visual is being updated
+     * Update function for when the visual updates in any way
+     * @param options The update options
+     * @param type The optional update type being passed to update
      */
-    public updateWithType(options: powerbi.VisualUpdateOptions, updateType: UpdateType) {
-        super.updateWithType(options, updateType);
+    public update(options: powerbi.extensibility.visual.VisualUpdateOptions, type?: UpdateType) {
         this.isHandlingUpdate = true;
+        const updateType = type !== undefined ? type : calcUpdateType(this.prevUpdateOptions, options);
+        this.prevUpdateOptions = options;
         try {
             log("Update", options);
 
@@ -229,13 +208,12 @@ export default class AttributeSlicer extends VisualBase {
                         this.mySlicer.refresh();
                     }
 
-                    if (this.isReloadRequired(newState, oldState)) {
+                    // The colors have changed, so we need to reload data
+                    if (!oldState.colors.equals(newState.colors)) {
                         this.data = this.convertData(dv, this.state);
                         this.mySlicer.data = this.data.items;
                         this.mySlicer.selectedItems = this.state.selectedItems.map(createItemFromSerializedItem);
                     }
-
-
                     this.mySlicer.scrollPosition = newState.scrollPosition;
                 }
             }
@@ -247,8 +225,8 @@ export default class AttributeSlicer extends VisualBase {
     /**
      * Enumerates the instances for the objects that appear in the power bi panel
      */
-    public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): powerbi.VisualObjectInstanceEnumeration {
-        let instances = (super.enumerateObjectInstances(options) || []) as VisualObjectInstance[];
+    public enumerateObjectInstances(options: powerbi.EnumerateVisualObjectInstancesOptions): powerbi.VisualObjectInstanceEnumeration {
+        let instances = [] as powerbi.VisualObjectInstance[];
         let builtObjects = this.state.buildEnumerationObjects(options.objectName, this.dataView, false);
         return instances.concat(builtObjects);
     }
@@ -257,17 +235,9 @@ export default class AttributeSlicer extends VisualBase {
      * Gets called when PBI destroys this visual
      */
     public destroy() {
-        super.destroy();
         if (this.mySlicer) {
             this.mySlicer.destroy();
         }
-    }
-
-    /**
-     * Gets the inline css used for this element
-     */
-    protected getCss(): any[] {
-        return super.getCss().concat([CUSTOM_CSS_MODULE + ""]);
     }
 
     /**
@@ -276,7 +246,7 @@ export default class AttributeSlicer extends VisualBase {
     private loadDataFromVisualUpdate(
         updateType: UpdateType,
         pbiUpdateType: powerbi.VisualUpdateType,
-        dv: DataView,
+        dv: powerbi.DataView,
         pbiState: VisualState) {
         // Load data if the data has definitely changed, sometimes however it hasn't actually changed
         // ie search for Microsof then Microsoft
@@ -344,7 +314,7 @@ export default class AttributeSlicer extends VisualBase {
      */
     private convertData(dv: powerbi.DataView, state: VisualState) {
         const { labelDisplayUnits, labelPrecision } = state;
-        let formatter: powerbi.visuals.IValueFormatter;
+        let formatter: any;
         if (labelDisplayUnits || labelPrecision) {
             formatter = createValueFormatter(labelDisplayUnits, labelPrecision);
         }
@@ -352,15 +322,13 @@ export default class AttributeSlicer extends VisualBase {
             this.zeroEmptyItems(dv);
         }
 
-        let listItems = converter(dv, formatter, undefined, state.colors);
-
+        const createSelectionIdBuilder = this.host.createSelectionIdBuilder ? () => this.host.createSelectionIdBuilder() : undefined;
+        const listItems = converter(dv, formatter, undefined, state.colors, createSelectionIdBuilder);
         if (state.hideEmptyItems) {
             listItems.items = listItems.items.filter(item => item.match && item.match.trim() !== "");
         }
-
         return listItems;
     }
-
 
     /**
      * Zero out values for blank categories so they won't affect
@@ -371,7 +339,6 @@ export default class AttributeSlicer extends VisualBase {
         let categories = dv.categorical.categories[0].values;
         for (let i in categories) {
             if (!categories[i] || categories[i].toString().trim().length === 0) {
-
                 for (let dataColumn of dv.categorical.values) {
                     if (dataColumn.values && dataColumn.values[i]) {
                         dataColumn.values[i] = 0;
@@ -424,12 +391,31 @@ export default class AttributeSlicer extends VisualBase {
      * Listener for when loading more data
      */
     private onLoadMoreData(item: any, isSearch: boolean) {
+        const loadMoreData = () => {
+            if (this.host["loadMoreData"]) {
+                this.host["loadMoreData"]();
+            } else {
+                const selManagerHost = this.selectionManager && this.selectionManager["hostServices"];
+                if (selManagerHost && selManagerHost.loadMoreData) {
+                    selManagerHost.loadMoreData();
+                }
+            }
+        };
+
         if (isSearch) {
             // Set the search filter on PBI
-            const builder = createPersistObjectBuilder();
-            const filter = buildContainsFilter(ldget(this.dataView, "categorical.categories[0].source"), this.mySlicer.searchString);
-            builder.persist("general", "selfFilter", filter);
-            this.propertyPersister.persist(false, builder.build());
+            const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
+            const hasFilter = filter && filter.conditions.length > 0;
+            this.state.searchText = this.mySlicer.searchString;
+
+            let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
+            this.host.applyJsonFilter(
+                hasFilter ? filter : null, // tslint:disable-line
+                "general",
+                "selfFilter",
+                hasFilter ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
+
+            this.host.persistProperties(objects);
 
             // Set up the load deferred, and load more data
             this.loadDeferred = $.Deferred();
@@ -446,8 +432,8 @@ export default class AttributeSlicer extends VisualBase {
             this.loadDeferred = $.Deferred();
             item.result = this.loadDeferred.promise();
             if (!alreadyLoading) {
-                this.host.loadMoreData();
                 log("Loading more data");
+                loadMoreData();
             }
         }
     }
@@ -474,75 +460,26 @@ export default class AttributeSlicer extends VisualBase {
         log("AttributeSlicer loading state into PBI", state);
         if (state && this.host) {
             // Restoring selection into PBI
-            const highlight = false;
             let objects: powerbi.VisualObjectInstancesToPersist = state.buildPersistObjects(this.dataView, true);
-            let selection = false;
-            const ids = getSelectionIdsFromSelectors((state.selectedItems || []).map(n => n.selector));
-            if (highlight) {
-                const currentlySelIds = this.selectionManager.getSelectionIds() || [];
-                const toSelect = ids.filter(n => !currentlySelIds.some(m => m.equals(n)));
-                const toDeselect = currentlySelIds.filter(n => !ids.some(m => m.equals(n)));
-                toSelect.concat(toDeselect).forEach(n => {
-                    this.selectionManager.select(n, true);
-                });
-            } else {
-                selection = true;
-                let filter: any;
-                if (ids && ids.length) {
-                    let selectors = ids.map(n => n.getSelector());
-                    filter = data.Selector.filterFromSelector(selectors);
-                }
-                let operation = filter ? "merge" : "remove";
-                const opObjs = objects[operation] = objects[operation] || [];
-                opObjs.push(<powerbi.VisualObjectInstance>{
-                    objectName: "general",
-                    selector: undefined,
-                    properties: {
-                        filter,
-                    },
-                });
-            }
+            const selItems = state.selectedItems || [];
+            const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
+            const target: models.IFilterColumnTarget = {
+                table: categories.source.queryName.substr(0, categories.source.queryName.indexOf(".")),
+                column: categories.source.displayName,
+            };
 
-            // TODO: Remove this once PBI base has been updated with a functioning persist:false flag
-            // Right now it means, don't save at all, rather than, don't generate persistProperties
-            const keysToKeep = ["selfFilter", "filter", "selection"];
-            if (objects) {
-                const applyFilter = (n: powerbi.VisualObjectInstance) => {
-                    const newProps = {};
-                    keysToKeep.forEach(propName => {
-                        if (n.properties.hasOwnProperty(propName)) {
-                            newProps[propName] = n.properties[propName];
-                        }
-                    });
-                    if (!n.selector) {
-                        n.selector = undefined;
-                    }
-                    n.properties = newProps;
-                    return Object.keys(newProps).length > 0;
-                };
+            const filter = new models.BasicFilter(
+                target,
+                "In",
+                selItems.map(n => n.match)
+            );
 
-                if (objects.merge) {
-                    objects.merge = objects.merge.filter(applyFilter);
-                }
-
-                if (objects.remove) {
-                    objects.remove = objects.remove.filter(applyFilter);
-                }
-
-                if (objects.replace) {
-                    objects.replace = objects.replace.filter(applyFilter);
-                }
-            }
-
-            this.propertyPersister.persist(selection, objects);
+            this.host.persistProperties(objects);
+            this.host.applyJsonFilter(
+                selItems.length > 0 ? filter : null, // tslint:disable-line
+                "general",
+                "filter",
+                selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
         }
     }
-
-     /**
-      * If reload is required based on state changes.
-      */
-    private isReloadRequired(newState: VisualState, oldState: VisualState) {
-        return !oldState.colors.equals(newState.colors) || oldState.hideEmptyItems !== newState.hideEmptyItems;
-    }
-
 }

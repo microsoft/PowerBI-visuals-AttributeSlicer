@@ -32,10 +32,10 @@ module.exports = config => {
   config.set({
     basePath: '',
     frameworks: ['mocha'],
-    files: [ 'src/**/*.spec.js' ],
+    files: [ 'src/**/*.spec.ts' ],
     exclude: [],
     preprocessors: {
-      'src/**/*.spec.js': ['webpack', 'sourcemap']
+      'src/**/*.spec.ts': ['webpack', 'sourcemap']
     },
     webpack: webpackConf,
     reporters: ['progress'],

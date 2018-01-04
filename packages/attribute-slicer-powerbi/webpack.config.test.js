@@ -21,14 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+const path = require("path");
+const webpack = require("webpack");
 const config = {
     devTool: "eval",
     resolve: {
-        extensions: ['', '.js', '.json']
+        extensions: ['', '.js', '.ts', '.json']
     },
-    // resolveLoader: {
-    //     fallback: [path.join(__dirname, 'node_modules')],
-    // },
     module: {
         loaders: [
             {
@@ -42,13 +41,20 @@ const config = {
             {
                 test: /\.html$/,
                 loader: 'raw-loader'
-            }
+            },
+            {
+                test: /\.ts$/,
+                loader: 'ts-loader',
+            },
         ],
     },
     externals: {
-        "jsdom": "{}",
-        "powerbi-visuals/lib/powerbi-visuals": "{}",
+        "jsdom": "{}"
     },
+    plugins: [
+        new webpack.NormalModuleReplacementPlugin(/powerbi-visuals-tools/, 'node-noop'),
+        new webpack.NormalModuleReplacementPlugin(/powerbi-visuals-utils-.*index\.d/, 'node-noop'),
+    ]
 };
 
 module.exports = config;

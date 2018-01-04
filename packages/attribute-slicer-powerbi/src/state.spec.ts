@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import '@essex/pbi-base/dist/spec/visualHelpers'; // tslint:disable-line
-import { serializeIdentity, deserializeIdentity } from "@essex/pbi-base";
+import '@essex/visual-testing-tools/lib/visualHelpers'; // tslint:disable-line
 import state from "./state";
 import { expect } from "chai";
 

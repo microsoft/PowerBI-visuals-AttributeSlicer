@@ -1,7 +1,7 @@
 const exec = require('child_process').exec;
 const { spawn } = require('child_process');
 // const isWin = /^win/.test(process.platform);
-const baseExec = `${__dirname}/../node_modules/typescript/bin/tsc`;
+const baseExec = require.resolve("typescript") + `/../../bin/tsc`;
 const tsc = spawn("node", [baseExec]);
 
 let hasErrors = false;

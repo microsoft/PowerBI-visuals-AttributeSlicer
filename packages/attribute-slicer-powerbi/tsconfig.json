@@ -6,7 +6,8 @@
     "jsx": "react",
     "declaration": true,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "skipLibCheck": true
   },
   "compileOnSave": false,
   "exclude": [

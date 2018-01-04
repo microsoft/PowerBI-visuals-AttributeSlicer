@@ -545,13 +545,13 @@ import { IAttributeSlicerSegmentInfo } from "../interfaces";
 import * as _ from "lodash";
 export default function dataWithCategoriesAndValues() {
     "use strict";
-    const clonedOptions = <powerbi.VisualUpdateOptions><any>_.cloneDeep(data);
+    const clonedOptions = <any>_.cloneDeep(data);
 
     // Wont represent correctly with JSON stringify
     const values = clonedOptions.dataViews[0].categorical.values;
 
     (<any>values)["grouped"] = () => {
-        return values.map((n, i) => {
+        return values.map((n: any, i: any) => {
             const v = _.cloneDeep(n);
             v["name"] = "GROUPED_" + i;
             // v["objects"] = objects[i] as any;

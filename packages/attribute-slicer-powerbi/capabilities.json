@@ -217,6 +217,12 @@
                         }
                     }
                 },
+                "searchText": {
+                    "displayName": "Search Text",
+                    "type": {
+                        "text": {}
+                    }
+                },
                 "selection": {
                     "displayName": "Selection",
                     "type": {
@@ -271,15 +277,14 @@
                 },
                 "filter": {
                     "type": {
-                        "filter": {}
-                    },
-                    "rule": {
-                        "output": {
-                            "property": "selected",
-                            "selector": [
-                                "Values"
-                            ]
-                        }
+                        "filter": true
+                    }
+                },
+                "version": {
+                    "displayName": "Version",
+                    "description": "The version of Attribute Slicer",
+                    "type": {
+                        "text": {}
                     }
                 }
             }
