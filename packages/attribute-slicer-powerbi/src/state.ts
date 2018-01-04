@@ -339,7 +339,7 @@ function doesDataSupportSearch(dv: powerbi.DataView) {
     "use strict";
     const source = ldget(dv, "categorical.categories[0].source");
     const metadataCols = ldget(dv, "metadata.columns");
-    const metadataSource = metadataCols && metadataCols.filter((n: any) => n.roles["Category"])[0];
+    const metadataSource = metadataCols && metadataCols.filter((n: any) => n.roles && n.roles["Category"])[0];
     if (source && metadataSource) {
         return source && metadataSource && metadataSource.type.text && source.type.text;
     }

@@ -97,7 +97,7 @@ export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
     const segmentColors = {};
 
     // If the segment by is a color segment
-    if (dataView.metadata.columns.filter(n => n.roles["Color"]).length >= 0 && groups) {
+    if (dataView.metadata.columns.filter(n => n.roles && n.roles["Color"]).length >= 0 && groups) {
         groups.forEach((n, i) => {
             const name = (n.name || "") + "";
             if (name && (HEX_COLOR_REGEX.test(name) || RGB_COLOR_REGEX.test(name))) {
