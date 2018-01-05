@@ -56,7 +56,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         enumerable: false,
         parse(value, desc, dv) {
             const searchText: any = ldget(dv, "metadata.objects.general.searchText");
-            if (!searchText) {
+            if (searchText === undefined) {
                 // TODO: Remove this after a few release cycles, this is purely for legacy support
                 const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
                 if (selfFilter) {

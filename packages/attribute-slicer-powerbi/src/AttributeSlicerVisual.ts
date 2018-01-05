@@ -60,9 +60,9 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     protected mySlicer: AttributeSlicerImpl;
 
     /**
-     * A callback after an update has happened
+     * A promise which is resolved after the next update
      */
-    private onNextUpdate: () => any;
+    private afterNextUpdate: PromiseLike<any>;
 
     /**
      * The current dataView
@@ -127,6 +127,9 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         this.host = options.host;
         this.element = $("<div></div>");
 
+        // Initialize the promise for the next update
+        this.afterNextUpdate = $.Deferred();
+
         // Add to the container
         options.element.appendChild(this.element[0]);
 
@@ -171,8 +174,11 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * @param type The optional update type being passed to update
      */
     public update(options: powerbi.extensibility.visual.VisualUpdateOptions, type?: UpdateType) {
-        // Do the callback
-        if (this.onNextUpdate) { this.onNextUpdate(); }
+        const afterNextUpdate = this.afterNextUpdate;
+        afterNextUpdate["resolve"](); // Resolve for anyone listening for the next update
+
+        // Initialize the promise for the next update
+        this.afterNextUpdate = $.Deferred();
 
         this.isHandlingUpdate = true;
         const updateType = type !== undefined ? type : calcUpdateType(this.prevUpdateOptions, options);
@@ -362,10 +368,51 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     private onSelectionChanged(selectedItems: ListItem[]) {
         if (!this.isHandlingUpdate) {
             log("onSelectionChanged");
-            const selection = selectedItems.map(n => n.match).join(", ");
-            const text = selection && selection.length ? `Select ${selection}` : "Clear Selection";
-            this.state.selectedItems = selectedItems;
-            this.writeStateToPBI(text);
+            const newIds = (selectedItems || []).map(n => n.id).sort();
+            const oldIds = (this.state.selectedItems || []).map(n => n.id).sort();
+            let hasChanges = newIds.length !== oldIds.length;
+            if (!hasChanges) {
+                hasChanges = newIds.some((ni, i) => newIds[i] !== oldIds[i]);
+            }
+            if (hasChanges) {
+                this.state.selectedItems = selectedItems;
+                this.propertyPersister.persist(false, {
+                    merge: [{
+                        objectName: "general",
+                        selector: undefined,
+                        properties: {
+                            selection: JSON.stringify(selectedItems || []),
+                        },
+                    }],
+                });
+
+                const state = this.state;
+                const selItems = state.selectedItems || [];
+                const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
+                const source = categories.source;
+                const target: models.IFilterColumnTarget = {
+                    table: source.queryName.substr(0, source.queryName.indexOf(".")),
+                    column: source.displayName,
+                };
+                const filter = new models.BasicFilter(
+                    target,
+                    "In",
+                    selItems.map(n => source.type && source.type.numeric ? parseFloat(n.match) : n.match)
+                );
+
+                const action = selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
+
+                let applied = false;
+                const applyFilter = () => {
+                    if (!applied) {
+                        applied = true;
+                        this.host.applyJsonFilter(filter, "general", "filter", action);
+                    }
+                };
+
+                this.afterNextUpdate.then(applyFilter);
+                setTimeout(applyFilter, 300);
+            }
         }
     }
 
@@ -373,9 +420,32 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * Listener for searches being performed
      */
     private onSearchPerformed(searchText: string) {
-        const text = searchText && searchText.length ? `Search for "${searchText}"` : "Clear Search";
-        this.state.searchText = searchText;
-        this.writeStateToPBI(text);
+        if (searchText !== this.state.searchText) {
+            this.state.searchText = searchText;
+            this.propertyPersister.persist(false, {
+                merge: [{
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        searchText,
+                    },
+                }],
+            });
+
+            const selfFilter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
+            const action = selfFilter && selfFilter.conditions.length > 0 ?
+                powerbi.FilterAction.merge : powerbi.FilterAction.remove;
+            let applied = false;
+            const applyFilter = () => {
+                if (!applied) {
+                    applied = true;
+                    this.host.applyJsonFilter(selfFilter, "general", "selfFilter", action);
+                }
+            };
+
+            this.afterNextUpdate.then(applyFilter);
+            setTimeout(applyFilter, 300);
+        }
     }
 
     /**
@@ -401,20 +471,6 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         };
 
         if (isSearch) {
-            // Set the search filter on PBI
-            const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
-            const hasFilter = filter && filter.conditions.length > 0;
-            this.state.searchText = this.mySlicer.searchString;
-
-            let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
-            this.host.applyJsonFilter(
-                hasFilter ? filter : null, // tslint:disable-line
-                "general",
-                "selfFilter",
-                hasFilter ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
-
-            this.host.persistProperties(objects);
-
             // Set up the load deferred, and load more data
             this.loadDeferred = $.Deferred();
 
@@ -447,50 +503,4 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 // (ie, if you search for Microsof then Microsoft, most likely will return the same dataset)
                 this.loadDeferred);
     }
-
-    /**
-     * Writes our current state back to powerbi.
-     */
-    private writeStateToPBI = _.debounce((text: string) => { // tslint:disable-line
-        this.state.scrollPosition = this.mySlicer.scrollPosition;
-
-        const state = this.state;
-        log("AttributeSlicer loading state into PBI", state);
-        if (state && this.host) {
-            // Restoring selection into PBI
-            let objects: powerbi.VisualObjectInstancesToPersist = state.buildPersistObjects(this.dataView, true);
-            const selItems = state.selectedItems || [];
-            const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
-            const target: models.IFilterColumnTarget = {
-                table: categories.source.queryName.substr(0, categories.source.queryName.indexOf(".")),
-                column: categories.source.displayName,
-            };
-
-            const filter = new models.BasicFilter(
-                target,
-                "In",
-                selItems.map(n => n.match)
-            );
-
-            // The *only* reason this is necessary is because for some reason when
-            // we do persistProperties & applyJsonFilter back to back, it was causing
-            // the data within attribute slicer to switch out with data that is later in the data set
-            // kind of like if a loadMoreData was called after the applyJsonFilter
-            let triggered = false;
-            const applyFilter = this.onNextUpdate = () => {
-                delete this.onNextUpdate;
-                if (!triggered) {
-                    triggered = true;
-                    const action = selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
-                    this.host.applyJsonFilter(filter, "general", "filter", action);
-                }
-            };
-
-            // Persist those properties, which should initiate an update call
-            this.host.persistProperties(objects);
-
-            // Auto trigger if not already run
-            setTimeout(() => applyFilter, 100);
-        }
-    }, 200);
 }
