@@ -298,7 +298,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                     if (!_.isEqual(pbiState.selectedItems, [])) {
                         log("Clearing Selection, Categories Changed");
                         pbiState.selectedItems = [];
-                        this._onSelectionChangedDebounced([]);
+                        this.onSelectionChanged([]);
                     }
                     if (pbiState.searchText !== "") {
                         log("Clearing Search, Categories Changed");
@@ -356,26 +356,16 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         }
     }
 
-    /* tslint:disable */
     /**
-     * The debounced version of the selection changed
+     * Listener for when the selection changes
      */
-    private _onSelectionChangedDebounced = _.debounce( /* tslint:enable */
-        (selectedItems: ListItem[]) => {
+    private onSelectionChanged(selectedItems: ListItem[]) {
+        if (!this.isHandlingUpdate) {
             log("onSelectionChanged");
             const selection = selectedItems.map(n => n.match).join(", ");
             const text = selection && selection.length ? `Select ${selection}` : "Clear Selection";
             this.state.selectedItems = selectedItems;
             this.writeStateToPBI(text);
-        },
-    100);
-
-    /**
-     * Listener for when the selection changes
-     */
-    private onSelectionChanged(newItems: ListItem[]) {
-        if (!this.isHandlingUpdate) {
-            this._onSelectionChangedDebounced(newItems);
         }
     }
 
@@ -461,7 +451,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     /**
      * Writes our current state back to powerbi.
      */
-    private writeStateToPBI(text: string) {
+    private writeStateToPBI = _.debounce((text: string) => { // tslint:disable-line
         this.state.scrollPosition = this.mySlicer.scrollPosition;
 
         const state = this.state;
@@ -500,7 +490,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
             this.host.persistProperties(objects);
 
             // Auto trigger if not already run
-            setTimeout(() => applyFilter, 200);
+            setTimeout(() => applyFilter, 100);
         }
-    }
+    }, 200);
 }
