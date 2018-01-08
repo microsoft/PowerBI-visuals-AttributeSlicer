@@ -111,7 +111,10 @@ export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
 /**
  * Builds the display string for the given category
  */
-export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], catIdx: number, categoryFormatter?: formatting.IValueFormatter): string {
+export function buildCategoryDisplay(
+    cats: powerbi.DataViewCategoryColumn[],
+    catIdx: number,
+    categoryFormatter?: formatting.IValueFormatter): string {
     "use strict";
     return (cats || []).map(n => {
         const category = n.values[catIdx];
