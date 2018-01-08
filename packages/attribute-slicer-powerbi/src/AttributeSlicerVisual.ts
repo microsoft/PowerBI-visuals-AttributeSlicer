@@ -40,7 +40,6 @@ import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
 import { default as VisualState } from "./state";
 import * as models from "powerbi-models";
-import { AdvancedFilter } from "powerbi-models";
 
 /* tslint:disable */
 const ldget = require("lodash.get");
