@@ -40,6 +40,7 @@ import { createValueFormatter } from "./formatting";
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from "./interfaces";
 import { default as VisualState } from "./state";
 import * as models from "powerbi-models";
+import { AdvancedFilter } from "powerbi-models";
 
 /* tslint:disable */
 const ldget = require("lodash.get");
@@ -386,32 +387,8 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                     }],
                 });
 
-                const state = this.state;
-                const selItems = state.selectedItems || [];
-                const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
-                const source = categories.source;
-                const target: models.IFilterColumnTarget = {
-                    table: source.queryName.substr(0, source.queryName.indexOf(".")),
-                    column: source.displayName,
-                };
-                const filter = new models.BasicFilter(
-                    target,
-                    "In",
-                    selItems.map(n => source.type && source.type.numeric ? parseFloat(n.match) : n.match)
-                );
-
-                const action = selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
-
-                let applied = false;
-                const applyFilter = () => {
-                    if (!applied) {
-                        applied = true;
-                        this.host.applyJsonFilter(filter, "general", "filter", action);
-                    }
-                };
-
-                this.afterNextUpdate.then(applyFilter);
-                setTimeout(applyFilter, 300);
+                const filter = this.buildFilter(selectedItems);
+                this.applyFilter(filter, "filter");
             }
         }
     }
@@ -432,19 +409,8 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 }],
             });
 
-            const selfFilter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
-            const action = selfFilter && selfFilter.conditions.length > 0 ?
-                powerbi.FilterAction.merge : powerbi.FilterAction.remove;
-            let applied = false;
-            const applyFilter = () => {
-                if (!applied) {
-                    applied = true;
-                    this.host.applyJsonFilter(selfFilter, "general", "selfFilter", action);
-                }
-            };
-
-            this.afterNextUpdate.then(applyFilter);
-            setTimeout(applyFilter, 300);
+            const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
+            this.applyFilter(filter, "selfFilter");
         }
     }
 
@@ -490,6 +456,57 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 loadMoreData();
             }
         }
+    }
+
+    /**
+     * Applies the given filter
+     * @param filter The filter to apply
+     * @param propertyName The property name within the pbi's objects for the filter
+     */
+    private applyFilter(filter: models.BasicFilter|models.AdvancedFilter, propertyName: string) {
+
+        // We at least need to have a filter object
+        let hasConditions = false;
+        if (filter && filter["values"]) {
+            hasConditions = filter["values"].length > 0;
+        } else if (filter && filter["conditions"]) {
+            hasConditions = filter["conditions"].length > 0;
+        }
+        const action = hasConditions ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
+        let applied = false;
+        const applyFilter = () => {
+            if (!applied) {
+                applied = true;
+                this.host.applyJsonFilter(filter, "general", propertyName, action);
+            }
+        };
+
+        // This is necessary because powerbi calls persistProperties with applyJSONFilter, so when you have two
+        // persistProperties back to back, it causes problems
+        this.afterNextUpdate.then(applyFilter);
+
+        // This is really a safety net in case `update` doesn't get called with the original persist call
+        setTimeout(applyFilter, 300);
+    }
+
+    /**
+     * Builds a filter to filter to the given items
+     * @param selectedItems The list of selected items
+     */
+    private buildFilter(selectedItems: ListItem[]) {
+        const state = this.state;
+        const selItems = state.selectedItems || [];
+        const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
+        const source = categories.source;
+        const target: models.IFilterColumnTarget = {
+            table: source.queryName.substr(0, source.queryName.indexOf(".")),
+            column: source.displayName,
+        };
+        return new models.BasicFilter(
+            target,
+            "In",
+            selItems.map(n => source.type && source.type.numeric ? parseFloat(n.match) : n.match)
+        );
     }
 
     /**
