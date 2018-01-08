@@ -97,7 +97,7 @@ export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
     const segmentColors = {};
 
     // If the segment by is a color segment
-    if (dataView.metadata.columns.filter(n => n.roles["Color"]).length >= 0 && groups) {
+    if (dataView.metadata.columns.filter(n => n.roles && n.roles["Color"]).length >= 0 && groups) {
         groups.forEach((n, i) => {
             const name = (n.name || "") + "";
             if (name && (HEX_COLOR_REGEX.test(name) || RGB_COLOR_REGEX.test(name))) {
@@ -111,7 +111,10 @@ export function calculateSegmentColorsFromData(dataView: powerbi.DataView) {
 /**
  * Builds the display string for the given category
  */
-export function buildCategoryDisplay(cats: powerbi.DataViewCategoryColumn[], catIdx: number, categoryFormatter?: formatting.IValueFormatter): string {
+export function buildCategoryDisplay(
+    cats: powerbi.DataViewCategoryColumn[],
+    catIdx: number,
+    categoryFormatter?: formatting.IValueFormatter): string {
     "use strict";
     return (cats || []).map(n => {
         const category = n.values[catIdx];

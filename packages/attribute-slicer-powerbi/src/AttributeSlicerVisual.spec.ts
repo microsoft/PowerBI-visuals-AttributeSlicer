@@ -53,7 +53,7 @@ describe("AttributeSlicerVisual", function () {
             element: parentEle[0],
             host: {
                 persistProperties: () => true,
-                createSelectionManager: () => {},
+                createSelectionManager: () => { }, // tslint:disable-line
             },
             viewport: {
                 width: 500,

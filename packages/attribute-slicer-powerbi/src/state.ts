@@ -56,7 +56,7 @@ export default class AttributeSlicerVisualState extends HasSettings implements I
         enumerable: false,
         parse(value, desc, dv) {
             const searchText: any = ldget(dv, "metadata.objects.general.searchText");
-            if (!searchText) {
+            if (searchText === undefined) {
                 // TODO: Remove this after a few release cycles, this is purely for legacy support
                 const selfFilter: any = ldget(dv, "metadata.objects.general.selfFilter");
                 if (selfFilter) {
@@ -339,7 +339,7 @@ function doesDataSupportSearch(dv: powerbi.DataView) {
     "use strict";
     const source = ldget(dv, "categorical.categories[0].source");
     const metadataCols = ldget(dv, "metadata.columns");
-    const metadataSource = metadataCols && metadataCols.filter((n: any) => n.roles["Category"])[0];
+    const metadataSource = metadataCols && metadataCols.filter((n: any) => n.roles && n.roles["Category"])[0];
     if (source && metadataSource) {
         return source && metadataSource && metadataSource.type.text && source.type.text;
     }
@@ -363,7 +363,7 @@ function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
 /**
  * Converts the given items into a format for PBI
  */
-function convertSelectionToPBI(value: ListItem[]) {
+export function convertSelectionToPBI(value: ListItem[]) {
     "use strict";
     if (value) {
         return JSON.stringify((value || []).map((n) => ({

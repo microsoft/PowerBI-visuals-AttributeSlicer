@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 import '@essex/visual-testing-tools/lib/visualHelpers'; // tslint:disable-line
-import state from "./state";
-import { expect } from "chai";
+// import state from "./state";
+// import { expect } from "chai";
 
 describe("state", () => {
     describe("integration", () => {

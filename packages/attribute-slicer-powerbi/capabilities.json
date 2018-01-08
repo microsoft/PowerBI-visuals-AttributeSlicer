@@ -110,7 +110,7 @@
                         "in": "Category"
                     },
                     "dataReductionAlgorithm": {
-                        "window": {
+                        "top": {
                             "count": 500
                         }
                     }

@@ -60,6 +60,11 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     protected mySlicer: AttributeSlicerImpl;
 
     /**
+     * A promise which is resolved after the next update
+     */
+    private afterNextUpdate: PromiseLike<any>;
+
+    /**
      * The current dataView
      */
     private dataView: powerbi.DataView;
@@ -122,6 +127,9 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         this.host = options.host;
         this.element = $("<div></div>");
 
+        // Initialize the promise for the next update
+        this.afterNextUpdate = $.Deferred();
+
         // Add to the container
         options.element.appendChild(this.element[0]);
 
@@ -166,6 +174,12 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * @param type The optional update type being passed to update
      */
     public update(options: powerbi.extensibility.visual.VisualUpdateOptions, type?: UpdateType) {
+        const afterNextUpdate = this.afterNextUpdate;
+        afterNextUpdate["resolve"](); // Resolve for anyone listening for the next update
+
+        // Initialize the promise for the next update
+        this.afterNextUpdate = $.Deferred();
+
         this.isHandlingUpdate = true;
         const updateType = type !== undefined ? type : calcUpdateType(this.prevUpdateOptions, options);
         this.prevUpdateOptions = options;
@@ -290,7 +304,7 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                     if (!_.isEqual(pbiState.selectedItems, [])) {
                         log("Clearing Selection, Categories Changed");
                         pbiState.selectedItems = [];
-                        this._onSelectionChangedDebounced([]);
+                        this.onSelectionChanged([]);
                     }
                     if (pbiState.searchText !== "") {
                         log("Clearing Search, Categories Changed");
@@ -348,26 +362,33 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         }
     }
 
-    /* tslint:disable */
-    /**
-     * The debounced version of the selection changed
-     */
-    private _onSelectionChangedDebounced = _.debounce( /* tslint:enable */
-        (selectedItems: ListItem[]) => {
-            log("onSelectionChanged");
-            const selection = selectedItems.map(n => n.match).join(", ");
-            const text = selection && selection.length ? `Select ${selection}` : "Clear Selection";
-            this.state.selectedItems = selectedItems;
-            this.writeStateToPBI(text);
-        },
-    100);
-
     /**
      * Listener for when the selection changes
      */
-    private onSelectionChanged(newItems: ListItem[]) {
+    private onSelectionChanged(selectedItems: ListItem[]) {
         if (!this.isHandlingUpdate) {
-            this._onSelectionChangedDebounced(newItems);
+            log("onSelectionChanged");
+            const newIds = (selectedItems || []).map(n => n.id).sort();
+            const oldIds = (this.state.selectedItems || []).map(n => n.id).sort();
+            let hasChanges = newIds.length !== oldIds.length;
+            if (!hasChanges) {
+                hasChanges = newIds.some((ni, i) => newIds[i] !== oldIds[i]);
+            }
+            if (hasChanges) {
+                this.state.selectedItems = selectedItems;
+                this.propertyPersister.persist(false, {
+                    merge: [{
+                        objectName: "general",
+                        selector: undefined,
+                        properties: {
+                            selection: JSON.stringify(selectedItems || []),
+                        },
+                    }],
+                });
+
+                const filter = this.buildFilter(selectedItems);
+                this.applyFilter(filter, "filter");
+            }
         }
     }
 
@@ -375,9 +396,21 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
      * Listener for searches being performed
      */
     private onSearchPerformed(searchText: string) {
-        const text = searchText && searchText.length ? `Search for "${searchText}"` : "Clear Search";
-        this.state.searchText = searchText;
-        this.writeStateToPBI(text);
+        if (searchText !== this.state.searchText) {
+            this.state.searchText = searchText;
+            this.propertyPersister.persist(false, {
+                merge: [{
+                    objectName: "general",
+                    selector: undefined,
+                    properties: {
+                        searchText,
+                    },
+                }],
+            });
+
+            const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
+            this.applyFilter(filter, "selfFilter");
+        }
     }
 
     /**
@@ -403,20 +436,6 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
         };
 
         if (isSearch) {
-            // Set the search filter on PBI
-            const filter = buildContainsFilter(this.dataView.categorical.categories[0].source, this.mySlicer.searchString);
-            const hasFilter = filter && filter.conditions.length > 0;
-            this.state.searchText = this.mySlicer.searchString;
-
-            let objects: powerbi.VisualObjectInstancesToPersist = this.state.buildPersistObjects(this.dataView, true);
-            this.host.applyJsonFilter(
-                hasFilter ? filter : null, // tslint:disable-line
-                "general",
-                "selfFilter",
-                hasFilter ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
-
-            this.host.persistProperties(objects);
-
             // Set up the load deferred, and load more data
             this.loadDeferred = $.Deferred();
 
@@ -439,6 +458,57 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
     }
 
     /**
+     * Applies the given filter
+     * @param filter The filter to apply
+     * @param propertyName The property name within the pbi's objects for the filter
+     */
+    private applyFilter(filter: models.BasicFilter|models.AdvancedFilter, propertyName: string) {
+
+        // We at least need to have a filter object
+        let hasConditions = false;
+        if (filter && filter["values"]) {
+            hasConditions = filter["values"].length > 0;
+        } else if (filter && filter["conditions"]) {
+            hasConditions = filter["conditions"].length > 0;
+        }
+        const action = hasConditions ? powerbi.FilterAction.merge : powerbi.FilterAction.remove;
+        let applied = false;
+        const applyFilter = () => {
+            if (!applied) {
+                applied = true;
+                this.host.applyJsonFilter(filter, "general", propertyName, action);
+            }
+        };
+
+        // This is necessary because powerbi calls persistProperties with applyJSONFilter, so when you have two
+        // persistProperties back to back, it causes problems
+        this.afterNextUpdate.then(applyFilter);
+
+        // This is really a safety net in case `update` doesn't get called with the original persist call
+        setTimeout(applyFilter, 300);
+    }
+
+    /**
+     * Builds a filter to filter to the given items
+     * @param selectedItems The list of selected items
+     */
+    private buildFilter(selectedItems: ListItem[]) {
+        const state = this.state;
+        const selItems = state.selectedItems || [];
+        const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
+        const source = categories.source;
+        const target: models.IFilterColumnTarget = {
+            table: source.queryName.substr(0, source.queryName.indexOf(".")),
+            column: source.displayName,
+        };
+        return new models.BasicFilter(
+            target,
+            "In",
+            selItems.map(n => source.type && source.type.numeric ? parseFloat(n.match) : n.match)
+        );
+    }
+
+    /**
      * A function used to determine whether or not a data update should be performed
      */
     private shouldLoadDataIntoSlicer(updateType: UpdateType, pbiState: VisualState, pbiUpdateType: powerbi.VisualUpdateType) {
@@ -448,38 +518,5 @@ export default class AttributeSlicer implements powerbi.extensibility.visual.IVi
                 // If attribute slicer requested more data, but the data actually hasn't changed
                 // (ie, if you search for Microsof then Microsoft, most likely will return the same dataset)
                 this.loadDeferred);
-    }
-
-    /**
-     * Writes our current state back to powerbi.
-     */
-    private writeStateToPBI(text: string) {
-        this.state.scrollPosition = this.mySlicer.scrollPosition;
-
-        const state = this.state;
-        log("AttributeSlicer loading state into PBI", state);
-        if (state && this.host) {
-            // Restoring selection into PBI
-            let objects: powerbi.VisualObjectInstancesToPersist = state.buildPersistObjects(this.dataView, true);
-            const selItems = state.selectedItems || [];
-            const categories: powerbi.DataViewCategoricalColumn = this.dataView.categorical.categories[0];
-            const target: models.IFilterColumnTarget = {
-                table: categories.source.queryName.substr(0, categories.source.queryName.indexOf(".")),
-                column: categories.source.displayName,
-            };
-
-            const filter = new models.BasicFilter(
-                target,
-                "In",
-                selItems.map(n => n.match)
-            );
-
-            this.host.persistProperties(objects);
-            this.host.applyJsonFilter(
-                selItems.length > 0 ? filter : null, // tslint:disable-line
-                "general",
-                "filter",
-                selItems.length > 0 ? powerbi.FilterAction.merge : powerbi.FilterAction.remove);
-        }
     }
 }
