@@ -22,46 +22,47 @@
  * SOFTWARE.
  */
 
-import "./powerbi";
-import { formatting } from "../powerbi-visuals-utils";
+import './powerbi';
+import { formatting } from '../powerbi-visuals-utils';
 
 /**
  * Creates a value formatter from the current set of options
  */
 export function createValueFormatter(displayUnits = 0, precision = 0) {
-    "use strict";
-    return formatting.valueFormatter.create({
-        value: displayUnits,
-        format: "0",
-        precision: precision,
-    });
+  'use strict';
+  return formatting.valueFormatter.create({
+    value: displayUnits,
+    format: '0',
+    precision,
+  });
 }
 
 /**
  * Creates a formatter capable of formatting the categories (or undefined) if not necessary
  */
 export function createCategoryFormatter(dataView: powerbi.DataView) {
-    "use strict";
-    let formatter: formatting.IValueFormatter;
-    let cats = dataView && dataView.categorical && dataView.categorical.categories;
-    if (cats && cats.length && cats[0].source.type.dateTime) {
-        let min: Date;
-        let max: Date;
-        cats[0].values.forEach(n => {
-            if (typeof min === "undefined" || min > n) {
-                min = new Date(n.valueOf());
-            }
-            if (typeof max === "undefined" || max < n) {
-                max = new Date(n.valueOf());
-            }
-        });
-        if (min && max) {
-            formatter = formatting.valueFormatter.create({
-                value: min,
-                value2: max,
-                format: cats[0].source.format || "0",
-            });
-        }
+  'use strict';
+  let formatter: formatting.IValueFormatter;
+  const cats =
+    dataView && dataView.categorical && dataView.categorical.categories;
+  if (cats && cats.length && cats[0].source.type.dateTime) {
+    let min: Date;
+    let max: Date;
+    cats[0].values.forEach((n) => {
+      if (typeof min === 'undefined' || min > n) {
+        min = new Date(n.valueOf());
+      }
+      if (typeof max === 'undefined' || max < n) {
+        max = new Date(n.valueOf());
+      }
+    });
+    if (min && max) {
+      formatter = formatting.valueFormatter.create({
+        value: min,
+        value2: max,
+        format: cats[0].source.format || '0',
+      });
     }
-    return formatter;
+  }
+  return formatter;
 }

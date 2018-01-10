@@ -21,9 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-export { AttributeSlicer } from "./AttributeSlicer";
-export * from "./interfaces";
-export * from "./Utils";
-export { default as JQuerySelectionManager } from "./selection/JQuerySelectionManager";
-export { default as SelectionManager } from "./selection/SelectionManager";
-export * from "./AttributeSlicer.defaults";
+export { AttributeSlicer } from './AttributeSlicer';
+export * from './interfaces';
+export * from './Utils';
+export {
+  default as JQuerySelectionManager,
+} from './selection/JQuerySelectionManager';
+export { default as SelectionManager } from './selection/SelectionManager';
+export * from './AttributeSlicer.defaults';
