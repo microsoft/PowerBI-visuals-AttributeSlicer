@@ -22,48 +22,52 @@
  * SOFTWARE.
  */
 
-import "./powerbi";
-import { SlicerItem, IAttributeSlicerState, ISlicerValueSegment } from "@essex/attribute-slicer";
+import './powerbi';
+import {
+  SlicerItem,
+  IAttributeSlicerState,
+  ISlicerValueSegment,
+} from '@essex/attribute-slicer';
 
 /**
  * Represents a list item
  */
 /* tslint:disable */
-export interface ListItem extends SlicerItem { }
+export interface ListItem extends SlicerItem {}
 
 /**
  * Represents attribute slicer visual data
  */
 export interface IAttributeSlicerVisualData {
-    /**
-     * The attribute slicer items
-    */
-    items: ListItem[];
+  /**
+   * The attribute slicer items
+   */
+  items: ListItem[];
 
-    /**
-     * The value segment info for each of the items values
-     */
-    segmentInfo: IAttributeSlicerSegmentInfo[];
+  /**
+   * The value segment info for each of the items values
+   */
+  segmentInfo: IAttributeSlicerSegmentInfo[];
 }
 
 /**
  * An interface describing the segments of value data coming into the attribute slicer
  */
 export interface IAttributeSlicerSegmentInfo {
-    /**
-     * The name of the segment
-     */
-    name: string;
+  /**
+   * The name of the segment
+   */
+  name: string;
 
-    /**
-     * The unique identity of this segment
-     */
-    identity: powerbi.DataViewScopeIdentity;
+  /**
+   * The unique identity of this segment
+   */
+  identity: powerbi.DataViewScopeIdentity;
 
-    /**
-     * The segment color
-     */
-    color: string
+  /**
+   * The segment color
+   */
+  color: string;
 }
 export type SlicerItem = SlicerItem;
 export type IAttributeSlicerState = IAttributeSlicerState;
