@@ -30,6 +30,7 @@ import {
   calcUpdateType,
   computeRenderedValues,
   buildContainsFilter,
+  buildColumnTarget,
 } from '@essex/visual-utils';
 import './powerbi';
 import * as _ from 'lodash';
@@ -567,12 +568,8 @@ export default class AttributeSlicer
     const categories: powerbi.DataViewCategoricalColumn = this.dataView
       .categorical.categories[0];
     const source = categories.source;
-    const target: models.IFilterColumnTarget = {
-      table: source.queryName.substr(0, source.queryName.indexOf('.')),
-      column: source.displayName,
-    };
     return new models.BasicFilter(
-      target,
+      buildColumnTarget(source),
       'In',
       selItems.map(
         n =>

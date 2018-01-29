@@ -56,11 +56,6 @@ export interface SlicerItem {
   equals: (b: SlicerItem) => boolean;
 
   /**
-   * Called when an item is created
-   */
-  onCreate?: (ele: JQuery) => void;
-
-  /**
    * The segments that make up this items value, the total of the widths must === 100
    */
   valueSegments?: ISlicerValueSegment[];
