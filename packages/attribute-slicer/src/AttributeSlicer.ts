@@ -266,9 +266,6 @@ export class AttributeSlicer {
               paddingTop: '2px',
             })
             .data('item', item);
-          if (item.onCreate) {
-            item.onCreate(ele);
-          }
           return ele[0];
         },
       });
