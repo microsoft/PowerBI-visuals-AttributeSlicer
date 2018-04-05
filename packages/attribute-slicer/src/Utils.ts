@@ -66,11 +66,10 @@ export function createItem(
   'use strict';
   return {
     id,
-    match: category,
+    text: category,
     color,
     value: value || 0,
     renderedValue,
-    equals: (b: SlicerItem) => id === b.id,
   };
 }
 

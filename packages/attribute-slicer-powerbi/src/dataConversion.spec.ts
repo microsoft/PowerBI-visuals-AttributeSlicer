@@ -35,7 +35,7 @@ describe('dataConversion', () => {
       it('should convert the categories correctly', () => {
         const { options, categories } = categoriesOnly();
         const converted = convert(options.dataViews[0]);
-        const catNames = converted.items.map(n => n.match);
+        const catNames = converted.items.map(n => n.text);
         expect(catNames).to.be.deep.equal(categories);
       });
       it('should convert the segment infos values correctly', () => {
@@ -51,10 +51,7 @@ describe('dataConversion', () => {
 
         converted.items.forEach((n) => {
           expect(n.color).to.be.equal('#ccc'); // The default color
-          expect(n.matchPrefix).to.be.empty;
-          expect(n.matchSuffix).to.be.empty;
           expect(n.id).to.not.be.undefined;
-          expect(n.equals).to.not.be.undefined;
 
           // None of the items should have any of the below since there is no value data
           expect(n.value).to.be.empty;
@@ -62,30 +59,12 @@ describe('dataConversion', () => {
           expect(n.valueSegments).to.be.empty;
         });
       });
-      it('should define an equals function correctly', () => {
-        const { options } = categoriesOnly();
-        const converted = convert(options.dataViews[0]);
-
-        converted.items.forEach((n) => {
-          expect(
-            n.equals(<any>{
-              id: n.id,
-            }),
-          ).to.be.true;
-
-          expect(
-            n.equals(<any>{
-              id: 'SOMETHING RANDOM',
-            }),
-          ).to.be.false;
-        });
-      });
     });
     describe('data with categories and values (no series)', () => {
       it('should convert the categories correctly', () => {
         const { options, categories } = categoriesAndValues();
         const converted = convert(options.dataViews[0]);
-        const catNames = converted.items.map(n => n.match);
+        const catNames = converted.items.map(n => n.text);
         expect(catNames).to.be.deep.equal(categories);
       });
       it('should convert the items values correctly', () => {
@@ -149,10 +128,7 @@ describe('dataConversion', () => {
 
         converted.items.forEach((n) => {
           expect(n.color).to.be.equal('#ccc'); // The default color
-          expect(n.matchPrefix).to.be.empty;
-          expect(n.matchSuffix).to.be.empty;
           expect(n.id).to.not.be.undefined;
-          expect(n.equals).to.not.be.undefined;
 
           // None of the items should have any of the below since there is no value data
           expect(n.value).to.not.be.empty;
@@ -160,31 +136,13 @@ describe('dataConversion', () => {
           expect(n.valueSegments).to.not.be.empty;
         });
       });
-      it('should define an equals function correctly', () => {
-        const { options } = categoriesAndValues();
-        const converted = convert(options.dataViews[0]);
-
-        converted.items.forEach((n) => {
-          expect(
-            n.equals(<any>{
-              id: n.id,
-            }),
-          ).to.be.true;
-
-          expect(
-            n.equals(<any>{
-              id: 'SOMETHING RANDOM',
-            }),
-          ).to.be.false;
-        });
-      });
     });
     describe('data with categories and values with series', () => {
       it('should convert the categories correctly', () => {
         const { options, expected } = categoriesAndValuesWithSeries();
         const converted = convert(options.dataViews[0]);
-        expect(converted.items.map(n => n.match)).to.be.deep.equal(
-          expected.items.map(n => n.match),
+        expect(converted.items.map(n => n.text)).to.be.deep.equal(
+          expected.items.map(n => n.text),
         );
       });
       it('should convert the items values correctly', () => {
@@ -272,33 +230,12 @@ describe('dataConversion', () => {
 
         converted.items.forEach((n) => {
           expect(n.color).to.be.equal('#ccc'); // The default color
-          expect(n.matchPrefix).to.be.empty;
-          expect(n.matchSuffix).to.be.empty;
           expect(n.id).to.not.be.undefined;
-          expect(n.equals).to.not.be.undefined;
 
           // None of the items should have any of the below since there is no value data
           expect(n.value).to.not.be.empty;
           expect(n.renderedValue).to.not.be.empty;
           expect(n.valueSegments).to.not.be.empty;
-        });
-      });
-      it('should define an equals function correctly', () => {
-        const { options } = categoriesAndValuesWithSeries();
-        const converted = convert(options.dataViews[0]);
-
-        converted.items.forEach((n) => {
-          expect(
-            n.equals(<any>{
-              id: n.id,
-            }),
-          ).to.be.true;
-
-          expect(
-            n.equals(<any>{
-              id: 'SOMETHING RANDOM',
-            }),
-          ).to.be.false;
         });
       });
     });

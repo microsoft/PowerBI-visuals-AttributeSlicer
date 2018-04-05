@@ -23,6 +23,22 @@
  */
 
 /**
+ * Represents a list item
+ */
+export interface ItemReference {
+
+  /**
+   * The ID of the item
+   */
+  id: string;
+
+  /**
+   * The text display of the item
+   */
+  text: string;
+}
+
+/**
  * Represents an item in the slicer
  */
 export interface SlicerItem {
@@ -32,12 +48,9 @@ export interface SlicerItem {
   id: string;
 
   /**
-   * The actual match
+   * The actual text of the item
    */
-  match: any;
-
-  matchPrefix?: any;
-  matchSuffix?: any;
+  text: any;
 
   /**
    * The color of the item
@@ -49,11 +62,6 @@ export interface SlicerItem {
    */
   value: any;
   // selected: boolean;
-
-  /**
-   * Returns true if this == b
-   */
-  equals: (b: SlicerItem) => boolean;
 
   /**
    * The segments that make up this items value, the total of the widths must === 100
@@ -95,16 +103,6 @@ export interface ISlicerValueSegment {
 }
 
 /**
- * Represents a serialized item
- */
-export interface ISerializedItem {
-  id: any;
-  match: any;
-  value: any;
-  renderedValue?: any;
-}
-
-/**
  * Represents the state of the attribute slicer
  */
 export interface IAttributeSlicerState {
@@ -116,7 +114,7 @@ export interface IAttributeSlicerState {
   /**
    * The list of selected items
    */
-  selectedItems?: ISerializedItem[];
+  selectedItems?: ItemReference[];
 
   /**
    * The text size in pt

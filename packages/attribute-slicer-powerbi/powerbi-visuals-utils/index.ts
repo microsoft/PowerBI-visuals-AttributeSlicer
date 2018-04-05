@@ -1,13 +1,17 @@
-import * as type from "./type";
-import * as formatting from "./formatting";
-import * as dataview from "./dataview";
-import * as svg from "./svg";
+import * as type from './type';
+import * as formatting from './formatting';
+import * as dataview from './dataview';
+import * as svg from './svg';
+import { interactivity, filter } from './interactivity';
 
-// These sub objects are using script-loader, we could just use exports-loader, but this way preserves typings
+// These sub objects are using script-loader, we could just use exports-loader
+// but this way preserves typings
 
 export {
     formatting,
     type,
     dataview,
-    svg
+    svg,
+    interactivity,
+    filter,
 };

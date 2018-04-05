@@ -35,8 +35,8 @@ describe('SelectionManager', () => {
   }
   function createItem(name: string) {
     return {
+      id: name,
       name,
-      equals: (b: any) => name === b.name,
     };
   }
   function createItems(...names: string[]) {

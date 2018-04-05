@@ -35,9 +35,10 @@
     "lodash.get": "^4.4.2",
     "moment": "^2.12.0",
     "powerbi-models": "0.11.3",
-    "powerbi-visuals-tools": "^1.9.0",
+    "powerbi-visuals-tools": "^1.11.2",
     "powerbi-visuals-utils-dataviewutils": "1.2.0",
     "powerbi-visuals-utils-formattingutils": "2.1.0",
+    "powerbi-visuals-utils-interactivityutils": "^3.2.0",
     "powerbi-visuals-utils-svgutils": "1.1.0",
     "powerbi-visuals-utils-typeutils": "1.1.0",
     "script-loader": "^0.7.0"

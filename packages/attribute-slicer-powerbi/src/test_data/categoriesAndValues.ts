@@ -745,7 +745,7 @@ export default function dataWithCategoriesAndValues() {
 // [
 //   {
 //     "id": 1,
-//     "match": "AED",
+//     "text": "AED",
 //     "color": "#ccc",
 //     "value": 2.34,
 //     "renderedValue": 198.29416921351128,
@@ -775,7 +775,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AFN",
+//     "text": "AFN",
 //     "color": "#ccc",
 //     "value": 14.473571428571429,
 //     "renderedValue": 198.29416921351128,
@@ -805,7 +805,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "ALL",
+//     "text": "ALL",
 //     "color": "#ccc",
 //     "value": 17.529411764705884,
 //     "renderedValue": 198.29416921351128,
@@ -835,7 +835,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AMD",
+//     "text": "AMD",
 //     "color": "#ccc",
 //     "value": 21.47095238095238,
 //     "renderedValue": 198.29416921351128,
@@ -865,7 +865,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AOA",
+//     "text": "AOA",
 //     "color": "#ccc",
 //     "value": 4.415,
 //     "renderedValue": 198.29416921351128,
@@ -895,7 +895,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "ARS",
+//     "text": "ARS",
 //     "color": "#ccc",
 //     "value": 61.52475409836065,
 //     "renderedValue": 198.29416921351128,
@@ -925,7 +925,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AUD",
+//     "text": "AUD",
 //     "color": "#ccc",
 //     "value": 6.286666666666667,
 //     "renderedValue": 198.29416921351128,
@@ -955,7 +955,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AWG",
+//     "text": "AWG",
 //     "color": "#ccc",
 //     "value": 1.12,
 //     "renderedValue": 198.29416921351128,
@@ -985,7 +985,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "AZN",
+//     "text": "AZN",
 //     "color": "#ccc",
 //     "value": 14.572142857142858,
 //     "renderedValue": 198.29416921351128,
@@ -1015,7 +1015,7 @@ export default function dataWithCategoriesAndValues() {
 //   },
 //   {
 //     "id": 1,
-//     "match": "BAM",
+//     "text": "BAM",
 //     "color": "#ccc",
 //     "value": 13.431538461538462,
 //     "renderedValue": 198.29416921351128,

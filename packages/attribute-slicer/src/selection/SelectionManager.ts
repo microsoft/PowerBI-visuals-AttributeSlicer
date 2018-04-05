@@ -234,7 +234,7 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
         // If the user is in "brush" mode, but just single clicks an item,
         // then just deselect it, otherwise set the item
         this.selection =
-          this.selection.length === 1 && this.selection[0].equals(item)
+          this.selection.length === 1 && this.selection[0].id === item.id
             ? []
             : [item];
       } else {
@@ -297,7 +297,7 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
     }
     for (let i = 0; i < list.length; i++) {
       const toCompare = list[i];
-      if (toCompare.equals(item)) {
+      if (toCompare.id === item.id) {
         return i;
       }
     }
@@ -321,14 +321,14 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
     // Are there any selected items which do not appear in the new selection
     let hasChanged =
       oldSelection.filter(
-        n => newSelection.filter(m => n.equals(m)).length === 0,
+        n => newSelection.filter(m => n.id === m.id).length === 0,
       ).length > 0;
 
     // Are there any selected items which do not appear in the old selection
     hasChanged =
       hasChanged ||
       newSelection.filter(
-        n => oldSelection.filter(m => n.equals(m)).length === 0,
+        n => oldSelection.filter(m => n.id === m.id).length === 0,
       ).length > 0;
 
     if (hasChanged) {
@@ -347,7 +347,7 @@ export default class SelectionManager<T extends ISelectableItem<any>> {
  * Represents an item that can be used with the selection manager
  */
 export interface ISelectableItem<T> {
-  equals: (otherItem: T) => boolean;
+  id: string;
 }
 
 export interface IKeyState {

@@ -42,9 +42,7 @@ export default function (
 ) {
   'use strict';
   const {
-    match,
-    matchPrefix,
-    matchSuffix,
+    text,
     valueSegments,
     renderedValue,
   } = item;
@@ -58,9 +56,7 @@ export default function (
         <div style="white-space:nowrap" class="item" style="cursor:pointer">
             <div style="margin-left: 5px;vertical-align:middle;height:100%" class="display-container">
                 <span style="${categoryStyle}" title="" class="category-container">
-                    <span class="matchPrefix">${pretty(matchPrefix)}</span>
-                    <span class="match"></span>
-                    <span class="matchSuffix">${pretty(matchSuffix)}</span>
+                    <span class="text"></span>
                 </span>
                 <span style="display:inline-block;max-width:${
                   sizes.value
@@ -81,10 +77,10 @@ export default function (
   );
 
   // use jquery to html the match text to prevent xss
-  itemUi[0].querySelector('.match').textContent = pretty(match);
+  itemUi[0].querySelector('.text').textContent = pretty(text);
   itemUi[0]
     .querySelector('.category-container')
-    .setAttribute('title', pretty(match));
+    .setAttribute('title', pretty(text));
 
   return itemUi;
 }
