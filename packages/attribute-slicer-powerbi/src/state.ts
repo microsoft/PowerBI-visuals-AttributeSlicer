@@ -33,10 +33,11 @@ import {
   coloredObjectsSettings,
   colorSetting as color,
 } from '@essex/visual-settings';
-import { type } from '../powerbi-visuals-utils';
+import { type, filter } from '../powerbi-visuals-utils';
 import { IAttributeSlicerState, ListItem } from './interfaces';
 import { dataSupportsColorizedInstances } from './dataConversion';
-import { DEFAULT_STATE } from '@essex/attribute-slicer';
+import { DEFAULT_STATE, ItemReference } from '@essex/attribute-slicer';
+import { IAdvancedFilter, IBasicFilter } from 'powerbi-models';
 
 const ldget = require('lodash/get'); // tslint:disable-line
 
@@ -53,21 +54,16 @@ export default class AttributeSlicerVisualState extends HasSettings
    */
   @setting({
     name: 'searchText',
-    enumerable: false,
+    readOnly: true,
     parse(value, desc, dv) {
-      const searchText: any = ldget(dv, 'metadata.objects.general.searchText');
-      if (searchText === undefined) {
-        // TODO: Remove this after a few release cycles, this is purely for legacy support
-        const selfFilter: any = ldget(
-          dv,
-          'metadata.objects.general.selfFilter',
-        );
-        if (selfFilter) {
-          const right = ldget(selfFilter.where(), '[0].condition.right');
-          return (right && right.value) || '';
+      const selfFilter: any = ldget(dv, 'metadata.objects.general.selfFilter');
+      if (selfFilter) {
+        const filterValues: any = getFilterValues(dv, 'general.selfFilter');
+        if (filterValues && filterValues.length) {
+          return filterValues[0] || '';
         }
       }
-      return searchText || '';
+      return '';
     },
   })
   public searchText?: string;
@@ -78,19 +74,10 @@ export default class AttributeSlicerVisualState extends HasSettings
   @setting({
     name: 'selection',
     displayName: 'Selection',
-    enumerable: false,
-    config: {
-      type: { text: {} },
-    },
+    readOnly: true,
     parse: (v, d, dv) => parseSelectionFromPBI(dv),
-    compose: (value, d) => convertSelectionToPBI(value),
   })
-  public selectedItems?: {
-    id: any;
-    match: any;
-    value: any;
-    renderedValue?: any;
-  }[];
+  public selectedItems?: ItemReference[];
 
   /**
    * Whether or not the slicer should show the values column
@@ -364,55 +351,38 @@ function doesDataSupportSearch(dv: powerbi.DataView) {
 /**
  * Loads the selection from PowerBI
  */
-function parseSelectionFromPBI(dataView: powerbi.DataView): ListItem[] {
+function parseSelectionFromPBI(dv: powerbi.DataView): ItemReference[] {
   'use strict';
-  const objects = ldget(dataView, 'metadata.objects');
-  if (objects) {
-    const selectedItems = ldget(objects, 'general.selection');
-    return selectedItems ? JSON.parse(selectedItems) : [];
-  } else if (dataView) { // tslint:disable-line
-    // If we have a dataview, but we don't have any selection, then clear it
-    return [];
-  }
+  const filterValues = getFilterValues(dv, 'general.filter');
+  return filterValues.map(text => ({ id: text, text }));
 }
 
-/**
- * Converts the given items into a format for PBI
- */
-export function convertSelectionToPBI(value: ListItem[]) {
-  'use strict';
-  if (value) {
-    return JSON.stringify(
-      (value || []).map(n => ({
-        id: n.id,
-        match: n.match,
-        value: n.value,
-        renderedValue: n.renderedValue,
-      })),
-    );
-  }
-}
+function getFilterValues(dv: powerbi.DataView, filterPath: string): string[] {
+  const savedFilter: any = ldget(
+    dv,
+    `metadata.objects.${filterPath}`,
+  );
+  if (savedFilter) {
+    const appliedFilter = filter.FilterManager.restoreFilter(savedFilter);
+    if (appliedFilter) {
+      // The way we do this is a little funky
+      // Cause it doesn't always produce what the interface says it should
+      // sometimes it has 'values' property, other times it has conditions
+      const conditions = ldget(appliedFilter, 'conditions', ldget(appliedFilter, 'values', []));
+      return conditions.map((n: any) => {
+        // This is also a little funky cause sometimes the actual value is nested under a 'value'
+        // property, other times it is just the value
+        let text = n + '';
 
-/**
- * Changes all nulls to undefined in an object graph
- * * Temporary *
- * @param obj The object to change null to undefined
- */
-function nullToUndefined(obj: object) {
-  'use strict';
-  if (obj) {
-    Object.keys(obj).forEach((key) => {
-      const val = obj[key];
-      // Array
-      if (val && val.forEach) {
-        val.forEach(nullToUndefined);
-        // pojo
-      } else if (val === null) {
-        // tslint:disable-line
-        obj[key] = undefined;
-      } else if (typeof val === 'object') {
-        nullToUndefined(val);
-      }
-    });
+        // Is an array
+        if (n && n.splice) {
+          text = n[0].value + '';
+        } else if (n && n.value) {
+          text = n.value + '';
+        }
+        return text;
+      });
+    }
   }
+  return []
 }

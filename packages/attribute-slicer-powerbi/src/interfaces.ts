@@ -29,9 +29,7 @@ import {
   ISlicerValueSegment,
 } from '@essex/attribute-slicer';
 
-/**
- * Represents a list item
- */
+
 /* tslint:disable */
 export interface ListItem extends SlicerItem {}
 

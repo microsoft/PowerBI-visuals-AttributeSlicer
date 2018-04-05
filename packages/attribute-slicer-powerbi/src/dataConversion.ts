@@ -24,7 +24,7 @@
 
 import './powerbi';
 import { ListItem, IAttributeSlicerVisualData } from './interfaces';
-import { ISerializedItem } from '@essex/attribute-slicer';
+import { ItemReference } from '@essex/attribute-slicer';
 
 import { formatting } from '../powerbi-visuals-utils';
 import DataView = powerbi.DataView;
@@ -67,13 +67,13 @@ export default function converter(
         dvCats: powerbi.DataViewCategoryColumn[],
         catIdx: number,
         total: number,
-        id: powerbi.visuals.ISelectionId,
+        selectionid: powerbi.visuals.ISelectionId,
         valueSegments: IValueSegment[],
       ) => {
         const item = createItem(
           buildCategoryDisplay(dvCats, catIdx, categoryFormatter),
           total,
-          id.getKey ? id.getKey() : <any>id,
+          dvCats[0].values[catIdx] + '',
           undefined,
           '#ccc',
         );
@@ -88,7 +88,7 @@ export default function converter(
       },
       dataSupportsColorizedInstances(dataView) ? settings : undefined,
       createIdBuilder,
-    ) as IAttributeSlicerVisualData;
+    ) as any as IAttributeSlicerVisualData;
     return converted;
   }
 }
@@ -141,22 +141,6 @@ export function buildCategoryDisplay(
 }
 
 /**
- * Creates an item from a serialized item
- */
-export function createItemFromSerializedItem(item: ISerializedItem) {
-  'use strict';
-  if (item) {
-    return createItem(
-      item.match,
-      item.value,
-      item.id,
-      item.renderedValue,
-      undefined,
-    );
-  }
-}
-
-/**
  * A utility method to create a slicer item
  */
 export function createItem(
@@ -169,11 +153,10 @@ export function createItem(
   'use strict';
   return {
     id,
-    match: category,
+    text: category,
     color,
     value: value || 0,
     renderedValue,
-    equals: (b: ListItem) => id === b.id,
   };
 }
 

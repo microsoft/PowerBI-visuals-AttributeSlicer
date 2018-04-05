@@ -777,7 +777,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
       items: [
         {
           id: 1,
-          match: 'CNY',
+          text: 'CNY',
           color: '#ccc',
           value: 779,
           renderedValue: 118.10012836970473,
@@ -863,7 +863,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'EUR',
+          text: 'EUR',
           color: '#ccc',
           value: 445,
           renderedValue: 118.10012836970473,
@@ -949,7 +949,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'IDR',
+          text: 'IDR',
           color: '#ccc',
           value: 423,
           renderedValue: 118.10012836970473,
@@ -1035,7 +1035,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'RUB',
+          text: 'RUB',
           color: '#ccc',
           value: 229,
           renderedValue: 118.10012836970473,
@@ -1121,7 +1121,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'PHP',
+          text: 'PHP',
           color: '#ccc',
           value: 221,
           renderedValue: 118.10012836970473,
@@ -1207,7 +1207,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'BRL',
+          text: 'BRL',
           color: '#ccc',
           value: 138,
           renderedValue: 118.10012836970473,
@@ -1293,7 +1293,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'PLN',
+          text: 'PLN',
           color: '#ccc',
           value: 131,
           renderedValue: 118.10012836970473,
@@ -1379,7 +1379,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'USD',
+          text: 'USD',
           color: '#ccc',
           value: 101,
           renderedValue: 118.10012836970473,
@@ -1465,7 +1465,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'SEK',
+          text: 'SEK',
           color: '#ccc',
           value: 86,
           renderedValue: 118.10012836970473,
@@ -1551,7 +1551,7 @@ export default function dataWithCategoriesAndValuesWithSeries() {
         },
         {
           id: 1,
-          match: 'JPY',
+          text: 'JPY',
           color: '#ccc',
           value: 79,
           renderedValue: 118.10012836970473,

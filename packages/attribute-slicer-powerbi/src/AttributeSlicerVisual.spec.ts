@@ -187,7 +187,7 @@ describe('AttributeSlicerVisual', () => {
     instance.update(update, UpdateType.Data);
     // Make sure the data was passed correctly to attribute slicer
     expect(
-      attributeSlicer.data.map(n => n.match),
+      attributeSlicer.data.map(n => n.text),
     ).to.be.deep.equal(fakeCats);
   });
 
@@ -198,7 +198,7 @@ describe('AttributeSlicerVisual', () => {
     instance.update(update, UpdateType.Data);
     // delete instance["_state"];
     // Set our fake selected items
-    attributeSlicer.state.selectedItems = <any>[{ match: 'WHATEVER' }];
+    attributeSlicer.state.selectedItems = <any>[{ text: 'WHATEVER' }];
     const anotherUpdate = createOptionsWithCategories(
       categories,
       'SOME_OTHER_CATEGORY',
@@ -309,17 +309,31 @@ describe('AttributeSlicerVisual', () => {
     return {
       general: {
         selfFilter: {
-          where: () => {
-            return [
-              {
-                condition: {
-                  right: {
-                    value: text,
+          whereItems: [
+            {
+              condition: {
+                _kind: 12,
+                left: {
+                  _kind: 2,
+                  source: {
+                    _kind: 0,
+                    entity: 'Orders',
+                    variable: 'o',
                   },
+                  ref: 'Customer Name',
+                },
+                right: {
+                  _kind: 17,
+                  type: {
+                    underlyingType: 1,
+                    category: null as any, // tslint:disable-line
+                  },
+                  value: `${text}`,
+                  typeEncodedValue: `'${text}'`,
                 },
               },
-            ];
-          },
+            },
+          ],
         },
       },
     };
@@ -344,8 +358,8 @@ describe('AttributeSlicerVisual', () => {
     performSelectionUpdate(instance);
 
     expect(
-      attributeSlicer.state.selectedItems.map(n => n.match),
-    ).to.be.deep.equal(selectedItems.map(n => n.match));
+      attributeSlicer.state.selectedItems.map(n => n.text),
+    ).to.be.deep.equal(selectedItems.map(n => n.text));
   });
 
   it('should clear selection when the category field is changed in PBI', () => {
@@ -391,8 +405,8 @@ describe('AttributeSlicerVisual', () => {
     performValueUpdateWithSelections(instance);
 
     expect(
-      attributeSlicer.state.selectedItems.map(n => n.match),
-    ).to.be.deep.equal(selectedItems.map(n => n.match));
+      attributeSlicer.state.selectedItems.map(n => n.text),
+    ).to.be.deep.equal(selectedItems.map(n => n.text));
   });
 
   it('should clear the search when switching column types', () => {
@@ -451,8 +465,8 @@ describe('AttributeSlicerVisual', () => {
     });
 
     expect(
-      attributeSlicer.state.selectedItems.map(n => n.match),
-    ).to.be.deep.equal(selectedItems.map(n => n.match));
+      attributeSlicer.state.selectedItems.map(n => n.text),
+    ).to.be.deep.equal(selectedItems.map(n => n.text));
     expect(attributeSlicer.state.horizontal).to.be.true;
   });
 
@@ -474,7 +488,7 @@ describe('AttributeSlicerVisual', () => {
     const update = createOptionsWithCategories(fakeCats, 'SOME_CATEGORY_NAME');
     instance.update(update, UpdateType.Data);
 
-    expect(attributeSlicer.data.map(n => n.match)).to.be.deep.equal(fakeCats);
+    expect(attributeSlicer.data.map(n => n.text)).to.be.deep.equal(fakeCats);
   });
 
   it('should filter out blank categories with option', () => {
@@ -492,7 +506,7 @@ describe('AttributeSlicerVisual', () => {
     instance.update(update, UpdateType.Data);
 
     expect(
-      attributeSlicer.data.map(n => n.match),
+      attributeSlicer.data.map(n => n.text),
     ).to.be.deep.equal(['CAT_1', 'CAT_2']);
   });
 

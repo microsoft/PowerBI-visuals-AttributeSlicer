@@ -27,9 +27,7 @@ import { SlicerItem, ISlicerValueSegment } from './interfaces';
 import { expect } from 'chai';
 describe('SlicerItem', () => {
   const callTemplate = (
-    match: string,
-    matchPrefix?: string,
-    matchSuffix?: string,
+    text: string,
     valueSegments?: any,
     alignTextLeft?: boolean,
     showValueLabels?: boolean,
@@ -37,10 +35,8 @@ describe('SlicerItem', () => {
   ) => {
     return SlicerItemTmpl(
       ({
-        id: match,
-        match,
-        matchPrefix,
-        matchSuffix,
+        id: text,
+        text,
         valueSegments,
       } as any) as SlicerItem,
       {
@@ -55,21 +51,7 @@ describe('SlicerItem', () => {
   const templateWithMatch = () => {
     return {
       element: callTemplate('HELLO'),
-      match: 'HELLO',
-    };
-  };
-  const templateWithMatchAndPrefix = () => {
-    return {
-      element: callTemplate('HELLO', 'PREFIX'),
-      match: 'HELLO',
-      prefix: 'PREFIX',
-    };
-  };
-  const templateWithMatchAndSuffix = () => {
-    return {
-      element: callTemplate('HELLO', '', 'SUFFIX'),
-      match: 'HELLO',
-      suffix: 'SUFFIX',
+      text: 'HELLO',
     };
   };
   const templateWithMatchAndSingleSegment = () => {
@@ -82,8 +64,8 @@ describe('SlicerItem', () => {
       },
     ] as ISlicerValueSegment[];
     return {
-      element: callTemplate('HELLO', '', '', segments),
-      match: 'HELLO',
+      element: callTemplate('HELLO', segments),
+      text: 'HELLO',
       segments,
     };
   };
@@ -98,8 +80,8 @@ describe('SlicerItem', () => {
       },
     ] as ISlicerValueSegment[];
     return {
-      element: callTemplate('HELLO', '', '', segments),
-      match: 'HELLO',
+      element: callTemplate('HELLO', segments),
+      text: 'HELLO',
       segments,
     };
   };
@@ -119,8 +101,8 @@ describe('SlicerItem', () => {
       },
     ] as ISlicerValueSegment[];
     return {
-      element: callTemplate('HELLO', '', '', segments),
-      match: 'HELLO',
+      element: callTemplate('HELLO', segments),
+      text: 'HELLO',
       segments,
     };
   };
@@ -141,14 +123,12 @@ describe('SlicerItem', () => {
     return {
       element: callTemplate(
         'HELLO',
-        '',
-        '',
         segments,
         leftAlign,
         showValues,
         textColor,
       ),
-      match: 'HELLO',
+      text: 'HELLO',
     };
   };
   const templateWithMatchScriptTag = () => {
@@ -157,34 +137,14 @@ describe('SlicerItem', () => {
       html: '&lt;script&gt;Hello&lt;/script&gt;',
     };
   };
-  it('should display the match on an item with a match', () => {
-    const { element, match } = templateWithMatch();
+  it('should display the text on an item with a text', () => {
+    const { element, text } = templateWithMatch();
     expect(
       element
-        .find('.match')
+        .find('.text')
         .text()
         .replace(/ /g, ''),
-    ).to.be.equal(match);
-  });
-  it('should display the match prefix on an item with a match and a match prefix', () => {
-    const { element, match, prefix } = templateWithMatchAndPrefix();
-    expect(element.text().replace(/ /g, '')).to.be.equal(prefix + match);
-    expect(
-      element
-        .find('.matchPrefix')
-        .text()
-        .replace(/ /g, ''),
-    ).to.be.equal(prefix);
-  });
-  it('should display the match suffix on an item with a match and a match suffix', () => {
-    const { element, match, suffix } = templateWithMatchAndSuffix();
-    expect(element.text().replace(/ /g, '')).to.be.equal(match + suffix);
-    expect(
-      element
-        .find('.matchSuffix')
-        .text()
-        .replace(/ /g, ''),
-    ).to.be.equal(suffix);
+    ).to.be.equal(text);
   });
   it('should display the correct widths of the category and value containers', () => {
     const element = callTemplate('HELLO');
@@ -302,8 +262,8 @@ describe('SlicerItem', () => {
       'rgb(51, 51, 51)',
     );
   });
-  it('should html decode match text', () => {
+  it('should html decode text text', () => {
     const { element, html } = templateWithMatchScriptTag();
-    expect(element.find('.match').html()).to.be.equal(html);
+    expect(element.find('.text').html()).to.be.equal(html);
   });
 });

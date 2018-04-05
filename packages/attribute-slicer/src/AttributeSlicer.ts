@@ -26,7 +26,7 @@ import EventEmitter from '../base/EventEmitter';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import JQuerySelectionManager from './selection/JQuerySelectionManager';
-import { SlicerItem, IAttributeSlicerState } from './interfaces';
+import { SlicerItem, IAttributeSlicerState, ItemReference } from './interfaces';
 import { prettyPrintValue as pretty } from './Utils';
 import SlicerItemTmpl from './SlicerItem.tmpl';
 import {
@@ -55,7 +55,7 @@ export class AttributeSlicer {
   /**
    * The selection manager to use
    */
-  private selectionManager: JQuerySelectionManager<SlicerItem>;
+  private selectionManager: JQuerySelectionManager<ItemReference>;
 
   /**
    * The slicer element
@@ -269,7 +269,7 @@ export class AttributeSlicer {
           return ele[0];
         },
       });
-    this.selectionManager = new JQuerySelectionManager<SlicerItem>((items) => {
+    this.selectionManager = new JQuerySelectionManager<ItemReference>((items) => {
       this.syncSelectionTokens(items);
       this.raiseSelectionChanged(items);
     });
@@ -382,9 +382,7 @@ export class AttributeSlicer {
     this.fontSize = state.textSize;
 
     this.selectedItems = (state.selectedItems || []).map((n) => {
-      return _.merge({}, n, {
-        equals: (m: SlicerItem) => m.id === n.id,
-      });
+      return _.merge({}, n);
     });
     this.renderHorizontal = state.horizontal;
     this.valueWidthPercentage = state.valueColumnWidth;
@@ -675,14 +673,14 @@ export class AttributeSlicer {
   /**
    * The list of selected items
    */
-  public get selectedItems(): SlicerItem[] {
+  public get selectedItems(): ItemReference[] {
     return this.selectionManager.selection;
   }
 
   /**
    * Sets the set of selected items
    */
-  public set selectedItems(value: SlicerItem[]) {
+  public set selectedItems(value: ItemReference[]) {
     this.selectionManager.selection = value;
     this.syncSelectionTokens(value);
   }
@@ -748,9 +746,7 @@ export class AttributeSlicer {
     const flags = caseInsensitive ? 'i' : '';
     const regex = new RegExp(AttributeSlicer.escapeRegExp(searchStr), flags);
     return (
-      regex.test(pretty(item.match)) ||
-      regex.test(pretty(item.matchPrefix)) ||
-      regex.test(pretty(item.matchSuffix))
+      regex.test(pretty(item.text))
     );
   }
 
@@ -855,7 +851,7 @@ export class AttributeSlicer {
   /**
    * Raises the event to load more data
    */
-  protected raiseLoadMoreData(isNewSearch: boolean): PromiseLike<SlicerItem[]> {
+  protected raiseLoadMoreData(isNewSearch: boolean) {
     const item: { result?: PromiseLike<SlicerItem[]> } = {};
     this.events.raiseEvent(
       'loadMoreData',
@@ -914,7 +910,7 @@ export class AttributeSlicer {
   /**
    * Raises the selectionChanged event
    */
-  protected raiseSelectionChanged(newItems: SlicerItem[]) {
+  protected raiseSelectionChanged(newItems: ItemReference[]) {
     this.events.raiseEvent('selectionChanged', newItems);
   }
 
@@ -934,7 +930,7 @@ export class AttributeSlicer {
   /**
    * Syncs the tokens in the UI with the actual selection
    */
-  private syncSelectionTokens(items: SlicerItem[]) {
+  private syncSelectionTokens(items: ItemReference[]) {
     // Important that these are always in sync, in case showSelections gets set to true
     if (items) {
       this.selectionsEle.find('.token').remove();
@@ -963,7 +959,7 @@ export class AttributeSlicer {
           !this.showSelections ||
           !(
             !!this.selectedItems &&
-            this.selectedItems.filter(b => b.equals(item)).length > 0
+            this.selectedItems.filter(b => b.id === item.id).length > 0
           );
 
         // update the search
@@ -1026,17 +1022,16 @@ export class AttributeSlicer {
   /**
    * Creates a new selection token element
    */
-  private createSelectionToken(v: SlicerItem): JQuery {
+  private createSelectionToken(v: ItemReference): JQuery {
     const newEle = $('<div/>');
-    const text =
-      pretty(v.matchPrefix) + pretty(v.match) + pretty(v.matchSuffix);
+    const text = pretty(v.text);
     newEle
       .addClass('token')
       .attr('title', text)
       .data('item', v)
       .on('click', () => {
         newEle.remove();
-        const item = this.selectedItems.filter(n => n.equals(v))[0];
+        const item = this.selectedItems.filter(n => n.id === v.id)[0];
         const newSel = this.selectedItems.slice(0);
         newSel.splice(newSel.indexOf(item), 1);
         this.selectedItems = newSel;

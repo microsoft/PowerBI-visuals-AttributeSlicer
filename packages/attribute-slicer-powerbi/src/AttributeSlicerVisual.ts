@@ -38,10 +38,10 @@ import * as $ from 'jquery';
 import {
   isStateEqual,
   AttributeSlicer as AttributeSlicerImpl,
+  ItemReference,
 } from '@essex/attribute-slicer';
 import {
   default as converter,
-  createItemFromSerializedItem,
 } from './dataConversion';
 import { createValueFormatter } from './formatting';
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from './interfaces';
@@ -251,9 +251,7 @@ export default class AttributeSlicer
           if (!oldState.colors.equals(newState.colors)) {
             this.data = this.convertData(dv, this.state);
             this.mySlicer.data = this.data.items;
-            this.mySlicer.selectedItems = this.state.selectedItems.map(
-              createItemFromSerializedItem,
-            );
+            this.mySlicer.selectedItems = (this.state.selectedItems || []).slice(0); // make a copy
           }
           this.mySlicer.scrollPosition = newState.scrollPosition;
         }
@@ -320,16 +318,14 @@ export default class AttributeSlicer
 
           // Recompute the rendered values, cause otherwise only half will have the updated values
           // because the min/max of all the columns change when new data is added.
-          computeRenderedValues(this.mySlicer.data as ListItem[]);
+          computeRenderedValues(this.mySlicer.data as any);
 
           this.mySlicer.refresh();
         } else {
           this.mySlicer.data = filteredData;
 
           // Restore selection
-          this.mySlicer.selectedItems = (pbiState.selectedItems || []).map(
-            createItemFromSerializedItem,
-          );
+          this.mySlicer.selectedItems = (pbiState.selectedItems || []).slice(0); // Make a copy
 
           delete this.loadDeferred;
         }
@@ -394,7 +390,7 @@ export default class AttributeSlicer
     );
     if (state.hideEmptyItems) {
       listItems.items = listItems.items.filter(
-        item => item.match && item.match.trim() !== '',
+        item => item.text && item.text.trim() !== '',
       );
     }
     return listItems;
@@ -421,7 +417,7 @@ export default class AttributeSlicer
   /**
    * Listener for when the selection changes
    */
-  private onSelectionChanged(selectedItems: ListItem[]) {
+  private onSelectionChanged(selectedItems: ItemReference[]) {
     if (!this.isHandlingUpdate) {
       log('onSelectionChanged');
       const newIds = (selectedItems || []).map(n => n.id).sort();
@@ -432,17 +428,6 @@ export default class AttributeSlicer
       }
       if (hasChanges) {
         this.state.selectedItems = selectedItems;
-        this.propertyPersister.persist(false, {
-          merge: [
-            {
-              objectName: 'general',
-              selector: undefined,
-              properties: {
-                selection: JSON.stringify(selectedItems || []),
-              },
-            },
-          ],
-        });
 
         const filter = this.buildFilter(selectedItems);
         this.applyFilter(filter, 'filter');
@@ -456,18 +441,7 @@ export default class AttributeSlicer
   private onSearchPerformed(searchText: string) {
     if (searchText !== this.state.searchText) {
       this.state.searchText = searchText;
-      this.propertyPersister.persist(false, {
-        merge: [
-          {
-            objectName: 'general',
-            selector: undefined,
-            properties: {
-              searchText,
-            },
-          },
-        ],
-      });
-
+      
       const filter = buildContainsFilter(
         this.dataView.categorical.categories[0].source,
         this.mySlicer.searchString,
@@ -542,27 +516,17 @@ export default class AttributeSlicer
       ? powerbi.FilterAction.merge
       : powerbi.FilterAction.remove;
     let applied = false;
-    const applyFilter = () => {
-      if (!applied) {
-        applied = true;
-        this.host.applyJsonFilter(filter, 'general', propertyName, action);
-      }
-    };
-
-    // This is necessary because powerbi calls persistProperties with
-    // applyJSONFilter, so when you have two persistProperties back to back, it causes problems
-    this.afterNextUpdate.then(applyFilter);
-
-    // This is really a safety net in case `update` doesn't get called
-    // with the original persist call
-    setTimeout(applyFilter, 300);
+    if (!applied) {
+      applied = true;
+      this.host.applyJsonFilter(filter, 'general', propertyName, action);
+    }
   }
 
   /**
    * Builds a filter to filter to the given items
    * @param selectedItems The list of selected items
    */
-  private buildFilter(selectedItems: ListItem[]) {
+  private buildFilter(selectedItems: ItemReference[]) {
     const state = this.state;
     const selItems = state.selectedItems || [];
     const categories: powerbi.DataViewCategoricalColumn = this.dataView
@@ -573,7 +537,7 @@ export default class AttributeSlicer
       'In',
       selItems.map(
         n =>
-          source.type && source.type.numeric ? parseFloat(n.match) : n.match,
+          source.type && source.type.numeric ? parseFloat(n.text) : n.text,
       ),
     );
   }

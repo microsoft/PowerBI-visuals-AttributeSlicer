@@ -84,10 +84,9 @@ describe('AttributeSlicer', () => {
   const createData = (...items: string[]) => {
     return items.map((n: string) => ({
       id: n,
-      match: n,
+      text: n,
       value: n,
       selected: false,
-      equals: (b: any) => b.match === n,
     }));
   };
 
@@ -97,9 +96,8 @@ describe('AttributeSlicer', () => {
     return $.extend(
       true,
       {
-        equals: n.equals,
-        value: n.match.charCodeAt(0),
-        renderedValue: n.match.charCodeAt(0),
+        value: n.text.charCodeAt(0),
+        renderedValue: n.text.charCodeAt(0),
       },
       n,
     );
@@ -168,7 +166,7 @@ describe('AttributeSlicer', () => {
       expect(
         AttributeSlicer.isMatch(
           <SlicerItem>(<any>{
-            match: text1,
+            text: text1,
           }),
           text2,
           caseInsensitive,
@@ -210,7 +208,7 @@ describe('AttributeSlicer', () => {
       instance.data = SIMPLE_DATA;
       instance.search('M');
 
-      expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(['M', 'm']);
+      expect(vlist.items.map((n: any) => n.text)).to.be.deep.equal(['M', 'm']);
     });
 
     it('should show filtered data when caseInsensitive is false', () => {
@@ -220,7 +218,7 @@ describe('AttributeSlicer', () => {
       instance.caseInsensitive = false;
       instance.search('M');
 
-      expect(vlist.items.map((n: any) => n.match)).to.be.deep.equal(['M']);
+      expect(vlist.items.map((n: any) => n.text)).to.be.deep.equal(['M']);
     });
   });
 
@@ -632,7 +630,7 @@ describe('AttributeSlicer', () => {
           .find('.token')
           .map((i, ele) => $(ele).text())
           .toArray(),
-      ).to.deep.equal(selItems.map(n => n.match));
+      ).to.deep.equal(selItems.map(n => n.text));
 
       // Should have this class if true
       expect(element.is('.show-selections')).to.be.true;
