@@ -1,7 +1,6 @@
 {
   "scripts": {
     "test": "lerna run test --stream",
-    "test:powerbi": "lerna run test --stream --scope @essex/attribute-slicer-powerbi",
     "start": "lerna --stream --scope @essex/attribute-slicer run test && lerna run start --stream --scope @essex/attribute-slicer-powerbi"
   },
   "private": true,
