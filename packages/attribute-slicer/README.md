@@ -4,10 +4,7 @@
 
 This is the base Attribute Slicer
 
-> This visual is currently in beta testing and is undergoing active development.
+> This visual is experimental and not actively being developed, only major issues will be addressed.
 
 ## Usage
-* Fork this repo
-* Install [node.js 6+](https://nodejs.org)
-* Install [yarn](https://yarnpkg.com/)
-* Run `yarn && yarn test` in this directory.
+See the root [README](../../README.md)
