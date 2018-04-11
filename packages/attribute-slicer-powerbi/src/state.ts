@@ -357,32 +357,51 @@ function parseSelectionFromPBI(dv: powerbi.DataView): ItemReference[] {
   return filterValues.map(text => ({ id: text, text }));
 }
 
+/**
+ * Gets the text values that form the current selection filter
+ * @param dv The dataView
+ * @param filterPath The path to the filter within the metadata objets
+ */
 function getFilterValues(dv: powerbi.DataView, filterPath: string): string[] {
   const savedFilter: any = ldget(
-    dv,
-    `metadata.objects.${filterPath}`,
+      dv,
+      `metadata.objects.${filterPath}`,
   );
   if (savedFilter) {
     const appliedFilter = filter.FilterManager.restoreFilter(savedFilter);
     if (appliedFilter) {
-      // The way we do this is a little funky
-      // Cause it doesn't always produce what the interface says it should
-      // sometimes it has 'values' property, other times it has conditions
+          // The way we do this is a little funky
+          // Cause it doesn't always produce what the interface says it should
+          // sometimes it has 'values' property, other times it has conditions
       const conditions = ldget(appliedFilter, 'conditions', ldget(appliedFilter, 'values', []));
       return conditions.map((n: any) => {
+
         // This is also a little funky cause sometimes the actual value is nested under a 'value'
         // property, other times it is just the value
-        let text = n + '';
+        let text = pretty(n);
 
-        // Is an array
+              // Is an array
         if (n && n.splice) {
-          text = n[0].value + '';
-        } else if (n && n.value) {
-          text = n.value + '';
+          text = pretty(n[0].value);
+
+              // If we have a non empty value property
+        } else if (n && (n.value !== undefined && n.value !== null)) {
+          text = pretty(n.value);
         }
         return text;
       });
     }
   }
-  return []
+  return [];
+}
+
+/**
+* Pretty prints a string value
+* @param val The value to pretty print
+*/
+function pretty(val: string) {
+  if (val === null || val === undefined) {
+    return '';
+  }
+  return val + '';
 }
