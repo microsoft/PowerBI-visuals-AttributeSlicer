@@ -102,9 +102,9 @@
     powerbi-models "^0.11.3"
     powerbi-visuals-tools "^1.7.0"
 
-"@essex/visual-utils@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.0.1.tgz#6cf103863a989ffa702682e9065a253ad98470a0"
+"@essex/visual-utils@^2.0.10":
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.0.10.tgz#f20243ac30783269781bba3bf0d94d07c7499a45"
   dependencies:
     "@essex/visual-styling" "^2.0.0"
     debug "^2.2.0"
