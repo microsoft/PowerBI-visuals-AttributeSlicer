@@ -423,7 +423,7 @@ const data = {
 
 import cloneDeep = require('lodash.clonedeep');
 export default function dataWithOnlyCategories() {
-  const clonedOptions = cloneDeep(data);
+  const clonedOptions = cloneDeep(data) as any;
 
   'use strict';
   return {

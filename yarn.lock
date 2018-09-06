@@ -54,25 +54,18 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@essex/visual-settings@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@essex/visual-settings/-/visual-settings-2.0.0.tgz#d388ed014c197f03ca93512fbd71115329985cd2"
+"@essex/visual-settings@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@essex/visual-settings/-/visual-settings-2.1.1.tgz#9e602386f24203aa36270aa046623f62d89f57ca"
   dependencies:
     "@essex/visual-styling" "^2.0.0"
-    "@essex/visual-utils" "^2.0.0"
+    "@essex/visual-utils" "^2.1.1"
     font-awesome "^4.6.1"
     json-stringify-safe "^5.0.1"
-    lodash "3.6.0"
     lodash.assignin "^4.2.0"
     lodash.get "^4.4.2"
     lodash.merge "^4.6.0"
     lodash.set "^4.3.2"
-
-"@essex/visual-styling@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@essex/visual-styling/-/visual-styling-1.0.0.tgz#5858c0e1dba278f07dbcf5b9a6f43849b8024d2d"
-  dependencies:
-    font-awesome "^4.6.1"
 
 "@essex/visual-styling@^2.0.0":
   version "2.0.0"
@@ -88,31 +81,20 @@
     jquery "^2.2.3"
     lodash "3.6.0"
 
-"@essex/visual-utils@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.0.0.tgz#a7978ad7f1b3d63a397a1719ca918a136d2c472a"
+"@essex/visual-utils@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.1.1.tgz#cf6932a4b76cf6ded215ff47eec72650249a3a78"
   dependencies:
     "@essex/visual-styling" "^2.0.0"
     debug "^2.2.0"
     font-awesome "^4.6.1"
-    lodash "3.6.0"
     lodash.assignin "^4.2.0"
+    lodash.debounce "^4.0.8"
     lodash.get "^4.4.2"
+    lodash.isequal "^4.5.0"
     lodash.merge "^4.6.0"
-    powerbi-models "^0.11.3"
-    powerbi-visuals-tools "^1.7.0"
-
-"@essex/visual-utils@^2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.0.10.tgz#f20243ac30783269781bba3bf0d94d07c7499a45"
-  dependencies:
-    "@essex/visual-styling" "^2.0.0"
-    debug "^2.2.0"
-    font-awesome "^4.6.1"
-    lodash "3.6.0"
-    lodash.assignin "^4.2.0"
-    lodash.get "^4.4.2"
-    lodash.merge "^4.6.0"
+    lodash.pick "^4.4.0"
+    lodash.some "^4.6.0"
     powerbi-models "^0.11.3"
     powerbi-visuals-tools "^1.7.0"
 
@@ -5261,6 +5243,10 @@ lodash.omit@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.omit/-/lodash.omit-4.5.0.tgz#6eb19ae5a1ee1dd9df0b969e66ce0b7fa30b5e60"
 
+lodash.pick@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
+
 lodash.restparam@^3.0.0:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/lodash.restparam/-/lodash.restparam-3.6.1.tgz#936a4e309ef330a7645ed4145986c85ae5b20805"
@@ -5268,6 +5254,10 @@ lodash.restparam@^3.0.0:
 lodash.set@^4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/lodash.set/-/lodash.set-4.3.2.tgz#d8757b1da807dde24816b0d6a84bea1a76230b23"
+
+lodash.some@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.some/-/lodash.some-4.6.0.tgz#1bb9f314ef6b8baded13b549169b2a945eb68e4d"
 
 lodash.sortby@^4.5.0:
   version "4.7.0"

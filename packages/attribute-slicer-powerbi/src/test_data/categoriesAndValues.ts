@@ -544,7 +544,7 @@ import { IAttributeSlicerSegmentInfo } from '../interfaces';
 import cloneDeep = require('lodash.clonedeep');
 export default function dataWithCategoriesAndValues() {
   'use strict';
-  const clonedOptions = cloneDeep(data);
+  const clonedOptions = cloneDeep(data) as any;
 
   // Wont represent correctly with JSON stringify
   const values = clonedOptions.dataViews[0].categorical.values;

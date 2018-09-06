@@ -20,9 +20,9 @@
   "license": "MIT",
   "dependencies": {
     "@essex/attribute-slicer": "^2.0.4",
-    "@essex/visual-settings": "2.0.0",
-    "@essex/visual-styling": "^1.0.0",
-    "@essex/visual-utils": "^2.0.10",
+    "@essex/visual-settings": "^2.1.1",
+    "@essex/visual-styling": "^2.0.0",
+    "@essex/visual-utils": "^2.1.1",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/lodash.forown": "^4.4.4",
     "@types/lodash.get": "^4.4.4",

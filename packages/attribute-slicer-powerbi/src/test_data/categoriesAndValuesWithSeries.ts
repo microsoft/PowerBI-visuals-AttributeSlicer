@@ -708,7 +708,7 @@ const options = {
 import cloneDeep = require('lodash.clonedeep');
 export default function dataWithCategoriesAndValuesWithSeries() {
   'use strict';
-  const clonedOptions = cloneDeep(options);
+  const clonedOptions = cloneDeep(options) as any;
 
   // Wont represent correctly with JSON stringify
   const values = clonedOptions.dataViews[0].categorical.values;
