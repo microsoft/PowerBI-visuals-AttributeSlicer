@@ -541,17 +541,17 @@ const data = {
 };
 
 import { IAttributeSlicerSegmentInfo } from '../interfaces';
-import * as _ from 'lodash';
+import cloneDeep = require('lodash.clonedeep');
 export default function dataWithCategoriesAndValues() {
   'use strict';
-  const clonedOptions = <any>_.cloneDeep(data);
+  const clonedOptions = cloneDeep(data);
 
   // Wont represent correctly with JSON stringify
   const values = clonedOptions.dataViews[0].categorical.values;
 
   (<any>values)['grouped'] = () => {
     return values.map((n: any, i: any) => {
-      const v = _.cloneDeep(n);
+      const v = cloneDeep(n);
       v['name'] = 'GROUPED_' + i;
       // v["objects"] = objects[i] as any;
       return v;

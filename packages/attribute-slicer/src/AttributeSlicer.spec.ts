@@ -31,7 +31,7 @@ import { prettyPrintValue } from './Utils';
 import SlicerItemTmpl from './SlicerItem.tmpl';
 import * as $ from 'jquery';
 import { Promise } from 'es6-promise';
-import * as _ from 'lodash';
+import set = require('lodash.set');
 
 describe('AttributeSlicer', () => {
   let parentEle: JQuery;
@@ -677,7 +677,7 @@ describe('AttributeSlicer', () => {
   describe('state', () => {
     it('setting should update the value of \'renderHorizontal\'', () => {
       const { instance, element } = createInstance();
-      instance.state = <any>_.set({}, 'horizontal', true);
+      instance.state = set({}, 'horizontal', true);
       expect(instance.renderHorizontal).to.be.true;
       expect(element.is('.render-horizontal')).to.be.true;
     });
@@ -689,7 +689,7 @@ describe('AttributeSlicer', () => {
 
     it('setting should update the value of \'renderHorizontal\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'horizontal', true);
+      instance.state = set({}, 'horizontal', true);
       expect(instance.renderHorizontal).to.be.true;
     });
     it('setting should return the value of \'renderHorizontal\'', () => {
@@ -699,7 +699,7 @@ describe('AttributeSlicer', () => {
     });
     it('setting should update the value of \'valueColumnWidth\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'valueColumnWidth', 56.6);
+      instance.state = set({}, 'valueColumnWidth', 56.6);
       expect(instance.valueWidthPercentage).to.be.equal(56.6);
     });
     it('setting should return the value of \'valueColumnWidth\'', () => {
@@ -710,7 +710,7 @@ describe('AttributeSlicer', () => {
 
     it('setting should update the value of \'textSize\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'textSize', 56.6);
+      instance.state = set({}, 'textSize', 56.6);
       expect(instance.fontSize).to.be.equal(56.6);
     });
     it('setting should return the value of \'textSize\'', () => {
@@ -720,7 +720,7 @@ describe('AttributeSlicer', () => {
     });
     it('setting should update the value of \'showOptions\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'showOptions', false);
+      instance.state = set({}, 'showOptions', false);
       expect(instance.showOptions).to.be.equal(false);
     });
     it('setting should return the value of \'showOptions\'', () => {
@@ -730,7 +730,7 @@ describe('AttributeSlicer', () => {
     });
     it('setting should update the value of \'showValues\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'showValues', false);
+      instance.state = set({}, 'showValues', false);
       expect(instance.showValues).to.be.equal(false);
     });
     it('setting should return the value of \'showValues\'', () => {
@@ -740,7 +740,7 @@ describe('AttributeSlicer', () => {
     });
     it('setting should update the value of \'showSearch\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'showSearch', false);
+      instance.state = set({}, 'showSearch', false);
       expect(instance.showSearchBox).to.be.equal(false);
     });
     it('setting should return the value of \'showSearch\'', () => {
@@ -751,7 +751,7 @@ describe('AttributeSlicer', () => {
 
     it('setting should update the value of \'showSelections\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'showSelections', false);
+      instance.state = set({}, 'showSelections', false);
       expect(instance.showSelections).to.be.equal(false);
     });
     it('setting should return the value of \'showSelections\'', () => {
@@ -762,7 +762,7 @@ describe('AttributeSlicer', () => {
 
     it('setting should update the value of \'singleSelect\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'singleSelect', true);
+      instance.state = set({}, 'singleSelect', true);
       expect(instance.singleSelect).to.be.equal(true);
     });
     it('setting should return the value of \'singleSelect\'', () => {
@@ -773,7 +773,7 @@ describe('AttributeSlicer', () => {
 
     it('setting should update the value of \'brushSelectionMode\'', () => {
       const { instance } = createInstance();
-      instance.state = <any>_.set({}, 'brushMode', true);
+      instance.state = set({}, 'brushMode', true);
       expect(instance.brushSelectionMode).to.be.equal(true);
     });
     it('setting should return the value of \'brushSelectionMode\'', () => {

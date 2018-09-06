@@ -13,7 +13,6 @@
     "@types/debug": "0.0.29",
     "@types/es6-promise": "0.0.32",
     "@types/jquery": "^2.0.33",
-    "@types/lodash": "^4.14.37",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.45",
     "babel-cli": "6.x",
