@@ -24,7 +24,10 @@
 
 import EventEmitter from '../base/EventEmitter';
 import * as $ from 'jquery';
-import * as _ from 'lodash';
+import debounce = require('lodash.debounce');
+import merge = require('lodash.merge');
+import cloneDeep = require('lodash.clonedeep');
+import get = require('lodash.get');
 import JQuerySelectionManager from './selection/JQuerySelectionManager';
 import { SlicerItem, IAttributeSlicerState, ItemReference } from './interfaces';
 import { prettyPrintValue as pretty } from './Utils';
@@ -39,8 +42,6 @@ import {
 /* tslint:disable */
 const naturalSort = require('javascript-natural-sort');
 const VirtualList = require('./lib/VirtualList');
-const log = require('debug')('essex.widget.AttributeSlicer');
-const ldget = require('lodash/get');
 /* tslint:enable */
 
 /**
@@ -215,7 +216,7 @@ export class AttributeSlicer {
   /**
    * Updates the list height
    */
-  private updateListHeight = _.debounce(() => {
+  private updateListHeight = debounce(() => {
     if (!this.destroyed && this.dimensions) {
       const height =
         this.dimensions.height -
@@ -227,7 +228,7 @@ export class AttributeSlicer {
       this.virtualList.setHeight(height);
       this.virtualList.setDir(this.renderHorizontal);
     }
-  },                                    50);
+  }, 50); // tslint:disable-line
 
   /**
    * Constructor for the advanced slicer
@@ -243,7 +244,7 @@ export class AttributeSlicer {
       .append($(AttributeSlicer.template))
       .find('.advanced-slicer');
     this.listEle = this.slicerEle.find('.list');
-    this.searchDebounce = ldget(config, 'searchDebounce', SEARCH_DEBOUNCE);
+    this.searchDebounce = get(config, 'searchDebounce', SEARCH_DEBOUNCE);
     this.virtualList =
       vlist ||
       new VirtualList({
@@ -290,9 +291,9 @@ export class AttributeSlicer {
     this.fontSize = this.fontSize;
 
     this.virtualListEle = this.virtualList.container;
-    const emitScrollEvent = _.debounce((position: [number, number]) => {
+    const emitScrollEvent = debounce((position: [number, number]) => {
       this.events.raiseEvent('scroll', position);
-    },                                 500) as any;
+    }, 500) as any; // tslint:disable-line
     this.virtualListEle.scroll((event: any) => {
       const position = [event.target.scrollTop, event.target.scrollLeft];
       emitScrollEvent(position);
@@ -322,7 +323,7 @@ export class AttributeSlicer {
    */
   public get state(): IAttributeSlicerState {
     return {
-      selectedItems: this.selectedItems.map(n => <any>_.cloneDeep(n)),
+      selectedItems: this.selectedItems.map(n => <any>cloneDeep(n)),
       searchText: this.searchString || '',
       labelDisplayUnits: 0,
       labelPrecision: 0,
@@ -366,7 +367,7 @@ export class AttributeSlicer {
    */
   public set state(state: IAttributeSlicerState) {
     this.loadingState = true;
-    state = _.merge({}, _.cloneDeep(DEFAULT_STATE), state);
+    state = merge({}, cloneDeep(DEFAULT_STATE), state);
     this.singleSelect = state.singleSelect;
     this.brushSelectionMode = state.brushMode;
     this.showSelections = state.showSelections;
@@ -382,7 +383,7 @@ export class AttributeSlicer {
     this.fontSize = state.textSize;
 
     this.selectedItems = (state.selectedItems || []).map((n) => {
-      return _.merge({}, n);
+      return merge({}, n);
     });
     this.renderHorizontal = state.horizontal;
     this.valueWidthPercentage = state.valueColumnWidth;
@@ -719,7 +720,7 @@ export class AttributeSlicer {
   /**
    * Setter for loadingMoreData
    */
-  private _toggleClass = _.debounce(
+  private _toggleClass = debounce(
     () => this.element.toggleClass('loading', this.loadingMoreData),
     100,
   );
@@ -1063,7 +1064,7 @@ export class AttributeSlicer {
    * Attaches all the necessary events
    */
   private attachEvents() {
-    const searchDebounced = _.debounce(
+    const searchDebounced = debounce(
       () => this.search(this.getSearchStringFromElement()),
       this.searchDebounce,
     );

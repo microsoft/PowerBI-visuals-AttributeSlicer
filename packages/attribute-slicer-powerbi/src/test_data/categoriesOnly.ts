@@ -421,21 +421,9 @@ const data = {
   ],
 };
 
-import * as _ from 'lodash';
+import cloneDeep = require('lodash.clonedeep');
 export default function dataWithOnlyCategories() {
-  const clonedOptions = <any>_.cloneDeep(data);
-
-  // // Wont represent correctly with JSON stringify
-  // const values = clonedOptions.dataViews[0].categorical.values;
-
-  // (<any>values)["grouped"] = () => {
-  //     return values.map((n, i) => {
-  //         const v = _.cloneDeep(n);
-  //         v["name"] = "GROUPED_" + i;
-  //         // v["objects"] = objects[i] as any;
-  //         return v;
-  //     });
-  // };
+  const clonedOptions = cloneDeep(data) as any;
 
   'use strict';
   return {

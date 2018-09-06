@@ -5,6 +5,7 @@
         "no-increment-decrement": false,
         "no-parameter-reassignment": false,
         "object-shorthand-properties-first": false,
+        "import-name": false,
         "variable-name": ["check-format", "allow-leading-underscore"]
     }
 }

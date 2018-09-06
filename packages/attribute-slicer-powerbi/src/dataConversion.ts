@@ -35,7 +35,7 @@ import {
   IValueSegment,
 } from '@essex/visual-utils';
 
-const ldget = require('lodash/get'); //tslint:disable-line
+import get = require('lodash.get'); 
 const HEX_COLOR_REGEX = /#[0-9A-F]{3,6}/;
 const RGB_COLOR_REGEX = /rgba?\s*\(\s*[\d\.]+\s*,\s*[\d\.]+\s*,\s*[\d\.]+\s*(,\s*[\d\.]+\s*)?\)/;
 
@@ -167,7 +167,7 @@ export type IConversionSettings = IColorSettings & { reverseBars?: boolean };
  */
 export function dataSupportsValueSegments(dv: powerbi.DataView) {
   'use strict';
-  return ldget(dv, 'categorical.values.length', 0) > 0;
+  return get(dv, 'categorical.values.length', 0) > 0;
 }
 
 /**

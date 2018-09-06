@@ -37,11 +37,10 @@ import { type, filter } from '../powerbi-visuals-utils';
 import { IAttributeSlicerState, ListItem } from './interfaces';
 import { dataSupportsColorizedInstances } from './dataConversion';
 import { DEFAULT_STATE, ItemReference } from '@essex/attribute-slicer';
-import { IAdvancedFilter, IBasicFilter } from 'powerbi-models';
 
-const ldget = require('lodash/get'); // tslint:disable-line
-
+import get = require('lodash.get'); 
 // Webpack defines this
+
 declare var BUILD_VERSION: string;
 
 /**
@@ -56,7 +55,7 @@ export default class AttributeSlicerVisualState extends HasSettings
     name: 'searchText',
     readOnly: true,
     parse(value, desc, dv) {
-      const selfFilter: any = ldget(dv, 'metadata.objects.general.selfFilter');
+      const selfFilter: any = get(dv, 'metadata.objects.general.selfFilter');
       if (selfFilter) {
         const filterValues: any = getFilterValues(dv, 'general.selfFilter');
         if (filterValues && filterValues.length) {
@@ -84,7 +83,7 @@ export default class AttributeSlicerVisualState extends HasSettings
    */
   @setting({
     readOnly: true,
-    parse: (v, d, dv) => ldget(dv, 'categorical.values', []).length > 0,
+    parse: (v, d, dv) => get(dv, 'categorical.values', []).length > 0,
     defaultValue: DEFAULT_STATE.showValues,
   })
   public showValues?: boolean;
@@ -95,7 +94,7 @@ export default class AttributeSlicerVisualState extends HasSettings
   @setting({
     readOnly: true,
     parse(v, d, dv) {
-      const isSelfFilterEnabled = ldget(
+      const isSelfFilterEnabled = get(
         dv,
         'metadata.objects.general.selfFilterEnabled',
         false,
@@ -335,8 +334,8 @@ export default class AttributeSlicerVisualState extends HasSettings
  */
 function doesDataSupportSearch(dv: powerbi.DataView) {
   'use strict';
-  const source = ldget(dv, 'categorical.categories[0].source');
-  const metadataCols = ldget(dv, 'metadata.columns');
+  const source = get(dv, 'categorical.categories[0].source');
+  const metadataCols = get(dv, 'metadata.columns');
   const metadataSource =
     metadataCols &&
     metadataCols.filter((n: any) => n.roles && n.roles['Category'])[0];
@@ -363,7 +362,7 @@ function parseSelectionFromPBI(dv: powerbi.DataView): ItemReference[] {
  * @param filterPath The path to the filter within the metadata objets
  */
 function getFilterValues(dv: powerbi.DataView, filterPath: string): string[] {
-  const savedFilter: any = ldget(
+  const savedFilter: any = get(
       dv,
       `metadata.objects.${filterPath}`,
   );
@@ -373,7 +372,7 @@ function getFilterValues(dv: powerbi.DataView, filterPath: string): string[] {
           // The way we do this is a little funky
           // Cause it doesn't always produce what the interface says it should
           // sometimes it has 'values' property, other times it has conditions
-      const conditions = ldget(appliedFilter, 'conditions', ldget(appliedFilter, 'values', []));
+      const conditions = get(appliedFilter, 'conditions', get(appliedFilter, 'values', []));
       return conditions.map((n: any) => {
 
         // This is also a little funky cause sometimes the actual value is nested under a 'value'
