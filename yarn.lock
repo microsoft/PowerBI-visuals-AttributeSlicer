@@ -54,12 +54,12 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@essex/visual-settings@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@essex/visual-settings/-/visual-settings-2.1.1.tgz#9e602386f24203aa36270aa046623f62d89f57ca"
+"@essex/visual-settings@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@essex/visual-settings/-/visual-settings-2.1.2.tgz#a7da2d6eea8aaa07cf771b60ff17c807832b6f0b"
   dependencies:
     "@essex/visual-styling" "^2.0.0"
-    "@essex/visual-utils" "^2.1.1"
+    "@essex/visual-utils" "^2.1.2"
     font-awesome "^4.6.1"
     json-stringify-safe "^5.0.1"
     lodash.assignin "^4.2.0"
@@ -81,9 +81,9 @@
     jquery "^2.2.3"
     lodash "3.6.0"
 
-"@essex/visual-utils@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.1.1.tgz#cf6932a4b76cf6ded215ff47eec72650249a3a78"
+"@essex/visual-utils@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@essex/visual-utils/-/visual-utils-2.1.2.tgz#58e0e49d965dde7cd83b8b00bc505c2cd97b9246"
   dependencies:
     "@essex/visual-styling" "^2.0.0"
     debug "^2.2.0"

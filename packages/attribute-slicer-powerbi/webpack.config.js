@@ -56,10 +56,6 @@ const config = {
             {
                 test: /\.ts$/,
                 loader: 'ts-loader',
-            },
-            {
-                test: /lodash\.js/,
-                loader: 'imports-loader?define=>false'
             }
         ],
     },

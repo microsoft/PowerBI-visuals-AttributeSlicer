@@ -25,7 +25,7 @@
 'use strict';
 
 var $ = require("jquery");
-var _ = require("lodash");
+var debounce = require("lodash.debounce");
 
 /**
  * Creates a virtually-rendered scrollable list.
@@ -81,7 +81,7 @@ function VirtualList(config) {
   /**
    * This is here, because otherwise, the function gets placed on the prototype, so multiple attribute slicers interfere with each other if they are on the same page.
    */
-  this._renderChunkDebounced = _.debounce(VirtualList.prototype._renderChunk, 50);
+  this._renderChunkDebounced = debounce(VirtualList.prototype._renderChunk, 50);
 }
 
 VirtualList.prototype.setDir = function (horiz) {
@@ -199,7 +199,7 @@ VirtualList.prototype.createRow = function(i) {
   return item;
 };
 
-VirtualList.prototype.rerender = _.debounce(function() {
+VirtualList.prototype.rerender = debounce(function() {
     var first = parseInt(this.container[0][this.scrollProp] / this.itemHeight) - this.screenItemsLen;
     this._renderChunk(this.listContainer, first < 0 ? 0 : first);
     this.lastScrolled = 0;
