@@ -13,7 +13,7 @@
     "package": "node bin/packageVisual",
     "test": "npm run lint && karma start --color && node bin/packageVisual",
     "test:tdd": "karma start --color --tdd",
-    "lint": "tslint src/**/*.ts",
+    "lint": "tslint \"src/**/*[!.d].{ts,tsx}\"",
     "clean": "rm -rf node_modules .tmp"
   },
   "author": "Microsoft",
