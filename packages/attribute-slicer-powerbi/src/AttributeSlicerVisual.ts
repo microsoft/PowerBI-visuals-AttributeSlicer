@@ -33,7 +33,6 @@ import {
   buildColumnTarget,
 } from '@essex/visual-utils';
 import './powerbi';
-import * as _ from 'lodash';
 import * as $ from 'jquery';
 import {
   isStateEqual,
@@ -47,12 +46,13 @@ import { createValueFormatter } from './formatting';
 import { ListItem, SlicerItem, IAttributeSlicerVisualData } from './interfaces';
 import { default as VisualState } from './state';
 import * as models from 'powerbi-models';
+import get = require('lodash.get');
+import isEqual = require('lodash.isequal');
+import forOwn = require('lodash.forown');
 
 /* tslint:disable */
-const ldget = require('lodash.get');
 const log = logger('essex.widget.AttributeSlicerVisual');
 const CUSTOM_CSS_MODULE = require('!css-loader!sass-loader!./css/AttributeSlicerVisual.scss');
-const stringify = require('json-stringify-safe');
 /* tslint:enable */
 
 // // PBI Swallows these
@@ -331,7 +331,7 @@ export default class AttributeSlicer
         }
 
         const columnNames: string[] = [];
-        _.forOwn(ldget(dv, 'categorical.categories'), (value, key: any) => {
+        forOwn(get(dv, 'categorical.categories'), (value, key: any) => {
           columnNames.push(value.source.queryName);
         });
 
@@ -339,11 +339,11 @@ export default class AttributeSlicer
         // We've already loaded a dataset, and the user has changed the dataset to something else
         if (
           this.currentCategory &&
-          !_.isEqual(this.currentCategory, columnNames)
+          !isEqual(this.currentCategory, columnNames)
         ) {
           // This will really be undefined behaviour for pbi-stateful
           // because this indicates the user changed datasets
-          if (!_.isEqual(pbiState.selectedItems, [])) {
+          if (!isEqual(pbiState.selectedItems, [])) {
             log('Clearing Selection, Categories Changed');
             pbiState.selectedItems = [];
             this.onSelectionChanged([]);

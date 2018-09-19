@@ -23,7 +23,8 @@
  */
 
 import { SlicerItem, IAttributeSlicerState } from './interfaces';
-import * as _ from 'lodash';
+import isEqual = require('lodash.isequal');
+import omit = require('lodash.omit');
 
 /**
  * Pretty prints a value
@@ -90,10 +91,10 @@ export function isStateEqual(
       ? stateTwo['toJSONObject']()
       : stateTwo;
   return (
-    _.isEqual(s1 && s1.searchText, s2 && s2.searchText) &&
-    _.isEqual(
-      _.omit(s1, OMITTED_EQUALITY_PROPS),
-      _.omit(s2, OMITTED_EQUALITY_PROPS),
+    isEqual(s1 && s1.searchText, s2 && s2.searchText) &&
+    isEqual(
+      omit(s1, OMITTED_EQUALITY_PROPS),
+      omit(s2, OMITTED_EQUALITY_PROPS),
     ) &&
     areItemsEqual(s1 && s1.selectedItems, s2 && s2.selectedItems)
   );
