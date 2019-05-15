@@ -246,7 +246,7 @@ describe('AttributeSlicerVisual', () => {
       objects: metadata,
       columns: update.dataViews[0].metadata.columns,
     };
-    instance.update(update);
+    instance.update(update, UpdateType.Data);
   }
 
   function performValueUpdate(instance: AttributeSlicerVisual) {

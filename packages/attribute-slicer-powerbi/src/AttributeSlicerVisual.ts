@@ -27,7 +27,6 @@ import {
   createPropertyPersister,
   UpdateType,
   receiveDimensions,
-  calcUpdateType,
   computeRenderedValues,
   buildContainsFilter,
   buildColumnTarget,
@@ -43,7 +42,7 @@ import {
   default as converter,
 } from './dataConversion';
 import { createValueFormatter } from './formatting';
-import { ListItem, SlicerItem, IAttributeSlicerVisualData } from './interfaces';
+import { SlicerItem, IAttributeSlicerVisualData } from './interfaces';
 import { default as VisualState } from './state';
 import * as models from 'powerbi-models';
 import get = require('lodash.get');
@@ -123,11 +122,6 @@ export default class AttributeSlicer
   private isHandlingUpdate: boolean;
 
   /**
-   * The previous update options
-   */
-  private prevUpdateOptions: powerbi.extensibility.visual.VisualUpdateOptions;
-
-  /**
    * Constructor
    */
   constructor(
@@ -200,15 +194,12 @@ export default class AttributeSlicer
     this.afterNextUpdate = $.Deferred();
 
     this.isHandlingUpdate = true;
-    const updateType =
-      type !== undefined
-        ? type
-        : calcUpdateType(this.prevUpdateOptions, options);
-    this.prevUpdateOptions = options;
+    const updateType = type !== undefined ? type : UpdateType.Unknown;
     try {
       log('Update', options);
 
-      if (updateType === UpdateType.Resize) {
+      if (updateType === UpdateType.Resize ||
+         ((options.type & powerbi.VisualUpdateType.Resize) === powerbi.VisualUpdateType.Resize)) {
         this.setDimensions(options.viewport);
       }
 
@@ -550,7 +541,8 @@ export default class AttributeSlicer
     pbiState: VisualState,
     pbiUpdateType: powerbi.VisualUpdateType,
   ) {
-    const isDataLoad = (updateType & UpdateType.Data) === UpdateType.Data;
+    const isDataLoad = (updateType & UpdateType.Data) === UpdateType.Data ||
+        ((pbiUpdateType & powerbi.VisualUpdateType.Data) === powerbi.VisualUpdateType.Data);
     // If there is a new dataset from PBI
     return (
       isDataLoad ||
