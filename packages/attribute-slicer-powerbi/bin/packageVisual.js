@@ -207,6 +207,7 @@ const _buildPackage = (fileContent) => {
     const iconType = pbivizJson.assets.icon.indexOf('.svg') >= 0 ? 'svg+xml' : 'png';
     const iconBase64 = `data:image/${iconType};base64,` + icon.toString('base64');
 
+    pbivizJson.visual.version = packageJson.version;
     pbivizJson.capabilities = capabilities;
     pbivizJson.content = {
         js: jsContent,
