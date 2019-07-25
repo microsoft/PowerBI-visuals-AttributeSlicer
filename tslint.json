@@ -1,0 +1,10 @@
+{
+		"extends": ["tslint-microsoft-contrib/recommended"],
+		"rules": {
+			// This doesn't play nicely with files in node_modules
+			"no-relative-imports": false,
+
+			"semicolon": true,
+			"trailing-comma": true
+		}
+}

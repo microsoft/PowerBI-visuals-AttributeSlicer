@@ -2,12 +2,12 @@
     "dataRoles": [
         {
             "name": "Category",
-            "kind": 0,
+            "kind": "Grouping",
             "displayName": "Items"
         },
         {
             "name": "Values",
-            "kind": 1,
+            "kind": "Measure",
             "requiredTypes": [
                 {
                     "numeric": true
@@ -20,12 +20,12 @@
         },
         {
             "name": "Series",
-            "kind": 0,
+            "kind": "Grouping",
             "displayName": "Segmented By"
         },
         {
             "name": "Color",
-            "kind": 0,
+            "kind": "Grouping",
             "displayName": "Colored By"
         }
     ],
@@ -131,14 +131,6 @@
                             }
                         }
                     }
-                },
-                "rowCount": {
-                    "preferred": {
-                        "min": 2
-                    },
-                    "supported": {
-                        "min": 0
-                    }
                 }
             }
         },
@@ -189,14 +181,6 @@
                             }
                         }
                     }
-                },
-                "rowCount": {
-                    "preferred": {
-                        "min": 2
-                    },
-                    "supported": {
-                        "min": 0
-                    }
                 }
             }
         }
@@ -206,7 +190,6 @@
     },
     "objects": {
         "general": {
-            "objectName": "general",
             "displayName": "General",
             "properties": {
                 "selfFilter": {
@@ -220,7 +203,7 @@
                 "selection": {
                     "displayName": "Selection",
                     "type": {
-                        "text": {}
+                        "text": true
                     }
                 },
                 "textSize": {
@@ -278,13 +261,12 @@
                     "displayName": "Version",
                     "description": "The version of Attribute Slicer",
                     "type": {
-                        "text": {}
+                        "text": true
                     }
                 }
             }
         },
         "display": {
-            "objectName": "display",
             "displayName": "Display",
             "properties": {
                 "horizontal": {
@@ -341,7 +323,6 @@
             }
         },
         "selection": {
-            "objectName": "selection",
             "displayName": "Selection",
             "properties": {
                 "singleSelect": {
@@ -368,7 +349,6 @@
             }
         },
         "dataPoint": {
-            "objectName": "dataPoint",
             "displayName": "Data Point",
             "properties": {
                 "fill": {
@@ -387,11 +367,11 @@
                     "type": {
                         "enumeration": [
                             {
-                                "value": 0,
+                                "value": "0",
                                 "displayName": "Gradient"
                             },
                             {
-                                "value": 1,
+                                "value": "1",
                                 "displayName": "Instance"
                             }
                         ]

@@ -1,3 +1,5 @@
+import { Selection } from "d3-selection";
+
 /*
  * Copyright (c) Microsoft
  * All rights reserved.
@@ -22,181 +24,172 @@
  * SOFTWARE.
  */
 
+export type BaseSelection = Selection<HTMLElement, any, null, null>;
+
 /**
  * Represents a list item
  */
-export interface ItemReference {
+export interface IItemReference {
+	/**
+	 * The ID of the item
+	 */
+	id: string;
 
-  /**
-   * The ID of the item
-   */
-  id: string;
-
-  /**
-   * The text display of the item
-   */
-  text: string;
+	/**
+	 * The text display of the item
+	 */
+	text: string;
 }
 
 /**
  * Represents an item in the slicer
  */
-export interface SlicerItem {
-  /**
-   * The unique identifier for this item
-   */
-  id: string;
+export interface ISlicerItem extends IItemReference {
+	/**
+	 * The color of the item
+	 */
+	color?: string;
 
-  /**
-   * The actual text of the item
-   */
-  text: any;
+	/**
+	 * The raw value of this item
+	 */
+	value: number | string | Date;
 
-  /**
-   * The color of the item
-   */
-  color?: string;
+	/**
+	 * The segments that make up this items value, the total of the widths must === 100
+	 */
+	valueSegments?: ISlicerValueSegment[];
 
-  /**
-   * The raw value of this item
-   */
-  value: any;
-  // selected: boolean;
-
-  /**
-   * The segments that make up this items value, the total of the widths must === 100
-   */
-  valueSegments?: ISlicerValueSegment[];
-
-  /**
-   * The percentage value that should be displayed (0 - 100)
-   * TODO: Better name, basically it is the value that should be displayed in the histogram
-   */
-  renderedValue?: number;
+	/**
+	 * The percentage value that should be displayed (0 - 100)
+	 */
+	renderedValue?: number | string;
 }
 
 export interface ISlicerValueSegment {
-  /**
-   * The raw value of the segment
-   */
-  value: any;
+	name?: string;
 
-  /**
-   * The display value of the segment
-   */
-  displayValue: any;
+	/**
+	 * The raw value of the segment
+	 */
+	value: number | string;
 
-  /**
-   * The percentage width of this segment
-   */
-  width: number;
+	/**
+	 * The display value of the segment
+	 */
+	displayValue: string | number;
 
-  /**
-   * The percentage of the width which should be highlighted
-   */
-  highlightWidth?: number;
+	/**
+	 * The percentage width of this segment
+	 */
+	width: number;
 
-  /**
-   * The color of this segment
-   */
-  color: string;
+	/**
+	 * The percentage of the width which should be highlighted
+	 */
+	highlightWidth?: number;
+
+	/**
+	 * The color of this segment
+	 */
+	color: string;
 }
 
 /**
  * Represents the state of the attribute slicer
  */
 export interface IAttributeSlicerState {
-  /**
-   * The currently selected search text
-   */
-  searchText?: string;
+	/**
+	 * The currently selected search text
+	 */
+	searchText?: string;
 
-  /**
-   * The list of selected items
-   */
-  selectedItems?: ItemReference[];
+	/**
+	 * The list of selected items
+	 */
+	selectedItems?: IItemReference[];
 
-  /**
-   * The text size in pt
-   */
-  textSize?: number;
+	/**
+	 * The text size in pt
+	 */
+	textSize?: number;
 
-  /**
-   * The text color
-   */
-  itemTextColor?: string;
+	/**
+	 * The text color
+	 */
+	itemTextColor?: string;
 
-  /**
-   * If we should left align the text
-   */
-  leftAlignText?: boolean;
+	/**
+	 * If we should left align the text
+	 */
+	leftAlignText?: boolean;
 
-  /**
-   * If we should show the options area
-   */
-  showOptions?: boolean;
+	/**
+	 * If we should show the options area
+	 */
+	showOptions?: boolean;
 
-  /**
-   * If we should show the search box
-   */
-  showSearch?: boolean;
+	/**
+	 * If we should show the search box
+	 */
+	showSearch?: boolean;
 
-  /**
-   * If search is supported for the data
-   */
-  searchSupported?: boolean;
+	/**
+	 * If search is supported for the data
+	 */
+	searchSupported?: boolean;
 
-  /**
-   * If we should show the values column
-   */
-  showValues?: boolean;
+	/**
+	 * If we should show the values column
+	 */
+	showValues?: boolean;
 
-  /**
-   * The percentage based width of the value column 0 = hidden, 100 = whole screen
-   */
-  valueColumnWidth?: number;
+	/**
+	 * The percentage based width of the value column 0 = hidden, 100 = whole screen
+	 */
+	valueColumnWidth?: number;
 
-  /**
-   * The display units to use when rendering values
-   */
-  labelDisplayUnits?: number;
+	/**
+	 * The display units to use when rendering values
+	 */
+	labelDisplayUnits?: number;
 
-  // TODO?: This are basically unused the the base slicer
+	/**
+	 * The precision of the numbers to render
+	 */
+	labelPrecision?: number;
 
-  /**
-   * The precision of the numbers to render
-   */
-  labelPrecision?: number;
+	/**
+	 * If we are being rendered horizontally
+	 */
+	horizontal?: boolean;
 
-  /**
-   * If we are being rendered horizontally
-   */
-  horizontal?: boolean;
+	/**
+	 * If we should single select
+	 */
+	singleSelect?: boolean;
 
-  /**
-   * If we should single select
-   */
-  singleSelect?: boolean;
+	/**
+	 * If brushMode is enabled
+	 */
+	brushMode?: boolean;
 
-  /**
-   * If brushMode is enabled
-   */
-  brushMode?: boolean;
+	/**
+	 * If we should show the tokens
+	 */
+	showSelections?: boolean;
 
-  /**
-   * If we should show the tokens
-   */
-  showSelections?: boolean;
+	scrollPosition?: [number, number];
 
-  scrollPosition?: [number, number];
+	/**
+	 * If we should always display values text
+	 */
+	displayValueLabels?: boolean;
 
-  /**
-   * If we should always display values text
-   */
-  displayValueLabels?: boolean;
+	/**
+	 * If we should allow value text to overflow and be visible
+	 */
+	overflowValueLabels?: boolean;
 
-  /**
-   * If we should allow value text to overflow and be visible
-   */
-  overflowValueLabels?: boolean;
+	toJSONObject?(): IAttributeSlicerState;
 }

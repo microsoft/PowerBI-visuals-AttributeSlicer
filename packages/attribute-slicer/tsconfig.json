@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+		"target": "esnext",
+		"module": "esnext",
     "experimentalDecorators": true,
-    "jsx": "react",
     "declaration": true,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+    "moduleResolution": "node",
+    "outDir": "lib"
   },
   "compileOnSave": false,
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "power-bi",
     "node_modules",

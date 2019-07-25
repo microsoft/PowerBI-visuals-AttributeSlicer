@@ -22,47 +22,45 @@
  * SOFTWARE.
  */
 
-import './powerbi';
-import { formatting } from '../powerbi-visuals-utils';
+import powerbiVisualsApi from "powerbi-visuals-api";
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 
 /**
  * Creates a value formatter from the current set of options
  */
 export function createValueFormatter(displayUnits = 0, precision = 0) {
-  'use strict';
-  return formatting.valueFormatter.create({
-    value: displayUnits,
-    format: '0',
-    precision,
-  });
+	return valueFormatter.create({
+		value: displayUnits,
+		format: "0",
+		precision,
+	});
 }
 
 /**
  * Creates a formatter capable of formatting the categories (or undefined) if not necessary
  */
-export function createCategoryFormatter(dataView: powerbi.DataView) {
-  'use strict';
-  let formatter: formatting.IValueFormatter;
-  const cats =
-    dataView && dataView.categorical && dataView.categorical.categories;
-  if (cats && cats.length && cats[0].source.type.dateTime) {
-    let min: Date;
-    let max: Date;
-    cats[0].values.forEach((n) => {
-      if (typeof min === 'undefined' || min > n) {
-        min = new Date(n.valueOf());
-      }
-      if (typeof max === 'undefined' || max < n) {
-        max = new Date(n.valueOf());
-      }
-    });
-    if (min && max) {
-      formatter = formatting.valueFormatter.create({
-        value: min,
-        value2: max,
-        format: cats[0].source.format || '0',
-      });
-    }
-  }
-  return formatter;
+export function createCategoryFormatter(dataView: powerbiVisualsApi.DataView) {
+	let formatter: valueFormatter.IValueFormatter;
+	const cats =
+		dataView && dataView.categorical && dataView.categorical.categories;
+	if (cats && cats.length && cats[0].source.type.dateTime) {
+		let min: Date;
+		let max: Date;
+		cats[0].values.forEach(n => {
+			if (min === undefined || min > n) {
+				min = new Date(<number>n.valueOf());
+			}
+			if (max === undefined || max < n) {
+				max = new Date(<number>n.valueOf());
+			}
+		});
+		if (min && max) {
+			formatter = valueFormatter.create({
+				value: min,
+				value2: max,
+				format: cats[0].source.format || "0",
+			});
+		}
+	}
+	return formatter;
 }

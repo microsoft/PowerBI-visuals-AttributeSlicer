@@ -26,3 +26,6 @@ docs/
 !/packages/*/bin/*.js
 *.d.ts
 build.out
+packages/attribute-slicer/lib
+
+webpack.statistics.*.html
