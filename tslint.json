@@ -1,0 +1,11 @@
+{
+		"extends": ["tslint-microsoft-contrib/recommended"],
+		"rules": {
+
+			// This doesn't play nicely with our mono-repo setup
+			"no-relative-imports": false,
+
+			"semicolon": true,
+			"trailing-comma": true
+		}
+}
