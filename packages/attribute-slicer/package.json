@@ -31,8 +31,7 @@
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",
     "lodash.set": "^4.3.2",
-    "mocha": "^6.2.0",
-    "powerbi-visuals-utils-testutils": "^2.2.0"
+    "mocha": "^6.2.0"
   },
   "devDependencies": {
     "copyfiles": "^2.1.1"

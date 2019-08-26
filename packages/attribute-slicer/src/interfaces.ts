@@ -1,5 +1,3 @@
-import { Selection } from "d3-selection";
-
 /*
  * Copyright (c) Microsoft
  * All rights reserved.
@@ -23,6 +21,8 @@ import { Selection } from "d3-selection";
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+import { Selection } from "d3-selection";
 
 export type BaseSelection = Selection<HTMLElement, any, null, null>;
 

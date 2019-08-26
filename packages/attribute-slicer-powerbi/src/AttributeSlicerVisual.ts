@@ -240,7 +240,6 @@ export class AttributeSlicerVisual
 		return this.state.buildEnumerationObjects(
 			options.objectName,
 			this.dataView,
-			false,
 		);
 	}
 
